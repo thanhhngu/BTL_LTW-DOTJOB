@@ -1,0 +1,140 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/css/StyleAuth.css">
+    <title>Create</title>
+</head>
+<body>
+    <div class="main">
+        @* <img src="~/img/1.png" alt=""> *@
+        <form action="" method="POST" class="form" id="form-1">
+            <h3 class="heading">Form đăng ký</h3>
+            <p class="desc">...</p>
+
+            <div class="form-group">
+                <label for="RoleSelect" class="form-label">Bạn đăng ký với vai trò:</label>
+                <select id="RoleSelect" name="Role" class="form-control">
+                    <option value="Candidate">Ứng viên</option>
+                    <option value="Employer">Nhà tuyển dụng</option>
+                </select>
+            </div>
+
+            <div class="spacer"></div>
+
+            <div class="form-group">
+                <label for="fullname" class="form-label">Tên đầy đủ</label>
+                <input id="fullname" name="fullname" type="text" placeholder="VD: Nguyen Van A" class="form-control">
+                <span class="form-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input id="email" name="email" type="text" placeholder="VD: email@domain.com" class="form-control">
+                <span class="form-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="phone" class="form-label">Số điện thoại</label>
+                <input id="phone" name="phone" type="text" placeholder="VD: 0123456789" class="form-control">
+                <span class="form-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <input id="password" name="password" type="password" placeholder="Nhập mật khẩu" class="form-control">
+                <span class="form-message"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="password_confirmation" class="form-label">Nhập lại mật khẩu</label>
+                <input id="password_confirmation" name="password_confirmation" placeholder="Nhập lại mật khẩu" type="password" class="form-control">
+                <span class="form-message"></span>
+            </div>
+
+            <div id="group-employer" style="display: none;">
+                <div class="form-group">
+                    <label for="CompanyName" class="form-label">Tên công ty</label>
+                    <input id="CompanyName" name="CompanyName" type="text" class="form-control" placeholder="VD: Công ty TNHH ABC">
+                    <span class="form-message"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="WorkLocation" class="form-label">Khu vực làm việc</label>
+                    <select id="WorkLocation" name="WorkLocation" class="form-control">
+                        <option value="" disabled selected>-- Chọn Tỉnh/Thành phố --</option>
+                    </select>
+                    <span class="form-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="CompanyAddress" class="form-label">Địa chỉ công ty cụ thể</label>
+                    <input id="CompanyAddress" name="CompanyAddress" type="text" class="form-control" placeholder="VD: Tòa nhà Keangnam, Phạm Hùng, Nam Từ Liêm">
+                    <span class="form-message"></span>
+                </div>
+
+            </div>
+
+            <button class="form-submit">Đăng ký</button>
+            <a id="link-tab" href="@Url.Action("Login", "Account")">Login!!</a>
+        </form>
+    </div>
+
+    <script>
+			document.addEventListener("DOMContentLoaded", function() {
+				const roleSelect = document.getElementById('RoleSelect');
+				const groupEmployer = document.getElementById('group-employer');
+				roleSelect.addEventListener('change', function() {
+					if (this.value === 'Employer') {
+						groupEmployer.style.display = 'block';
+					} else {
+						groupEmployer.style.display = 'none';
+					}
+				});
+			});
+
+            document.addEventListener("DOMContentLoaded", function() {
+                const provinces = [
+                    "Hà Nội", "TP Hồ Chí Minh", "Đà Nẵng",
+                    "Cần Thơ", "Hải Phòng",
+
+                    "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh",
+                    "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau",
+                    "Cao Bằng", "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp",
+                    "Gia Lai", "Hà Giang", "Hà Nam", "Hà Tĩnh", "Hải Dương", "Hậu Giang",
+                    "Hòa Bình", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu",
+                    "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An",
+                    "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam",
+                    "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La", "Tây Ninh",
+                    "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang",
+                    "Trà Vinh", "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái"
+                ];
+
+                const workLocationSelect = document.getElementById('WorkLocation');
+
+                if (workLocationSelect) {
+                    provinces.forEach(function(province) {
+
+                        if (province === "An Giang") {
+                            const separator = document.createElement('option');
+                            separator.disabled = true;
+                            separator.text = "-------------------";
+                            workLocationSelect.appendChild(separator);
+                        }
+
+                        const option = document.createElement('option');
+                        option.value = province;
+                        option.text = province;
+                        workLocationSelect.appendChild(option);
+                    });
+                }
+            });
+    </script>
+
+</body>
+</html>
