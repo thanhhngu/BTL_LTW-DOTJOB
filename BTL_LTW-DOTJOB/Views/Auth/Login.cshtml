@@ -1,4 +1,5 @@
-﻿@{
+﻿@model BTL_LTW_DOTJOB.ViewModels.Auth.LoginViewModel;
+@{
 Layout = null;
 }
 
@@ -9,36 +10,45 @@ Layout = null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="~/css/StyleAuth.css">
     <title>Login</title>
+    <style>
+            .field-validation-error {
+                color: var(--danger, #ef4444);
+                font-size: 1.2rem;
+                display: block;
+                margin-top: 4px;
+            }
+
+            .input-validation-error {
+                border-color: var(--danger, #ef4444) !important;
+                box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+            }
+    </style>
 </head>
 <body>
     <div class="main">
-        <form action="" method="POST" class="form" id="form-2">
+        <form asp-controller="Auth" asp-action="Login" method="POST" class="form" id="form-2">
             <h3 class="heading">LOGIN</h3>
             <p class="desc">...</p>
 
             <div class="spacer"></div>
 
             <div class="form-group">
-                <label for="email" class="form-label">Email</label>
-                <input id="email" name="email" type="text" placeholder="VD: email@domain.com" class="form-control">
-                <span class="form-message"></span>
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" type="text" placeholder="VD: email@domain.com" class="form-control">
+                <span asp-validation-for="Email" class="form-message"></span>
             </div>
 
             <div class="form-group">
-                <!-- Chú ý: Ở file gốc id là password_hash nhưng trong logic validator kiểm tra #password. Nên đổi id thành password để JS hoạt động chính xác -->
-                <label for="password" class="form-label">Mật khẩu</label>
-                <input id="password" name="password_hash" type="password" placeholder="Nhập mật khẩu" class="form-control">
-                <span class="form-message"></span>
+                <label asp-for="Password" class="form-label">Mật khẩu</label>
+                <input asp-for="Password" type="password" placeholder="Nhập mật khẩu" class="form-control">
+                <span asp-validation-for="Password" class="form-message"></span>
             </div>
-            <div class="form-group">
-                <label for="key_esp" class="form-label">Key ESP</label>
-                <input id="key_esp" name="key_esp" type="password" placeholder="Nhập key ESP" class="form-control">
-                <span class="form-message"></span>
-            </div>
-
             <button class="form-submit">Login</button>
             <a id="link-tab" href="@Url.Action("Create", "Account")">Create Now!!</a>
         </form>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
 </body>
 </html>
