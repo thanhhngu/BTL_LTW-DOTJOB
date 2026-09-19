@@ -1,9 +1,11 @@
-﻿using BTL_LTW_DOTJOB.ViewModels.Auth;
+﻿using BTL_LTW_DOTJOB.Models;
+using BTL_LTW_DOTJOB.ViewModels.Auth;
 
 namespace BTL_LTW_DOTJOB.Services.Auth
 {
     public interface IAuthService
     {
-        bool RegisterUser(RegisterViewModel model);
+        Task<User> AuthenticateAsync(string username, string password);
+        Task<bool> RegisterUserAsync(RegisterViewModel model);
     }
 }
