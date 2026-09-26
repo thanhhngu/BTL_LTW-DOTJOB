@@ -15,6 +15,8 @@ namespace BTL_LTW_DOTJOB.Controllers
         {
             _authService = authService;
         }
+
+        // GET: /Auth/Login
         [HttpGet]
         public IActionResult Login()
         {
@@ -25,14 +27,15 @@ namespace BTL_LTW_DOTJOB.Controllers
             return View();
         }
 
+        // GET: /Auth/Register
         [HttpGet]
         public IActionResult Register()
         {
-            return View(new RegisterViewModel { Role = "Candidate" });
+            return View(new RegisterViewModel { RoleId = "C" });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -47,7 +50,7 @@ namespace BTL_LTW_DOTJOB.Controllers
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.FullName),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role)
+                    new Claim(ClaimTypes.Role, user.RoleId)
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -58,10 +61,10 @@ namespace BTL_LTW_DOTJOB.Controllers
                     new AuthenticationProperties
                     {
                         IsPersistent = true, 
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7) 
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1) 
                     });
 
-                if (user.Role == "Employer")
+                if (user.RoleId == "E")
                     return RedirectToAction("Index", "Dashboard", new { area = "Employer" });
 
                 return RedirectToAction("Index", "Home");

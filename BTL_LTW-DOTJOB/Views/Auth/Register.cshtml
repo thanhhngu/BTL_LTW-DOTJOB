@@ -31,12 +31,12 @@
             <p class="desc">...</p>
 
             <div class="form-group">
-                <label asp-for="Role" class="form-label">Bạn đăng ký với vai trò:</label>
-                <select id="RoleSelect" asp-for="Role" class="form-control">
-                    <option value="Candidate">Candidate</option>
-                    <option value="Employer">Employer</option>
+                <label asp-for="RoleId" class="form-label">Bạn đăng ký với vai trò:</label>
+                <select id="RoleSelect" asp-for="RoleId" class="form-control">
+                    <option value="C">Candidate</option>
+                    <option value="E">Employer</option>
                 </select>
-                <span asp-validation-for="Role" class="form-message"></span>
+                <span asp-validation-for="RoleId" class="form-message"></span>
             </div>
 
             <div class="spacer"></div>

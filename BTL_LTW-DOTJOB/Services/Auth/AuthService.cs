@@ -29,7 +29,7 @@ namespace BTL_LTW_DOTJOB.Services.Auth
 
             var newUser = new User
             {
-                Role = model.Role,
+                RoleId = model.RoleId,
                 FullName = model.FullName,
                 Email = model.Email,
                 Phone = model.Phone,
@@ -37,7 +37,7 @@ namespace BTL_LTW_DOTJOB.Services.Auth
                 CreatedAt = DateTime.Now,
                 IsActive = true
             };
-            if (model.Role == "Employer")
+            if (model.RoleId == "E")
             {
                 newUser.Company = new Company
                 {
