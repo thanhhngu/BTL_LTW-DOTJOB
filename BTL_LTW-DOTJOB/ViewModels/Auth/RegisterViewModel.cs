@@ -6,7 +6,7 @@ namespace BTL_LTW_DOTJOB.ViewModels.Auth
     public class RegisterViewModel : IValidatableObject
     {
         [Required(ErrorMessage = "Vui lòng chọn vai trò.")]
-        public string RoleId { get; set; }
+        public string RoleName { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập tên đầy đủ của bạn.")]
         public string FullName { get; set; }
@@ -34,7 +34,7 @@ namespace BTL_LTW_DOTJOB.ViewModels.Auth
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (RoleId == "E")
+            if (RoleName == "Employer")
             {
                 if (string.IsNullOrWhiteSpace(CompanyName))
                 {

@@ -20,21 +20,15 @@ namespace BTL_LTW_DOTJOB.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
             }
             return View();
         }
 
-        // GET: /Auth/Register
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View(new RegisterViewModel { RoleId = "C" });
-        }
-
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
@@ -42,6 +36,12 @@ namespace BTL_LTW_DOTJOB.Controllers
                 return View(model);
             }
             var user = await _authService.AuthenticateAsync(model.Email, model.Password);
+
+            if(!user.IsActive)
+            {
+                ModelState.AddModelError(string.Empty, "Tài khoản của bạn đã bị khóa.");
+                return View(model);
+            }
 
             if (user != null)
             {
@@ -64,7 +64,7 @@ namespace BTL_LTW_DOTJOB.Controllers
                         ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1) 
                     });
 
-                if (user.RoleId == "E")
+                if (user.Company != null)
                     return RedirectToAction("Index", "Dashboard", new { area = "Employer" });
 
                 return RedirectToAction("Index", "Home");
@@ -80,5 +80,36 @@ namespace BTL_LTW_DOTJOB.Controllers
         //    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         //    return RedirectToAction("Login", "Auth");
         //}
+
+        // GET: /Auth/Register
+        [HttpGet]
+        public IActionResult Register()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(new RegisterViewModel { RoleName = "Candidate" });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            bool isSuccess = await _authService.RegisterUserAsync(model);
+
+            if (isSuccess)
+            {
+                TempData["SuccessMessage"] = "Đăng ký tài khoản thành công! Vui lòng đăng nhập.";
+                return RedirectToAction("Login");
+            }
+            ModelState.AddModelError("Email", "Email này đã được sử dụng hoặc thông tin đăng ký không hợp lệ.");
+            return View(model);
+        }
     }
 }

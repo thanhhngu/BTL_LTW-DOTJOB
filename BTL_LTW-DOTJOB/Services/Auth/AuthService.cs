@@ -14,14 +14,19 @@ namespace BTL_LTW_DOTJOB.Services.Auth
         {
             _db = db;
         }
+        public async Task<bool> UserExistsAsync(string email)
+        {
+            return await _db.Users.AnyAsync(u => u.Email == email);
+        }
         //register user
         public async Task<bool> RegisterUserAsync(RegisterViewModel model)
         {
-            //check if user already exists
-            //if (await UserExistsAsync(model.Username))
-            //{
-            //    return false;
-            //}
+            if (await UserExistsAsync(model.Email))
+            {
+                return false;
+            }
+
+            var role = await _db.Roles.FirstOrDefaultAsync(r => r.Name == model.RoleName);
 
             //hash password
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
@@ -29,7 +34,7 @@ namespace BTL_LTW_DOTJOB.Services.Auth
 
             var newUser = new User
             {
-                RoleId = model.RoleId,
+                RoleId = role.Id,
                 FullName = model.FullName,
                 Email = model.Email,
                 Phone = model.Phone,
@@ -37,13 +42,13 @@ namespace BTL_LTW_DOTJOB.Services.Auth
                 CreatedAt = DateTime.Now,
                 IsActive = true
             };
-            if (model.RoleId == "E")
+            if (model.RoleName == "Employer")
             {
                 newUser.Company = new Company
                 {
-                    CompanyName = model.CompanyName,
+                    CompanyName = model.CompanyName ?? "Chưa cập nhật tên công ty",
                     CompanyAddress = model.CompanyAddress,
-                    WorkLocation = model.WorkLocation,
+                    WorkLocation = model.WorkLocation
                 };
             }
 
