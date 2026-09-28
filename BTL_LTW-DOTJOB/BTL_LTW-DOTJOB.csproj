@@ -21,7 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\" />
+    <Folder Include="Areas\Admin\Controllers\" />
+    <Folder Include="Areas\Admin\Views\" />
+    <Folder Include="Areas\Employer\Controllers\" />
+    <Folder Include="Areas\Employer\Views\" />
   </ItemGroup>
 
 </Project>
