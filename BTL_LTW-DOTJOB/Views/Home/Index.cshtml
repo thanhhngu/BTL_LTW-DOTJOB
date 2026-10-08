@@ -1,8 +1,49 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using BTL_LTW_DOTJOB.Models
+@using BTL_LTW_DOTJOB.Models.Mock
+@model IEnumerable<JobMockData>
+
+@{
+    ViewData["Title"] = "Trang chủ - Tìm việc làm";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<partial name="_Banner" />
+
+<div id="featured-jobs-container">
+    <partial name="_FeaturedJobs" model="Model" />
 </div>
+
+@section Scripts {
+    <script>
+        let autoSlideTimer;
+
+        function loadJobsAjax(page) {
+            // Hiển thị hiệu ứng mờ đi 
+            document.getElementById('featured-jobs-container').style.opacity = '0.5';
+
+            fetch(`/Home/LoadFeaturedJobs?page=${page}`)
+                .then(response => response.text())
+                .then(html => {
+                    // Đổ HTML mới vào khung chứa
+                    document.getElementById('featured-jobs-container').innerHTML = html;
+                    document.getElementById('featured-jobs-container').style.opacity = '1';
+
+                    // Reset lại bộ đếm thời gian 5s để không bị nhảy trang kép
+                    startAutoSlide();
+                })
+                .catch(err => console.error('Lỗi khi tải việc làm:', err));
+        }
+
+        // Hàm tự động chuyển trang sau 5 giây
+        function startAutoSlide() {
+            clearInterval(autoSlideTimer); // Xóa bộ đếm cũ
+            autoSlideTimer = setInterval(() => {
+                // Lấy số trang tiếp theo từ thẻ span ẩn (sẽ tạo ở Bước 2)
+                let nextPage = document.getElementById('ajax-next-page').value;
+                loadJobsAjax(nextPage);
+            }, 10000);
+        }
+
+        // Bắt đầu chạy khi trang vừa load xong
+        startAutoSlide();
+    </script>
+}

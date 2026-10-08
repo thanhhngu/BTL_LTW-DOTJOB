@@ -2,11 +2,13 @@
 using BTL_LTW_DOTJOB.ViewModels.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace BTL_LTW_DOTJOB.Controllers
 {
+    [AllowAnonymous]
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
@@ -110,6 +112,13 @@ namespace BTL_LTW_DOTJOB.Controllers
             }
             ModelState.AddModelError("Email", "Email này đã được sử dụng hoặc thông tin đăng ký không hợp lệ.");
             return View(model);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

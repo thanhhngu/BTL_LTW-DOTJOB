@@ -29,3 +29,206 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+:root {
+    --topcv-green: #00b14f;
+}
+
+/*banner and sea
+    
+    
+    
+    
+    
+ rch*/
+:root {
+    --topcv-green: #00b14f;
+    --topcv-dark-green: #004d2e;
+}
+
+.topcv-banner-section {
+    background: linear-gradient(to right, var(--topcv-dark-green), var(--topcv-green));
+}
+
+.btn-topcv-search {
+    background-color: var(--topcv-green);
+    color: white;
+    transition: all 0.2s;
+}
+
+    .btn-topcv-search:hover {
+        background-color: #009944;
+        color: white;
+    }
+
+.search-wrapper input:focus,
+.search-wrapper select:focus {
+    box-shadow: none;
+    border-color: transparent;
+}
+
+.search-wrapper .border-end,
+.search-wrapper .border-start {
+    border-color: #e0e0e0 !important;
+}
+
+/* Màu chủ đạo TopCV */
+
+
+/* Hiệu ứng thẻ công việc */
+.job-card {
+    transition: all 0.2s ease-in-out;
+    border: 1px solid transparent !important;
+}
+
+.job-card {
+    border: 1px solid transparent; /* tạo border trong suốt ban đầu */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .job-card:hover {
+        border-color: var(--topcv-green) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    }
+
+
+/* Viền xanh bên trái cho việc làm Top/Hot */
+.border-start-success {
+    border-left: 4px solid var(--topcv-green) !important;
+}
+
+/* Hiệu ứng tiêu đề công việc */
+.job-title {
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.job-card:hover .job-title,
+.hover-success:hover {
+    color: var(--topcv-green) !important;
+}
+
+/* Nút thả tim */
+.btn-heart:hover i {
+    color: var(--topcv-green);
+    font-weight: 900; /* FontAwesome chuyển sang dạng Solid khi thẻ i có fw-900 */
+}
+
+/* Giới hạn số dòng hiển thị (Cắt bớt bằng dấu ...) */
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.85em; /* Đảm bảo chiều cao các thẻ bằng nhau dù có 1 hay 2 dòng */
+}
+
+/* CSS cho nút phân trang tròn đều */
+.topcv-pagination .pagination-btn {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+}
+
+/* Màu xanh đặc trưng */
+.topcv-pagination .btn-outline-success {
+    color: #00b14f;
+    border-color: #00b14f;
+    background-color: white;
+}
+
+    .topcv-pagination .btn-outline-success:hover {
+        background-color: #00b14f;
+        color: white;
+    }
+
+/* ================= FLOATING TOOLBAR FIXED ================= */
+.floating-toolbar-wrapper {
+    position: fixed !important;
+    right: 0 !important;
+    bottom: 20px !important;
+    z-index: 99999 !important;
+    /* Khóa độ rộng cố định */
+    width: 58px !important;
+    max-width: 58px !important;
+    background-color: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    border-right: none !important;
+    border-top-left-radius: 10px !important;
+    border-bottom-left-radius: 10px !important;
+    box-shadow: -2px 4px 12px rgba(0, 0, 0, 0.08) !important;
+    /* Căn dọc nội dung bên trong */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 6px 0 !important;
+}
+
+.toolbar-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    padding: 10px 0 !important;
+    color: #333333 !important;
+    text-decoration: none !important;
+    position: relative !important;
+    transition: background-color 0.2s ease;
+}
+
+    .toolbar-item:hover {
+        background-color: #f8f9fa !important;
+    }
+
+    .toolbar-item i {
+        font-size: 1.25rem !important;
+    }
+
+.toolbar-label {
+    font-size: 0.65rem !important;
+    margin-top: 3px !important;
+    color: #555555 !important;
+    font-weight: 500 !important;
+}
+
+/* Thẻ số 0 màu xanh gắn góc biểu tượng trái tim */
+.toolbar-badge {
+    position: absolute !important;
+    top: 4px !important;
+    right: 10px !important;
+    font-size: 0.6rem !important;
+    padding: 2px 5px !important;
+    line-height: 1 !important;
+    border: 1px solid #ffffff !important;
+}
+
+/* Đường kẻ phân cách ngắn giữa các nút */
+.toolbar-divider {
+    width: 60% !important;
+    height: 1px !important;
+    background-color: #f0f0f0 !important;
+    margin: 2px 0 !important;
+}
+
+/* ================= HR TECH CARDS (Footer) ================= */
+.hr-tech-card {
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+    .hr-tech-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
