@@ -1,0 +1,51 @@
+﻿@model IEnumerable<BTL_LTW_DOTJOB.Models.Mock.CateMockData>
+@{
+    var currentPage = (int)ViewBag.CurrentPage;
+    var pageCount = (int)ViewBag.PageCount;
+}
+
+<div id="category-menu-container" class="category-menu-panel col-lg-4 col-md-5 d-flex flex-column justify-content-between border-end pe-md-3">
+    <div class="list-group list-group-flush category-menu">
+        @foreach (var category in Model)
+        {
+            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 rounded-2 py-2">
+                <span class="fw-medium text-dark small"><i class="fa-solid fa-briefcase text-success me-2"></i>@category.Name</span>
+                <i class="fa-solid fa-chevron-right text-muted extra-small"></i>
+            </a>
+        }
+    </div>
+
+    @if (pageCount > 0)
+    {
+        <div class="category-menu-pagination d-flex justify-content-between align-items-center pt-2 mt-1 topcv-pagination">
+            <span class="category-page-label text-muted fw-bold small">@currentPage/@pageCount</span>
+            <div class="category-menu-page-controls d-flex align-items-center gap-2">
+            @if (currentPage > 1)
+            {
+                <button type="button" onclick="loadCategoryPage(@(currentPage - 1))" class="btn btn-outline-success rounded-circle pagination-btn shadow-sm" title="Trang trước">
+                    <i class="fa-solid fa-angle-left"></i>
+                </button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-light bg-white border rounded-circle pagination-btn text-muted shadow-sm" title="Trang trước" disabled>
+                    <i class="fa-solid fa-angle-left"></i>
+                </button>
+            }
+
+            @if (currentPage < pageCount)
+            {
+                <button type="button" onclick="loadCategoryPage(@(currentPage + 1))" class="btn btn-outline-success rounded-circle pagination-btn shadow-sm" title="Trang sau">
+                    <i class="fa-solid fa-angle-right"></i>
+                </button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-light bg-white border rounded-circle pagination-btn text-muted shadow-sm" title="Trang sau" disabled>
+                    <i class="fa-solid fa-angle-right"></i>
+                </button>
+            }
+            </div>
+        </div>
+    }
+</div>
