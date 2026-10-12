@@ -1,4 +1,4 @@
-﻿namespace BTL_LTW_DOTJOB.Models.Mock
+namespace BTL_LTW_DOTJOB.Models.Mock
 {
     public class CateMockData
     {

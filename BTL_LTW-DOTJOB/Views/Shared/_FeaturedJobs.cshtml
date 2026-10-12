@@ -1,4 +1,4 @@
-﻿@model IPagedList<BTL_LTW_DOTJOB.Models.Mock.JobMockData>
+﻿@model IPagedList<BTL_LTW_DOTJOB.Models.JobPosting>
 @using X.PagedList
 @using X.PagedList.Mvc.Core
 
@@ -52,25 +52,25 @@
                     </div>
                 </div> *@
                 <div class="col">
-                    <a href="/job/detail/@job.Id" target="_blank" class="text-decoration-none">
+                    <a asp-controller="Job" asp-action="Detail" asp-route-id="@job.Id" target="_blank" class="text-decoration-none">
                     <div class="card h-100 job-card shadow-sm rounded-3">
                         <div class="card-body p-3 d-flex flex-column justify-content-between">
                             <div class="d-flex gap-3 mb-2">
                                 <div class="job-logo border rounded border-light bg-white d-flex align-items-center justify-content-center p-1" style="width: 64px; height: 64px;">
-                                    <span class="text-dark fw-bold" style="font-size: 10px;">VINACO</span>
+                                    <span class="text-dark fw-bold" style="font-size: 10px;">@(job.Company?.CompanyName is { Length: > 0 } companyName ? companyName[..Math.Min(3, companyName.Length)].ToUpper() : "JOB")</span>
                                 </div>
                                 <div class="job-info flex-grow-1">
                                     <span class="badge bg-danger-subtle text-danger mb-1" style="font-size: 0.65rem;">NỔI BẬT</span>
                                     <h3 class="job-title text-dark fw-bold mb-1 line-clamp-2">
 										@job.Title
                                     </h3>
-                                    <p class="text-muted text-uppercase mb-0 line-clamp-1" style="font-size: 0.75rem;">@job.CompanyName</p>
+                                    <p class="text-muted text-uppercase mb-0 line-clamp-1" style="font-size: 0.75rem;">@job.Company?.CompanyName</p>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mt-2">
                                 <div class="d-flex gap-2">
-                                    <span class="badge bg-light text-dark fw-normal p-2 rounded-1 text-muted">16 - 25 triệu</span>
-                                    <span class="badge bg-light text-dark fw-normal p-2 rounded-1 text-muted">Hà Nội & Ninh Bình (mới)</span>
+                                    <span class="badge bg-light text-dark fw-normal p-2 rounded-1 text-muted">@(job.SalaryMin.HasValue && job.SalaryMax.HasValue ? $"{job.SalaryMin.Value / 1_000_000m:0.#} - {job.SalaryMax.Value / 1_000_000m:0.#} triệu" : "Thỏa thuận")</span>
+                                    <span class="badge bg-light text-dark fw-normal p-2 rounded-1 text-muted">@job.Location</span>
                                 </div>
                                 <button class="btn btn-link text-muted p-0 btn-heart"><i class="fa-regular fa-heart fs-5"></i></button>
                             </div>

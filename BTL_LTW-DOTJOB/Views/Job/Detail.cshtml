@@ -1,5 +1,170 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using BTL_LTW_DOTJOB.Models
+@model BTL_LTW_DOTJOB.Models.JobPosting
 @{
+    ViewData["Title"] = Model?.Title ?? "Chi tiết công việc";
 }
+
+<div class="container my-4">
+    <div class="row g-4">
+        
+        <!-- CỘT BÊN TRÁI: Nội dung chính của Job (col-lg-8) -->
+        <div class="col-lg-8">
+            
+            <!-- 1. Tiêu đề và Nút ứng tuyển -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h1 class="fw-bold fs-3 text-dark mb-2">@Model?.Title</h1>
+                
+                <div class="d-flex align-items-center flex-wrap gap-3 mb-3">
+                    <span class="fs-4 fw-bold text-success">
+                        @(Model?.SalaryMin.HasValue == true && Model?.SalaryMax.HasValue == true 
+                            ? $"{Model.SalaryMin.Value.ToString("N0")} - {Model.SalaryMax.Value.ToString("N0")} VNĐ" 
+                            : "Thoả thuận")
+                    </span>
+                    <span class="text-muted small">| Tra cứu lương thị trường việc làm</span>
+                </div>
+
+                <!-- Các thông tin nhanh: Địa điểm, Kinh nghiệm, Hạn ứng tuyển -->
+                <div class="row g-3 mb-4 text-secondary small">
+                    <div class="col-md-4 d-flex align-items-center">
+                        <div class="bg-light p-2 rounded-3 me-2 text-success"><i class="fa-solid fa-location-dot"></i></div>
+                        <div>
+                            <span class="d-block text-muted">Địa điểm</span>
+                            <span class="fw-semibold text-dark">@Model?.Location</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-center">
+                        <div class="bg-light p-2 rounded-3 me-2 text-success"><i class="fa-solid fa-medal"></i></div>
+                        <div>
+                            <span class="d-block text-muted">Kinh nghiệm</span>
+                            <span class="fw-semibold text-dark">1 - 2 năm kinh nghiệm</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-center">
+                        <div class="bg-light p-2 rounded-3 me-2 text-success"><i class="fa-regular fa-clock"></i></div>
+                        <div>
+                            <span class="d-block text-muted">Hạn ứng tuyển</span>
+                            @* <span class="fw-semibold text-dark">@(Model?.Deadline.ToString("dd/MM/yyyy") ?? "30/10/2026")</span> *@
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút Ứng tuyển ngay & Lưu tin -->
+                <div class="d-flex gap-3">
+                    <button class="btn btn-success flex-grow-1 py-3 fw-bold rounded-3 shadow-sm" style="background-color: #00b14f;">
+                        <i class="fa-solid fa-paper-plane me-2"></i> Ứng tuyển ngay
+                    </button>
+                    <button class="btn btn-outline-success px-4 py-3 fw-semibold rounded-3">
+                        <i class="fa-regular fa-heart me-1"></i> Lưu tin
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Phần đánh giá độ tin cậy (Giống hệt hình mẫu) -->
+            <div class="alert bg-white border shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center">
+                <div class="text-success fs-4 me-3"><i class="fa-solid fa-shield-check"></i></div>
+                <div class="small text-secondary">
+                    <strong class="text-dark">100% tin đăng</strong> tại trên hệ thống được cung cấp bởi các Nhà tuyển dụng đã được xác thực thông tin.
+                </div>
+            </div>
+
+            <!-- 3. Khối Tổng quan và Mô tả công việc -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                
+                <!-- Tổng quan -->
+                <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">Tổng quan</h4>
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <span class="text-muted small d-block mb-1">Yêu cầu chuyên môn:</span>
+                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill me-1">Kinh nghiệm chuyên môn</span>
+                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">Đại học trở lên</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <span class="text-muted small d-block mb-1">Lĩnh vực / Ngành nghề:</span>
+                        <span class="badge bg-light text-success border border-success px-3 py-2 rounded-pill">@Model?.Category?.Name</span>
+                    </div>
+                </div>
+
+                <hr class="text-muted opacity-25 my-4">
+
+                <!-- Mô tả công việc -->
+                <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">Mô tả công việc</h4>
+                <div class="text-secondary lh-lg mb-4">
+                    <p>@Model?.Description</p>
+                    <p>Phối hợp cùng các phòng ban liên quan để triển khai công việc hiệu quả, đảm bảo đúng tiến độ và chất lượng dự án được giao.</p>
+                </div>
+
+                <!-- Yêu cầu ứng viên -->
+                <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">Yêu cầu ứng viên</h4>
+                <div class="text-secondary lh-lg">
+                    <p>@Model?.Requirements</p>
+                    <ul class="ps-3">
+                        <li>Có tinh thần trách nhiệm cao, chịu được áp lực trong công việc.</li>
+                        <li>Kỹ năng giao tiếp và làm việc nhóm tốt.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CỘT BÊN PHẢI: Thông tin công ty & Thông tin chung (col-lg-4) -->
+        <div class="col-lg-4">
+            
+            <!-- Card Thông tin Công ty -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 text-center">
+                <div class="mb-3">
+                    <img src="@(string.IsNullOrEmpty(Model?.Company?.Logo) ? "/images/default-logo.png" : Model.Company.Logo)" 
+                         alt="Company Logo" class="rounded-3 border p-2 shadow-sm" style="width: 80px; height: 80px; object-fit: contain;">
+                </div>
+                <h5 class="fw-bold text-dark mb-3">@(Model?.Company?.CompanyName ?? "CÔNG TY TNHH ĐỐI TÁC TUYỂN DỤNG")</h5>
+                
+                <div class="text-start small text-secondary mb-4">
+                    <p class="mb-2"><i class="fa-solid fa-users text-muted me-2"></i><strong>Quy mô:</strong> 100-499 nhân viên</p>
+                    <p class="mb-2"><i class="fa-solid fa-location-dot text-muted me-2"></i><strong>Địa chỉ:</strong> @(Model?.Company?.CompanyAddress ?? Model?.Company?.WorkLocation ?? "Hà Nội")</p>
+                    <p class="mb-0"><i class="fa-solid fa-globe text-muted me-2"></i><strong>Website:</strong> <a href="@Model?.Company?.Website" target="_blank" class="text-success text-decoration-none">Xem trang web</a></p>
+                </div>
+
+                <a href="#" class="btn btn-outline-success w-100 fw-semibold rounded-3 py-2">
+                    Xem trang công ty <i class="fa-solid fa-arrow-up-right-from-square ms-1 small"></i>
+                </a>
+            </div>
+
+            <!-- Card Thông tin chung -->
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold text-dark mb-3">Thông tin chung</h5>
+                
+                <ul class="list-unstyled small text-secondary mb-0">
+                    <li class="d-flex align-items-center mb-3">
+                        <div class="bg-light p-2 rounded-3 me-3 text-success"><i class="fa-solid fa-user-tie"></i></div>
+                        <div>
+                            <span class="d-block text-muted">Cấp bậc</span>
+                            <span class="fw-semibold text-dark">Nhân viên</span>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center mb-3">
+                        <div class="bg-light p-2 rounded-3 me-3 text-success"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <div>
+                            <span class="d-block text-muted">Học vấn</span>
+                            <span class="fw-semibold text-dark">Cao Đẳng trở lên</span>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center mb-3">
+                        <div class="bg-light p-2 rounded-3 me-3 text-success"><i class="fa-solid fa-users-gear"></i></div>
+                        <div>
+                            <span class="d-block text-muted">Số lượng tuyển</span>
+                            <span class="fw-semibold text-dark">1 người</span>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <div class="bg-light p-2 rounded-3 me-3 text-success"><i class="fa-solid fa-briefcase"></i></div>
+                        <div>
+                            <span class="d-block text-muted">Hình thức làm việc</span>
+                            <span class="fw-semibold text-dark">@(Model?.JobType ?? "Toàn thời gian")</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+</div>

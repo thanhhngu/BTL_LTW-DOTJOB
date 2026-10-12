@@ -1,6 +1,7 @@
+using BTL_LTW_DOTJOB.Data;
 using BTL_LTW_DOTJOB.Models;
-using BTL_LTW_DOTJOB.Models.Mock;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 using X.PagedList;
@@ -11,14 +12,21 @@ namespace BTL_LTW_DOTJOB.Controllers
 {
     public class HomeController : Controller
     {
-        JobMockData JobMockData = new JobMockData();
-
+        private readonly AppDbContext _db;
+        public HomeController(AppDbContext db)
+        {
+            _db = db;
+        }
         public IActionResult Index(int? page)
         {
             int pageSize = 12; // 3 x 4
             int pageNumber = page ?? 1;
 
-            var jobs = JobMockData.GetJobs();
+            var jobs = _db.JobPostings
+                .AsNoTracking()
+                .Include(job => job.Company)
+                .Where(job => job.IsActive)
+                .OrderByDescending(job => job.CreatedAt);
             var pagedJobs = jobs.ToPagedList(pageNumber, pageSize);
 
             return View(pagedJobs);
@@ -29,8 +37,11 @@ namespace BTL_LTW_DOTJOB.Controllers
         {
             int pageSize = 12;
 
-            //var jobs = _db.JobPostings.ToPagedList(page, pageSize);
-            var jobs = JobMockData.GetJobs(); // lấy mock data
+            var jobs = _db.JobPostings
+                .AsNoTracking()
+                .Include(job => job.Company)
+                .Where(job => job.IsActive)
+                .OrderByDescending(job => job.CreatedAt);
             var pagedJobs = jobs.ToPagedList(page, pageSize);
 
             return PartialView("_FeaturedJobs", pagedJobs);
