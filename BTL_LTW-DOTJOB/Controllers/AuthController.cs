@@ -56,7 +56,7 @@ namespace BTL_LTW_DOTJOB.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.RoleId)
+                new Claim(ClaimTypes.Role, user.Role!.Name)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
