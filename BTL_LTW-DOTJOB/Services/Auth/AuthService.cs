@@ -68,8 +68,9 @@ namespace BTL_LTW_DOTJOB.Services.Auth
         }
         public async Task<User> AuthenticateAsync(string username, string password)
         {
-            
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == username);
+
+            var user = await _db.Users.Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == username);
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
                 return user;
