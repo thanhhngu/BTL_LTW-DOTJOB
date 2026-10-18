@@ -1,4 +1,5 @@
-﻿using BTL_LTW_DOTJOB.Services.Auth;
+﻿using BTL_LTW_DOTJOB.Constants;
+using BTL_LTW_DOTJOB.Services.Auth;
 using BTL_LTW_DOTJOB.ViewModels.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -70,10 +71,11 @@ namespace BTL_LTW_DOTJOB.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
                 });
 
-            if (user.Company != null)
-                return RedirectToAction("Index", "Dashboard", new { area = "Employer" });
-
-            return RedirectToAction("Index", "Home");
+            return user.Role!.Name switch
+            {
+                RoleNames.Employer => RedirectToAction("Index", "Dashboard", new { area = "Employer" }),
+                _ => RedirectToAction("Index", "Home")
+            };
         }
 
         //[HttpGet]
