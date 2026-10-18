@@ -39,41 +39,41 @@ namespace BTL_LTW_DOTJOB.Controllers
             }
             var user = await _authService.AuthenticateAsync(model.Email, model.Password);
 
-            if(!user.IsActive)
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không chính xác.");
+                return View(model);
+            }
+
+            if (!user.IsActive)
             {
                 ModelState.AddModelError(string.Empty, "Tài khoản của bạn đã bị khóa.");
                 return View(model);
             }
 
-            if (user != null)
+            var claims = new List<Claim>
             {
-                var claims = new List<Claim>
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.RoleId)
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                new AuthenticationProperties
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.FullName),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.RoleId)
-                };
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                });
 
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            if (user.Company != null)
+                return RedirectToAction("Index", "Dashboard", new { area = "Employer" });
 
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = true, 
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1) 
-                    });
-
-                if (user.Company != null)
-                    return RedirectToAction("Index", "Dashboard", new { area = "Employer" });
-
-                return RedirectToAction("Index", "Home");
-            }
-
-            ModelState.AddModelError("", "Email hoặc mật khẩu không chính xác.");
-            return View(model);
+            return RedirectToAction("Index", "Home");
         }
 
         //[HttpGet]
