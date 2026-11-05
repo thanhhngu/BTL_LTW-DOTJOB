@@ -50,35 +50,41 @@ namespace BTL_LTW_DOTJOB.Controllers
                 return View(model);
             }
 
-            if (user != null)
+            // Tên quyền (Admin / Employer / Candidate) lấy từ bảng Role
+            var roleName = user.Role?.Name;
+            if (string.IsNullOrEmpty(roleName))
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.FullName),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.RoleId)
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = true, 
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1) 
-                    });
-
-                if (user.Company != null)
-                    return RedirectToAction("Index", "Dashboard", new { area = "Employer" });
-
-                return RedirectToAction("Index", "Home");
+                ModelState.AddModelError(string.Empty, "Tài khoản chưa được gán quyền hợp lệ.");
+                return View(model);
             }
 
-            ModelState.AddModelError("", "Email hoặc mật khẩu không chính xác.");
-            return View(model);
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, roleName) // Tên role, không phải RoleId, để [Authorize(Roles = "...")] hoạt động
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                });
+
+            // Mỗi role về một trang riêng sau khi đăng nhập
+            return roleName switch
+            {
+                "Admin"      => RedirectToAction("Index", "Dashboard", new { area = "Admin" }),
+                "Employer"   => RedirectToAction("Index", "Dashboard", new { area = "Employer" }),
+                "Candidate"  => RedirectToAction("Index", "Home"),
+                _            => RedirectToAction("Index", "Home")
+            };
         }
 
         //[HttpGet]

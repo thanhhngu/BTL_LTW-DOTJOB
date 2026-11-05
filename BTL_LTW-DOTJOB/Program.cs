@@ -37,6 +37,12 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+// Seed dữ liệu mẫu (Role, tài khoản, danh mục, việc làm...). Cần chạy "dotnet ef database update" trước
+using (var scope = app.Services.CreateScope())
+{
+    SeedData.Initialize(scope.ServiceProvider);
+}
+
 
 
 // Configure the HTTP request pipeline.

@@ -34,6 +34,12 @@ namespace BTL_LTW_DOTJOB.ViewModels.Auth
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
+            // Chỉ cho tự đăng ký Candidate hoặc Employer (chặn sửa request để tạo Admin)
+            if (RoleName != "Candidate" && RoleName != "Employer")
+            {
+                yield return new ValidationResult("Vai trò không hợp lệ.", new[] { nameof(RoleName) });
+            }
+
             if (RoleName == "Employer")
             {
                 if (string.IsNullOrWhiteSpace(CompanyName))

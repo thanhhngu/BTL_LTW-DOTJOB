@@ -1,10 +1,12 @@
 ﻿using BTL_LTW_DOTJOB.Data;
 using BTL_LTW_DOTJOB.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 public static class SeedData
 {
+    // Mật khẩu chung cho toàn bộ tài khoản mẫu (đăng nhập bằng email + mật khẩu này)
+    private const string DefaultPassword = "123456";
+
     public static void Initialize(IServiceProvider serviceProvider)
     {
         using var context = new AppDbContext(
@@ -48,30 +50,90 @@ public static class SeedData
             context.SaveChanges();
         }
 
-        // 3. Seed Users (Đúng 30 User, tất cả đều là Employer để tương ứng với 30 công ty)
-        if (!context.Users.Any())
+        // 3. Seed Users: 1 Admin + 30 Employer (tương ứng 30 công ty) + 10 Candidate
+        // Hash BCrypt 1 lần dùng chung cho tài khoản mẫu (mỗi lần hash khá chậm). Phải dùng BCrypt vì AuthService xác thực bằng BCrypt
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(DefaultPassword);
+
+        // 3.1 Admin
+        if (!context.Users.Any(user => user.RoleId == roleIds["Admin"]))
         {
-            var hasher = new PasswordHasher<User>();
-            var users = new List<User>();
+            context.Users.Add(new User
+            {
+                Email = "admin@dotjob.vn",
+                FullName = "Quản trị viên",
+                Phone = "0900000000",
+                RoleId = roleIds["Admin"],
+                PasswordHash = passwordHash,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            });
+            context.SaveChanges();
+        }
+
+        // 3.2 Employer
+        if (!context.Users.Any(user => user.RoleId == roleIds["Employer"]))
+        {
+            var employers = new List<User>();
 
             for (int i = 1; i <= 30; i++)
             {
-                var user = new User
+                employers.Add(new User
                 {
                     Email = $"employer{i}@company{i}.com",
                     FullName = $"Nhà tuyển dụng {i}",
                     Phone = $"0901234{i:D3}",
                     Avatar = $"/images/avatars/user-{i}.png",
                     RoleId = roleIds["Employer"],
+                    PasswordHash = passwordHash,
                     CreatedAt = DateTime.UtcNow.AddDays(-i),
                     IsActive = true
-                };
-
-                user.PasswordHash = hasher.HashPassword(user, "123456");
-                users.Add(user);
+                });
             }
 
-            context.Users.AddRange(users);
+            context.Users.AddRange(employers);
+            context.SaveChanges();
+        }
+
+        // 3.3 Candidate (dùng để test phân quyền và luồng ứng tuyển)
+        if (!context.Users.Any(user => user.RoleId == roleIds["Candidate"]))
+        {
+            var candidates = new List<User>();
+
+            for (int i = 1; i <= 10; i++)
+            {
+                candidates.Add(new User
+                {
+                    Email = $"candidate{i}@gmail.com",
+                    FullName = $"Ứng viên {i}",
+                    Phone = $"0912345{i:D3}",
+                    RoleId = roleIds["Candidate"],
+                    PasswordHash = passwordHash,
+                    CreatedAt = DateTime.UtcNow.AddDays(-i),
+                    IsActive = true
+                });
+            }
+
+            context.Users.AddRange(candidates);
+            context.SaveChanges();
+        }
+
+        // 3.4 Chuẩn hóa mật khẩu cho tài khoản đã tồn tại từ trước (BCrypt luôn bắt đầu bằng "$2")
+        // - Mật khẩu plain text (vd: "123456"): giữ nguyên mật khẩu đang dùng, chỉ hash lại bằng BCrypt
+        // - Hash Identity (bắt đầu "AQAAAA", do bản seed cũ tạo): không đảo ngược được, đặt lại mật khẩu mặc định
+        var legacyUsers = context.Users
+            .Where(user => !user.PasswordHash.StartsWith("$2"))
+            .ToList();
+
+        foreach (var legacyUser in legacyUsers)
+        {
+            var plainPassword = legacyUser.PasswordHash.StartsWith("AQAAAA")
+                ? DefaultPassword
+                : legacyUser.PasswordHash;
+            legacyUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(plainPassword);
+        }
+
+        if (legacyUsers.Any())
+        {
             context.SaveChanges();
         }
 
@@ -186,26 +248,27 @@ public static class SeedData
             context.SaveChanges();
         }
 
-        // 6. Seed Applications (Tạo đơn ứng tuyển mẫu mô phỏng dữ liệu lịch sử cho các Job)
+        // 6. Seed Applications (Tạo đơn ứng tuyển mẫu của các Candidate cho các Job)
         if (!context.Applications.Any())
         {
             var jobIds = context.JobPostings.Select(job => job.Id).ToList();
-            var employerIdsForApp = context.Users
-                .Where(user => user.RoleId == roleIds["Employer"])
+            var candidateIds = context.Users
+                .Where(user => user.RoleId == roleIds["Candidate"])
                 .Select(user => user.Id)
                 .ToList();
 
-            if (!jobIds.Any() || !employerIdsForApp.Any()) return;
+            if (!jobIds.Any() || !candidateIds.Any()) return;
 
             string[] statuses = { "Pending", "Accepted", "Rejected" };
             var applications = new List<Application>();
 
+            // Mỗi Job chỉ có tối đa 1 đơn của 1 Candidate => không trùng cặp (JobPostingId, UserId)
             for (int i = 0; i < Math.Min(30, jobIds.Count); i++)
             {
                 applications.Add(new Application
                 {
                     JobPostingId = jobIds[i],
-                    UserId = employerIdsForApp[i % employerIdsForApp.Count],
+                    UserId = candidateIds[i % candidateIds.Count],
                     CvFilePath = $"/uploads/cvs/sample-cv-{i + 1}.pdf",
                     CoverLetter = "Kính gửi nhà tuyển dụng, tôi rất quan tâm đến cơ hội hợp tác và phát triển tại quý công ty.",
                     AppliedDate = DateTime.UtcNow.AddDays(-i % 15),

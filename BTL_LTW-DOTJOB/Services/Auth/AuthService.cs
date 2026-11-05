@@ -10,6 +10,10 @@ namespace BTL_LTW_DOTJOB.Services.Auth
     public class AuthService : IAuthService
     {
         private readonly AppDbContext _db;
+
+        // Chỉ cho phép tự đăng ký 2 vai trò này. Admin chỉ được tạo từ SeedData
+        private static readonly string[] RegisterableRoles = { "Candidate", "Employer" };
+
         public AuthService(AppDbContext db)
         {
             _db = db;
@@ -21,12 +25,23 @@ namespace BTL_LTW_DOTJOB.Services.Auth
         //register user
         public async Task<bool> RegisterUserAsync(RegisterViewModel model)
         {
+            // Chặn vai trò ngoài danh sách cho phép (vd: Admin) dù ViewModel đã kiểm tra
+            if (!RegisterableRoles.Contains(model.RoleName))
+            {
+                return false;
+            }
+
             if (await UserExistsAsync(model.Email))
             {
                 return false;
             }
 
             var role = await _db.Roles.FirstOrDefaultAsync(r => r.Name == model.RoleName);
+            if (role == null)
+            {
+                // Chưa có Role trong DB (chưa chạy SeedData)
+                return false;
+            }
 
             //hash password
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
@@ -56,7 +71,7 @@ namespace BTL_LTW_DOTJOB.Services.Auth
             {
                 _db.Users.Add(newUser);
                 await _db.SaveChangesAsync();
-                
+
                 return true;
             }
             catch (Exception ex)
@@ -66,17 +81,28 @@ namespace BTL_LTW_DOTJOB.Services.Auth
                 return false;
             }
         }
-        public async Task<User> AuthenticateAsync(string username, string password)
+        public async Task<User?> AuthenticateAsync(string username, string password)
         {
-            
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == username);
-            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            // Include Role để lấy tên quyền (Admin / Employer / Candidate) đưa vào Claim
+            var user = await _db.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == username);
+
+            if (user == null)
             {
-                return user;
+                return null;
             }
-            
-            return null;
-            
+
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash) ? user : null;
+            }
+            catch (Exception ex)
+            {
+                // PasswordHash không đúng định dạng BCrypt (vd: dữ liệu cũ hash bằng thuật toán khác)
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
     }
 }

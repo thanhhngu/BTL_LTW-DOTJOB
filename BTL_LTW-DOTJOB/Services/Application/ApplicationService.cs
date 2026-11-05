@@ -59,7 +59,7 @@ namespace BTL_LTW_DOTJOB.Services.Application
             }
 
             // 4. Lưu thông tin vào Database
-            var application = new BTL_LTW_DOTJOB.Models.Application
+            var application = new Models.Application
             {
                 JobPostingId = model.Id,
                 UserId = userId,
