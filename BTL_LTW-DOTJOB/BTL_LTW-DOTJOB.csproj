@@ -27,6 +27,7 @@
     <Folder Include="Areas\Admin\Views\" />
     <Folder Include="Areas\Employer\Controllers\" />
     <Folder Include="Areas\Employer\Views\" />
+    <Folder Include="wwwroot\uploads\cvs\" />
   </ItemGroup>
 
 </Project>

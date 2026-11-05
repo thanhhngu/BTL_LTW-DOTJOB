@@ -47,6 +47,12 @@ namespace BTL_LTW_DOTJOB.Controllers
             return PartialView("_FeaturedJobs", pagedJobs);
         }
 
+        [HttpGet]
+        public IActionResult LoadCategoryMenu(int page = 1)
+        {
+            return ViewComponent("CategoryMenu", new { page });
+        }
+
         public IActionResult Privacy()
         {
             return View();

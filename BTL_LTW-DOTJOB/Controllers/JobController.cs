@@ -9,7 +9,7 @@ namespace BTL_LTW_DOTJOB.Controllers
     public class JobController : Controller
     {
 
-        IJobService _jobService;
+        private readonly IJobService _jobService;
         public JobController(IJobService jobService)
         {
             _jobService = jobService;

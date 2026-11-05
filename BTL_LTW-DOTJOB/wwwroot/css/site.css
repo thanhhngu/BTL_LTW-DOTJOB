@@ -50,6 +50,27 @@ body {
     background: linear-gradient(to right, var(--topcv-dark-green), var(--topcv-green));
 }
 
+.topcv-banner-content {
+    width: 100%;
+    max-width: 1000px;
+    margin-inline: auto;
+}
+
+.topcv-banner-carousel {
+    height: 276px;
+}
+
+.topcv-banner-carousel .carousel-inner,
+.topcv-banner-carousel .carousel-item {
+    height: 100%;
+}
+
+.hero-banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 .btn-topcv-search {
     background-color: var(--topcv-green);
     color: white;

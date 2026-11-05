@@ -1,0 +1,76 @@
+﻿@model BTL_LTW_DOTJOB.ViewModels.Application.ApplyJobViewModel
+
+<div class="modal fade" id="applyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0">
+            <form id="applyForm" enctype="multipart/form-data" novalidate>
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="modal-header border-0 pb-0">
+                    <div>
+                        <h5 class="modal-title fw-bold">Ứng tuyển</h5>
+                        <div class="text-muted small">@Model.JobTitle</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Thông tin ứng viên -->
+                    <div class="border rounded-3 p-3 mb-3" style="border-style: dashed !important;">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+                            <input asp-for="FullName" class="form-control" placeholder="Họ tên hiển thị với NTD" />
+							<span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="Email hiển thị với NTD" />
+								<span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                                <input asp-for="Phone" class="form-control" placeholder="Số điện thoại hiển thị với NTD" />
+								<span asp-validation-for="Phone" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tải CV -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">CV của bạn <span class="text-danger">*</span></label>
+                        <input type="file" name="CvFile" id="cvFile" class="form-control" accept=".pdf,.doc,.docx" />
+                        <div class="form-text">Hỗ trợ PDF, DOC, DOCX, tối đa 5MB.</div>
+                    </div>
+
+                    <!-- Thư giới thiệu -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Thư giới thiệu</label>
+                        <textarea asp-for="CoverLetter" class="form-control" rows="3" maxlength="2000"
+                                  placeholder="Nội dung thư giới thiệu"></textarea>
+                    </div>
+
+                    <!-- Lưu ý -->
+                    <div class="border rounded-3 p-3 small text-secondary mb-3">
+                        <strong class="text-dark">Lưu ý:</strong>
+                        Hãy cẩn trọng khi tìm việc và chủ động nghiên cứu thông tin công ty, vị trí việc làm trước khi ứng tuyển.
+                    </div>
+
+                    <!-- Đồng ý-->
+                    <div class="form-check">
+                        <input asp-for="AgreeTerms" class="form-check-input" id="agreeTerms" />
+                        <label class="form-check-label" asp-for="AgreeTerms">Tôi đã đọc và đồng ý với thỏa thuận sử dụng dữ liệu cá nhân</label>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button type="submit" id="btnSubmitApply" class="btn btn-success w-100 py-2 fw-bold" disabled>
+                        Nộp hồ sơ ứng tuyển
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

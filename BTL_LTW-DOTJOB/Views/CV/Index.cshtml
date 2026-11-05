@@ -1,0 +1,309 @@
+﻿@{
+    ViewData["Title"] = "Tạo CV Chuyên Nghiệp";
+}
+
+<div class="container my-5">
+    <!-- Thanh công cụ điều khiển phía trên -->
+    <div class="card shadow-sm border-0 mb-4 p-3 bg-light rounded-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h3 class="fw-bold text-success mb-1">Trình Tạo CV Trực Tuyến</h3>
+                <p class="text-muted small mb-0">Click trực tiếp vào các ô chữ bên dưới để chỉnh sửa nội dung theo ý muốn.</p>
+                <p class="text-muted small mb-0">Double-click trực tiếp Tittle thêm nội dung theo ý muốn.</p>
+                <p class="text-muted small mb-0">Ctrl + B để in đậm</p>
+                <p class="text-muted small mb-0">Ctrl + I để in nghiêng</p>
+				<p class="text-muted small mb-0">Ctrl + U để gạch chân</p>
+                <p class="text-muted small mb-0">Ctrl + G để đổi chữ sang màu xanh</p>
+                <p class="text-muted small mb-0">Click vào ảnh để đổi avatar</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button onclick="window.print()" class="btn btn-outline-secondary px-3 py-2 fw-semibold rounded-3">
+                    <i class="fa-solid fa-print me-1"></i> In nhanh
+                </button>
+                <button onclick="exportPDF()" class="btn btn-success px-4 py-2 fw-bold rounded-3 shadow-sm" style="background-color: #00b14f;">
+                    <i class="fa-solid fa-file-pdf me-1"></i> Tải xuống PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHUNG GIẤY A4 CHỨA CV (Đây là phần sẽ được xuất thành PDF) -->
+    <div class="d-flex justify-content-center">
+        <div id="cv-paper" class="bg-white shadow-lg p-5 rounded-3 position-relative" style="width: 210mm; min-height: 297mm; box-sizing: border-box;">
+
+            <div class="row">
+                <!-- CỘT BÊN TRÁI (Thông tin cá nhân, Kỹ năng) -->
+                <div class="col-4 border-end pe-4">
+                    <!-- Ảnh đại diện -->
+                    <div class="text-center mb-4">
+                        <div id="avatarContainer" onclick="changeAvatar()" class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center" style="width:120px; height:120px; border-radius:50%; overflow:hidden; font-size:40px;">
+                            <img src="/images/default-avatar.png" alt="Avatar" class="w-100 h-100 object-fit-cover" id="avatarPreview" onerror="this.style.display='none'">
+                            <input type="file" id="avatarInput" accept="image/*" hidden>
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                    </div>
+
+                    <!-- Họ tên & Vị trí -->
+                    <div class="text-center mb-4">
+                        <h4 contenteditable="true" class="fw-bold text-dark mb-1 outline-none" style="border-bottom: 1px dashed transparent;">NGUYỄN VĂN A</h4>
+                        <p contenteditable="true" class="text-success fw-semibold mb-0">Kỹ Sư Phần Mềm .NET</p>
+                    </div>
+
+                    <!-- Thông tin liên hệ -->
+                    <div class="mb-4">
+                        <h6 ondblclick = "addContactInfo()" class="fw-bold text-uppercase text-success border-bottom pb-2 mb-3 fs-6">Thông Tin Liên Hệ</h6>
+                        <ul class="list-unstyled small text-secondary" id="addContact">
+                            <li class="mb-2"><i class="fa-solid fa-phone text-success me-2"></i><span contenteditable="true">0901 234 567</span></li>
+                            <li class="mb-2"><i class="fa-solid fa-envelope text-success me-2"></i><span contenteditable="true">nguyenvana@gmail.com</span></li>
+                            <li class="mb-2"><i class="fa-solid fa-location-dot text-success me-2"></i><span contenteditable="true">Cầu Giấy, Hà Nội</span></li>
+                            <li class="mb-2"><i class="fa-brands fa-linkedin text-success me-2"></i><span contenteditable="true">linkedin.com/in/nguyenvana</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Kỹ năng -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase text-success border-bottom pb-2 mb-3 fs-6">Kỹ Năng Chuyên Môn</h6>
+                        <div contenteditable="true" class="small text-secondary lh-lg">
+                            <p class="mb-1"><strong>Ngôn ngữ:</strong> C#, JavaScript, SQL</p>
+                            <p class="mb-1"><strong>Framework:</strong> ASP.NET Core, ReactJS</p>
+                            <p class="mb-1"><strong>Công cụ:</strong> Git, Docker, SQL Server</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CỘT BÊN PHẢI (Mục tiêu, Kinh nghiệm, Học vấn) -->
+                <div class="col-8 ps-4">
+
+                    <!-- Mục tiêu nghề nghiệp -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-uppercase text-success border-bottom pb-2 mb-3 fs-5"><i class="fa-solid fa-bullseye me-2"></i>Mục tiêu nghề nghiệp</h5>
+                        <div contenteditable="true" class="text-secondary small lh-lg">
+                            Trở thành một Senior .NET Developer trong vòng 2 năm tới, áp dụng kiến thức chuyên môn để phát triển các hệ thống phần mềm quy mô lớn, tối ưu hiệu suất và mang lại giá trị thiết thực cho doanh nghiệp.
+                        </div>
+                    </div>
+
+                    <!-- Kinh nghiệm làm việc -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-uppercase text-success border-bottom pb-2 mb-3 fs-5"><i class="fa-solid fa-briefcase me-2"></i>Kinh nghiệm làm việc</h5>
+
+                        <div class="mb-3" contenteditable="true">
+                            <div class="d-flex justify-content-between fw-bold text-dark small">
+                                <span>Công ty Cổ phần Công nghệ ABC</span>
+                                <span class="text-muted">2023 - Hiện tại</span>
+                            </div>
+                            <div class="text-success small fw-semibold mb-1">Lập trình viên .NET Backend</div>
+                            <ul class="text-secondary small ps-3 mb-0">
+                                <li>Phát triển các RESTful APIs phục vụ cho hệ thống thương mại điện tử bằng ASP.NET Core Web API.</li>
+                                <li>Tối ưu hóa câu lệnh truy vấn SQL Server giúp tăng 30% tốc độ xử lý dữ liệu.</li>
+                                <li>Phối hợp làm việc nhóm theo mô hình Agile/Scrum.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Học vấn -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-uppercase text-success border-bottom pb-2 mb-3 fs-5"><i class="fa-solid fa-graduation-cap me-2"></i>Học vấn</h5>
+                        <div contenteditable="true" class="small">
+                            <div class="d-flex justify-content-between fw-bold text-dark">
+                                <span>Đại học Bách Khoa Hà Nội</span>
+                                <span class="text-muted">2019 - 2023</span>
+                            </div>
+                            <div class="text-success fw-semibold">Chuyên ngành: Công nghệ Thông tin</div>
+                            <p class="text-secondary mb-0">Tốt nghiệp loại Giỏi (GPA: 3.4/4.0)</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- html2pdf.js from CDN and swal -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Cropper.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script>
+    //btn export
+    function exportPDF() {
+        const element = document.getElementById('cv-paper');
+
+        Swal.fire({
+            title: 'Nhập tên file PDF muốn lưu',
+            input: 'text',
+            inputValue: "My_Professional_CV.pdf",
+            inputPlaceholder: 'Nhập tên file (ví dụ: NguyenVanA_CV.pdf)...',
+            showCancelButton: true,
+            confirmButtonText: 'Xuất file',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                let filename = result.value.trim() || 'My_Professional_CV.pdf';
+
+                if (!filename.toLowerCase().endsWith('.pdf')) {
+                    filename += '.pdf';
+                }
+
+				// Cấu hình html2pdf dinh dạng A4, chất lượng cao, không bị cắt nội dung
+                const options = {
+                    margin: 0,
+                    filename: filename,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        height: element.scrollHeight - 1
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['css'] }
+                };
+
+                html2pdf().set(options).from(element).toPdf().get('pdf').then(pdf => {
+                   
+                }).save();
+            }
+        });
+    }
+	// ondblclick contact info
+    function addContactInfo() {
+        console.log("1111");
+		const contactList = document.getElementById('addContact');
+        const newItem = document.createElement('li');
+        newItem.className = 'mb-2';
+        newItem.innerHTML = '<i class="fa-solid fa-info-circle text-success me-2"></i><span contenteditable="true">Thông tin mới</span>';
+        contactList.appendChild(newItem);
+    }
+
+    //ctrl g
+    document.getElementById('cv-paper').addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') {
+            e.preventDefault();
+
+            const sel = window.getSelection();
+            if (!sel.rangeCount || sel.isCollapsed) return; 
+
+            const range = sel.getRangeAt(0);
+            const div = document.createElement('div');
+            div.className = 'text-success small fw-semibold ';
+            div.appendChild(range.extractContents());
+            range.insertNode(div);
+
+            sel.removeAllRanges();
+        }
+    });
+
+    
+</script>
+
+<style>
+    [contenteditable="true"]:hover {
+        background-color: rgba(0, 177, 79, 0.03);
+        outline: 1px dashed #00b14f;
+        border-radius: 4px;
+        cursor: text;
+    }
+
+    [contenteditable="true"]:focus {
+        background-color: rgba(0, 177, 79, 0.05);
+        outline: 2px solid #00b14f;
+        border-radius: 4px;
+    }
+
+    #cv-paper {
+        box-sizing: border-box;
+        width: 210mm;
+        min-height: 296mm;
+        margin: 0;
+        box-shadow: none;
+    }
+    #avatarContainer {
+        cursor: pointer;
+    }
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
+
+
+<script>
+    var cropper;
+
+    // Bấm vào avatar -> mở hộp thoại chọn file
+    function changeAvatar() {
+        document.getElementById('avatarInput').click();
+    }
+
+    document.getElementById('avatarInput').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            Swal.fire('Lỗi', 'Vui lòng chọn file ảnh.', 'error');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            Swal.fire('Lỗi', 'Ảnh tối đa 5MB.', 'error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = ev => openCropper(ev.target.result);
+        reader.readAsDataURL(file);
+        e.target.value = '';   // cho phép chọn lại cùng một file
+    });
+
+    // Hộp thoại căn chỉnh
+    function openCropper(src) {
+        Swal.fire({
+            title: 'Căn chỉnh ảnh đại diện',
+            width: 600,
+            html: `
+                <div style="max-height:380px;">
+                    <img id="cropImage" src="${src}" style="max-width:100%; display:block;">
+                </div>
+                <div class="mt-3 d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cropper.zoom(0.1)">Phóng to</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cropper.zoom(-0.1)">Thu nhỏ</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cropper.rotate(-90)">Xoay trái</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cropper.rotate(90)">Xoay phải</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cropper.reset()">Đặt lại</button>
+                </div>`,
+            showCancelButton: true,
+            confirmButtonText: 'Áp dụng',
+            cancelButtonText: 'Hủy',
+            didOpen: () => {
+                cropper = new Cropper(document.getElementById('cropImage'), {
+                    aspectRatio: 1,       // khung vuông, hiển thị tròn nhờ rounded-circle
+                    viewMode: 1,
+                    dragMode: 'move',     // kéo ảnh thay vì kéo khung
+                    autoCropArea: 1,
+                    background: false
+                });
+            },
+            preConfirm: () => cropper.getCroppedCanvas({
+                width: 400,
+                height: 400,
+                imageSmoothingQuality: 'high'
+            }).toDataURL('image/jpeg', 0.9),
+            willClose: () => { if (cropper) cropper.destroy(); }
+        }).then(result => {
+            if (result.isConfirmed) applyAvatar(result.value);
+        });
+    }
+
+    // Gắn ảnh đã cắt vào CV
+    function applyAvatar(dataUrl) {
+        const box = document.getElementById('avatarContainer');
+        box.style.backgroundImage = `url(${dataUrl})`;
+        box.style.backgroundSize = 'cover';
+        box.style.backgroundPosition = 'center';
+        box.style.backgroundRepeat = 'no-repeat';
+        box.classList.remove('bg-secondary');          // bỏ nền xám
+
+        document.getElementById('avatarPreview').style.display = 'none';
+        box.querySelector('i').style.display = 'none';
+    }
+</script>

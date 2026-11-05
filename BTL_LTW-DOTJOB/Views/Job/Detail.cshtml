@@ -2,6 +2,13 @@
 @model BTL_LTW_DOTJOB.Models.JobPosting
 @{
     ViewData["Title"] = Model?.Title ?? "Chi tiết công việc";
+
+
+    var requirement = Model.Requirements ?? "";
+    var match = System.Text.RegularExpressions.Regex.Match(requirement, @"\d+-\d+\s*năm");
+    var experience = match.Success ? match.Value : "Không yêu cầu";
+
+
 }
 
 <div class="container my-4">
@@ -36,7 +43,11 @@
                         <div class="bg-light p-2 rounded-3 me-2 text-success"><i class="fa-solid fa-medal"></i></div>
                         <div>
                             <span class="d-block text-muted">Kinh nghiệm</span>
-                            <span class="fw-semibold text-dark">1 - 2 năm kinh nghiệm</span>
+                            <span class="fw-semibold text-dark">
+                                
+                                    @experience
+                                
+                            </span>
                         </div>
                     </div>
                     <div class="col-md-4 d-flex align-items-center">
@@ -50,10 +61,13 @@
 
                 <!-- Nút Ứng tuyển ngay & Lưu tin -->
                 <div class="d-flex gap-3">
-                    <button class="btn btn-success flex-grow-1 py-3 fw-bold rounded-3 shadow-sm" style="background-color: #00b14f;">
+                    <button class="btn btn-success flex-grow-1 py-3 fw-bold rounded-3 shadow-sm"
+                            style="background-color: #00b14f;"
+                            data-bs-toggle="modal" data-bs-target="#applyModal">
                         <i class="fa-solid fa-paper-plane me-2"></i> Ứng tuyển ngay
                     </button>
-                    <button class="btn btn-outline-success px-4 py-3 fw-semibold rounded-3">
+
+                    <button class="btn btn-outline-success px-4 py-3 fw-semibold rounded-3 btn-heart">
                         <i class="fa-regular fa-heart me-1"></i> Lưu tin
                     </button>
                 </div>
@@ -98,8 +112,17 @@
                 <div class="text-secondary lh-lg">
                     <p>@Model?.Requirements</p>
                     <ul class="ps-3">
-                        <li>Có tinh thần trách nhiệm cao, chịu được áp lực trong công việc.</li>
-                        <li>Kỹ năng giao tiếp và làm việc nhóm tốt.</li>
+                        @{
+                            var requirements = (Model?.Requirements ?? "")
+                                               .Split('.', StringSplitOptions.RemoveEmptyEntries);
+
+                            foreach (var req in requirements)
+                            {
+                                var trimmed = req.Trim();
+                                var capitalized = char.ToUpper(trimmed[0]) + trimmed.Substring(1);
+                                <li>@capitalized</li>
+                            }
+                        }
                     </ul>
                 </div>
 
@@ -168,3 +191,58 @@
 
     </div>
 </div>
+
+
+
+<!-- Modal Ứng tuyển -->
+<partial name="_ApplyModal"
+         model="new BTL_LTW_DOTJOB.ViewModels.Application.ApplyJobViewModel { Id = Model.Id, JobTitle = Model.Title }" />
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const applyForm = document.getElementById('applyForm');
+    const btnSubmit = document.getElementById('btnSubmitApply');
+
+    // Chỉ cho bấm nộp khi đã tích đồng ý
+    document.getElementById('agreeTerms').addEventListener('change', e => {
+        btnSubmit.disabled = !e.target.checked;
+    });
+
+    applyForm.addEventListener('submit', async e => {
+        e.preventDefault();
+
+        const cv = document.getElementById('cvFile').files[0];
+        if (!cv) return Swal.fire('Thiếu CV', 'Vui lòng chọn file CV.', 'warning');
+        if (cv.size > 5 * 1024 * 1024) return Swal.fire('File quá lớn', 'CV tối đa 5MB.', 'warning');
+
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Đang gửi...';
+
+        try {
+            const res = await fetch('/Application/Apply', {
+                method: 'POST',
+                body: new FormData(applyForm)
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const modalEl = document.getElementById('applyModal');
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+                modalEl.addEventListener('hidden.bs.modal', () => {
+                    Swal.fire('Thành công', data.message, 'success');
+                }, { once: true });
+
+                applyForm.reset();
+                modal.hide();
+            } else {
+                Swal.fire('Lỗi', await res.text(), 'error');
+            }
+        } catch {
+            Swal.fire('Lỗi', 'Không kết nối được máy chủ.', 'error');
+        } finally {
+            btnSubmit.textContent = 'Nộp hồ sơ ứng tuyển';
+            btnSubmit.disabled = !document.getElementById('agreeTerms').checked;
+        }
+    });
+</script>

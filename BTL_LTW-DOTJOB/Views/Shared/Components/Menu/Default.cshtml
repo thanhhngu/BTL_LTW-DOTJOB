@@ -16,19 +16,19 @@
             <div class="collapse navbar-collapse" id="topcvNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-medium">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-success" data-bs-toggle="dropdown" asp-area="" asp-controller="Home" asp-action="Index">Việc làm</a>
+                        <a class="nav-link dropdown-toggle text-success"@*data-bs-toggle="dropdown"*@ asp-area="" asp-controller="Home" asp-action="Index">Việc làm</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Tạo CV</a>
+                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@ asp-area="" asp-controller="CV" asp-action="Index">Tạo CV</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Công cụ</a>
+                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@>Công cụ</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Cẩm nang nghề nghiệp</a>
+                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@>Cẩm nang nghề nghiệp</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-warning fw-bold" href="#">DOTJOB Pro</a>
+                        <a class="nav-link text-warning fw-bold">DOTJOB Pro</a>
                     </li>
                 </ul>
 
@@ -47,3 +47,22 @@
         </div>
     </nav>
 </header>
+<script>
+    const navLinks = document.querySelectorAll('#topcvNav .navbar-nav .nav-link');
+    const activeNavIndex = Number(sessionStorage.getItem('topcvActiveNavIndex'));
+
+    function setActiveNavLink(link, index) {
+        navLinks.forEach(navLink => navLink.classList.remove('text-success'));
+        link.classList.remove('text-warning');
+        link.classList.add('text-success');
+        sessionStorage.setItem('topcvActiveNavIndex', index);
+    }
+
+    if (Number.isInteger(activeNavIndex) && activeNavIndex >= 0 && activeNavIndex < navLinks.length) {
+        setActiveNavLink(navLinks[activeNavIndex], activeNavIndex);
+    }
+
+    navLinks.forEach((link, index) => {
+        link.addEventListener('click', () => setActiveNavLink(link, index));
+    });
+</script>

@@ -3,9 +3,10 @@
 
 @{
     ViewData["Title"] = "Trang chủ - Tìm việc làm";
+	ViewData["ShowHeroBanner"] = true;
 }
 
-<partial name="_Banner" />
+<partial name="_HeroBanner"  />
 
 <div id="featured-jobs-container">
     <partial name="_FeaturedJobs" model="Model" />

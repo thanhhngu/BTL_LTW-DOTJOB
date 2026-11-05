@@ -1,4 +1,5 @@
 using BTL_LTW_DOTJOB.Data;
+using BTL_LTW_DOTJOB.Services.Application;
 using BTL_LTW_DOTJOB.Services.Auth;
 using BTL_LTW_DOTJOB.Services.Job;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -11,6 +12,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>

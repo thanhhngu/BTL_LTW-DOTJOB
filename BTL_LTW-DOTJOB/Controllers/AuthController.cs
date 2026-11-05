@@ -39,7 +39,12 @@ namespace BTL_LTW_DOTJOB.Controllers
             }
             var user = await _authService.AuthenticateAsync(model.Email, model.Password);
 
-            if(!user.IsActive)
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không chính xác.");
+                return View(model);
+            }
+            if (!user.IsActive)
             {
                 ModelState.AddModelError(string.Empty, "Tài khoản của bạn đã bị khóa.");
                 return View(model);
