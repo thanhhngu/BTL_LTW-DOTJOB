@@ -11,6 +11,7 @@ namespace BTL_LTW_DOTJOB.Services.Application
         private readonly IWebHostEnvironment _env;
         private static readonly string[] AllowedExt = { ".pdf", ".doc", ".docx" };
         private const long MaxSize = 5 * 1024 * 1024;
+        private const int PageSize = 10;
         public ApplicationService(AppDbContext db, IWebHostEnvironment env)
         {
             _env = env;
@@ -43,8 +44,8 @@ namespace BTL_LTW_DOTJOB.Services.Application
             if (existingApp != null)
                 return (false, "Bạn đã nộp hồ sơ cho vị trí này rồi.");
 
-            // 3. Lưu file CV vào thư mục wwwroot/uploads/cvs
-            var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "cvs");
+            // 3. Lưu file CV vào App_Data/cvs (nằm ngoài wwwroot nên không thể truy cập trực tiếp bằng URL)
+            var uploadsFolder = Path.Combine(_env.ContentRootPath, "App_Data", "cvs");
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
@@ -63,16 +64,136 @@ namespace BTL_LTW_DOTJOB.Services.Application
             {
                 JobPostingId = model.Id,
                 UserId = userId,
-                CvFilePath = $"/uploads/cvs/{uniqueFileName}",
+                CvFilePath = $"cvs/{uniqueFileName}", // Đường dẫn tương đối trong App_Data, tải qua CvFileController
                 CoverLetter = model.CoverLetter ?? "...",
                 AppliedDate = DateTime.UtcNow,
                 Status = "Pending"
             };
 
-            _db.Applications.Add(application);
-            await _db.SaveChangesAsync();
+            try
+            {
+                _db.Applications.Add(application);
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Lưu DB lỗi (vd: bấm nộp 2 lần cùng lúc bị trùng đơn) => xóa file vừa lưu để không bị file rác
+                Console.WriteLine(ex.Message);
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+                return (false, "Không thể lưu hồ sơ (có thể bạn đã nộp vị trí này rồi). Vui lòng thử lại.");
+            }
 
             return (true, "Nộp hồ sơ thành công!");
+        }
+
+        public async Task<MyApplicationsViewModel> GetMyApplicationsAsync(string userId, string? status, int page)
+        {
+            // Luôn lọc theo userId của người đăng nhập, không nhận userId từ client (chống xem đơn của người khác)
+            var query = _db.Applications
+                .AsNoTracking()
+                .Where(a => a.UserId == userId);
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(a => a.Status == status);
+            }
+
+            var totalCount = await query.CountAsync();
+            var pageCount = Math.Max((int)Math.Ceiling(totalCount / (double)PageSize), 1);
+            page = Math.Clamp(page, 1, pageCount);
+
+            var items = await query
+                .OrderByDescending(a => a.AppliedDate)
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
+                .Select(a => new MyApplicationItemViewModel
+                {
+                    ApplicationId = a.Id,
+                    JobId = a.JobPostingId,
+                    JobTitle = a.JobPosting!.Title,
+                    CompanyName = a.JobPosting!.Company!.CompanyName,
+                    Location = a.JobPosting!.Location,
+                    AppliedDate = a.AppliedDate,
+                    Status = a.Status
+                })
+                .ToListAsync();
+
+            return new MyApplicationsViewModel
+            {
+                Items = items,
+                Status = status,
+                Page = page,
+                PageCount = pageCount,
+                TotalCount = totalCount
+            };
+        }
+
+        public async Task<(string PhysicalPath, string FileName)?> GetCvFileAsync(string applicationId, string userId, string role)
+        {
+            var info = await _db.Applications
+                .AsNoTracking()
+                .Where(a => a.Id == applicationId)
+                .Select(a => new
+                {
+                    a.UserId,
+                    a.CvFilePath,
+                    EmployerUserId = a.JobPosting!.Company!.UserId
+                })
+                .FirstOrDefaultAsync();
+
+            if (info == null)
+            {
+                return null;
+            }
+
+            // Phân quyền xem CV: Admin xem tất cả, Candidate chỉ xem CV của mình, Employer chỉ xem CV nộp vào tin của công ty mình
+            var allowed = role switch
+            {
+                "Admin" => true,
+                "Candidate" => info.UserId == userId,
+                "Employer" => info.EmployerUserId == userId,
+                _ => false
+            };
+
+            if (!allowed)
+            {
+                return null;
+            }
+
+            var physicalPath = ResolveCvPath(info.CvFilePath);
+            if (physicalPath == null || !File.Exists(physicalPath))
+            {
+                return null;
+            }
+
+            return (physicalPath, $"CV-{applicationId[..8]}{Path.GetExtension(physicalPath)}");
+        }
+
+        // Đổi đường dẫn lưu trong DB thành đường dẫn vật lý, đồng thời chặn đường dẫn thoát ra ngoài thư mục gốc
+        private string? ResolveCvPath(string storedPath)
+        {
+            string baseDir;
+
+            if (storedPath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+            {
+                // Dữ liệu cũ: CV nằm trong wwwroot/uploads
+                baseDir = _env.WebRootPath;
+            }
+            else
+            {
+                // Dữ liệu mới: CV nằm trong App_Data/cvs
+                baseDir = Path.Combine(_env.ContentRootPath, "App_Data");
+            }
+
+            var fullBase = Path.GetFullPath(baseDir);
+            var fullPath = Path.GetFullPath(Path.Combine(fullBase, storedPath.TrimStart('/', '\\')));
+
+            return fullPath.StartsWith(fullBase + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                ? fullPath
+                : null;
         }
 
     }

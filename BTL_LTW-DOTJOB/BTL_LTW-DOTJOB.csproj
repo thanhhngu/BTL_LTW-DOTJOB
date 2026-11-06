@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\..\..\Downloads\tien-do-sua-loi.md" Link="tien-do-sua-loi.md" />
     <None Include="..\..\LTW\.gitignore" Link=".gitignore" />
   </ItemGroup>
 

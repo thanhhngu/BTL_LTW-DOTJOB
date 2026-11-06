@@ -39,6 +39,17 @@ namespace BTL_LTW_DOTJOB.Data
                 .WithMany(j => j.Applications)
                 .HasForeignKey(a => a.JobPostingId)
                 .OnDelete(DeleteBehavior.Cascade); // Nếu bài tuyển dụng bị xóa, tự động xóa các Đơn ứng tuyển thuộc về bài đó
+
+            // 3. Chống trùng dữ liệu ở mức Database (chặn cả trường hợp bấm gửi 2 lần cùng lúc)
+            // Mỗi email chỉ có 1 tài khoản
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
+            // Mỗi Ứng viên chỉ nộp 1 đơn cho 1 tin tuyển dụng
+            modelBuilder.Entity<Application>()
+                .HasIndex(a => new { a.JobPostingId, a.UserId })
+                .IsUnique();
         }
 
     }

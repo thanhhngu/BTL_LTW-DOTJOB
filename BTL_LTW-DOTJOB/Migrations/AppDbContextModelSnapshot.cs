@@ -53,9 +53,10 @@ namespace BTL_LTW_DOTJOB.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("JobPostingId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("JobPostingId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("Application");
                 });
@@ -234,6 +235,9 @@ namespace BTL_LTW_DOTJOB.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.HasIndex("RoleId");
 
