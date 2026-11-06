@@ -45,7 +45,7 @@ namespace BTL_LTW_DOTJOB.Services.Application
                 return (false, "Bạn đã nộp hồ sơ cho vị trí này rồi.");
 
             // 3. Lưu file CV vào App_Data/cvs (nằm ngoài wwwroot nên không thể truy cập trực tiếp bằng URL)
-            var uploadsFolder = Path.Combine(_env.ContentRootPath, "App_Data", "cvs");
+            var uploadsFolder = Path.Combine(_env.ContentRootPath, "AppData", "cvs");
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
@@ -172,23 +172,10 @@ namespace BTL_LTW_DOTJOB.Services.Application
             return (physicalPath, $"CV-{applicationId[..8]}{Path.GetExtension(physicalPath)}");
         }
 
-        // Đổi đường dẫn lưu trong DB thành đường dẫn vật lý, đồng thời chặn đường dẫn thoát ra ngoài thư mục gốc
+        // Đổi đường dẫn lưu trong DB thành đường dẫn vật lý
         private string? ResolveCvPath(string storedPath)
         {
-            string baseDir;
-
-            if (storedPath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
-            {
-                // Dữ liệu cũ: CV nằm trong wwwroot/uploads
-                baseDir = _env.WebRootPath;
-            }
-            else
-            {
-                // Dữ liệu mới: CV nằm trong App_Data/cvs
-                baseDir = Path.Combine(_env.ContentRootPath, "App_Data");
-            }
-
-            var fullBase = Path.GetFullPath(baseDir);
+            var fullBase = Path.GetFullPath(Path.Combine(_env.ContentRootPath, "AppData"));
             var fullPath = Path.GetFullPath(Path.Combine(fullBase, storedPath.TrimStart('/', '\\')));
 
             return fullPath.StartsWith(fullBase + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)

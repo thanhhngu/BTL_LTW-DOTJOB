@@ -269,7 +269,7 @@ public static class SeedData
                 {
                     JobPostingId = jobIds[i],
                     UserId = candidateIds[i % candidateIds.Count],
-                    CvFilePath = $"/uploads/cvs/sample-cv-{i + 1}.pdf",
+                    CvFilePath = $"cvs/sample-cv-{i + 1}.pdf",
                     CoverLetter = "Kính gửi nhà tuyển dụng, tôi rất quan tâm đến cơ hội hợp tác và phát triển tại quý công ty.",
                     AppliedDate = DateTime.UtcNow.AddDays(-i % 15),
                     Status = statuses[i % statuses.Length]
