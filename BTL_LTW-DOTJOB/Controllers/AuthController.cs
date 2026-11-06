@@ -20,19 +20,31 @@ namespace BTL_LTW_DOTJOB.Controllers
 
         // GET: /Auth/Login
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
             }
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
+        //[HttpGet]
+        //public IActionResult Login()
+        //{
+        //    if (User.Identity != null && User.Identity.IsAuthenticated)
+        //    {
+        //        return RedirectToAction("Index", "Home");
+        //    }
+        //    return View();
+        //}
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
+
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -77,6 +89,11 @@ namespace BTL_LTW_DOTJOB.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
                 });
 
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return LocalRedirect(returnUrl);
+            }
+
             // Mỗi role về một trang riêng sau khi đăng nhập
             return roleName switch
             {
@@ -87,12 +104,14 @@ namespace BTL_LTW_DOTJOB.Controllers
             };
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> Logout()
-        //{
-        //    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        //    return RedirectToAction("Login", "Auth");
-        //}
+        // Logout action
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
+        }
 
         // GET: /Auth/Register
         [HttpGet]

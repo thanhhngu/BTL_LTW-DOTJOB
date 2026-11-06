@@ -36,6 +36,7 @@ Layout = null;
             <div asp-validation-summary="ModelOnly" class="field-validation-error"></div>
 
             <div class="spacer"></div>
+            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
 
             <div class="form-group">
                 <label asp-for="Email" class="form-label">Email</label>
