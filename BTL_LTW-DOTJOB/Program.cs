@@ -2,13 +2,19 @@ using BTL_LTW_DOTJOB.Data;
 using BTL_LTW_DOTJOB.Services.Application;
 using BTL_LTW_DOTJOB.Services.Auth;
 using BTL_LTW_DOTJOB.Services.Job;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+
+// Cache nhỏ dùng để kiểm tra trạng thái khóa tài khoản (IsActive) mà không truy vấn DB ở mọi request
+builder.Services.AddMemoryCache();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJobService, JobService>();
@@ -18,6 +24,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+// Request gửi bằng fetch/AJAX kèm header X-Requested-With: XMLHttpRequest
+static bool IsAjaxRequest(HttpRequest request) =>
+    request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
 //Cấu hình Cookie
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -26,6 +36,67 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Auth/Login";
         options.AccessDeniedPath = "/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromDays(1);
+
+        // AJAX chưa đăng nhập => trả 401 (JS tự xử lý), thay vì chuyển hướng 302 sang trang login
+        options.Events.OnRedirectToLogin = context =>
+        {
+            if (IsAjaxRequest(context.Request))
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            }
+            else
+            {
+                context.Response.Redirect(context.RedirectUri);
+            }
+            return Task.CompletedTask;
+        };
+
+        // AJAX sai quyền (vd: Employer bấm ứng tuyển) => trả 403
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            if (IsAjaxRequest(context.Request))
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            }
+            else
+            {
+                context.Response.Redirect(context.RedirectUri);
+            }
+            return Task.CompletedTask;
+        };
+
+        // Tài khoản bị khóa (IsActive = false) hoặc đã bị xóa thì cookie cũ mất hiệu lực (trễ tối đa 1 phút do cache)
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
+
+            var cache = context.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
+            var cacheKey = $"user-active:{userId}";
+
+            if (!cache.TryGetValue(cacheKey, out bool _))
+            {
+                var db = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+                var isActive = await db.Users
+                    .AsNoTracking()
+                    .AnyAsync(user => user.Id == userId && user.IsActive);
+
+                if (!isActive)
+                {
+                    context.RejectPrincipal();
+                    await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    return;
+                }
+
+                // Chỉ cache trường hợp đang hoạt động, để mở khóa có hiệu lực ngay
+                cache.Set(cacheKey, true, TimeSpan.FromMinutes(1));
+            }
+        };
     });
 
 builder.Services.AddAuthorization(options =>

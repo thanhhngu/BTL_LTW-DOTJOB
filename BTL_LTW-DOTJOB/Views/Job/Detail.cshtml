@@ -8,6 +8,10 @@
     var match = System.Text.RegularExpressions.Regex.Match(requirement, @"\d+-\d+\s*năm");
     var experience = match.Success ? match.Value : "Không yêu cầu";
 
+    // Trạng thái đăng nhập để hiển thị nút ứng tuyển phù hợp
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var isCandidate = User.IsInRole("Candidate");
+
 
 }
 
@@ -54,18 +58,38 @@
                         <div class="bg-light p-2 rounded-3 me-2 text-success"><i class="fa-regular fa-clock"></i></div>
                         <div>
                             <span class="d-block text-muted">Hạn ứng tuyển</span>
-                            @* <span class="fw-semibold text-dark">@(Model?.Deadline.ToString("dd/MM/yyyy") ?? "30/10/2026")</span> *@
+                            <span class="fw-semibold text-dark">@(Model?.Deadline?.ToString("dd/MM/yyyy") ?? "Không thời hạn")</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Nút Ứng tuyển ngay & Lưu tin -->
                 <div class="d-flex gap-3">
-                    <button class="btn btn-success flex-grow-1 py-3 fw-bold rounded-3 shadow-sm"
-                            style="background-color: #00b14f;"
-                            data-bs-toggle="modal" data-bs-target="#applyModal">
-                        <i class="fa-solid fa-paper-plane me-2"></i> Ứng tuyển ngay
-                    </button>
+                    @if (!isAuthenticated)
+                    {
+                        <!-- Chưa đăng nhập: chuyển sang trang đăng nhập rồi quay lại tin này -->
+                        <a asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@Context.Request.Path.Value"
+                           class="btn btn-success flex-grow-1 py-3 fw-bold rounded-3 shadow-sm"
+                           style="background-color: #00b14f;">
+                            <i class="fa-solid fa-paper-plane me-2"></i> Đăng nhập để ứng tuyển
+                        </a>
+                    }
+                    else if (isCandidate)
+                    {
+                        <button class="btn btn-success flex-grow-1 py-3 fw-bold rounded-3 shadow-sm"
+                                style="background-color: #00b14f;"
+                                data-bs-toggle="modal" data-bs-target="#applyModal">
+                            <i class="fa-solid fa-paper-plane me-2"></i> Ứng tuyển ngay
+                        </button>
+                    }
+                    else
+                    {
+                        <!-- Employer / Admin không được ứng tuyển -->
+                        <button class="btn btn-secondary flex-grow-1 py-3 fw-bold rounded-3" disabled
+                                title="Chỉ tài khoản Ứng viên mới có thể ứng tuyển">
+                            <i class="fa-solid fa-paper-plane me-2"></i> Chỉ dành cho Ứng viên
+                        </button>
+                    }
 
                     <button class="btn btn-outline-success px-4 py-3 fw-semibold rounded-3 btn-heart">
                         <i class="fa-regular fa-heart me-1"></i> Lưu tin
@@ -114,7 +138,7 @@
                     <ul class="ps-3">
                         @{
                             var requirements = (Model?.Requirements ?? "")
-                                               .Split('.', StringSplitOptions.RemoveEmptyEntries);
+                                               .Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
                             foreach (var req in requirements)
                             {
@@ -194,6 +218,9 @@
 
 
 
+@* Modal + script ứng tuyển chỉ dành cho Candidate (Employer/Admin/khách không có form nên không cần script) *@
+@if (isCandidate)
+{
 <!-- Modal Ứng tuyển -->
 <partial name="_ApplyModal"
          model="new BTL_LTW_DOTJOB.ViewModels.Application.ApplyJobViewModel { Id = Model.Id, JobTitle = Model.Title }" />
@@ -221,6 +248,7 @@
         try {
             const res = await fetch('/Application/Apply', {
                 method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }, // để server trả 401/403 thay vì chuyển hướng 302
                 body: new FormData(applyForm)
             });
 
@@ -235,6 +263,20 @@
 
                 applyForm.reset();
                 modal.hide();
+            } else if (res.status === 401) {
+                // Hết phiên đăng nhập: chuyển sang trang đăng nhập rồi quay lại tin này
+                Swal.fire({
+                    title: 'Cần đăng nhập',
+                    text: 'Vui lòng đăng nhập để ứng tuyển.',
+                    icon: 'info',
+                    confirmButtonText: 'Đăng nhập'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/Auth/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                    }
+                });
+            } else if (res.status === 403) {
+                Swal.fire('Không có quyền', 'Chỉ tài khoản Ứng viên mới có thể ứng tuyển.', 'warning');
             } else {
                 Swal.fire('Lỗi', await res.text(), 'error');
             }
@@ -246,3 +288,4 @@
         }
     });
 </script>
+}
