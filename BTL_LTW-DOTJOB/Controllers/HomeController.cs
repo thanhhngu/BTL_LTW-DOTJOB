@@ -1,5 +1,6 @@
 using BTL_LTW_DOTJOB.Data;
 using BTL_LTW_DOTJOB.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -10,6 +11,7 @@ using X.PagedList.Extensions;
 
 namespace BTL_LTW_DOTJOB.Controllers
 {
+    [AllowAnonymous] // Trang chủ công khai, chưa đăng nhập vẫn xem được việc làm
     public class HomeController : Controller
     {
         private readonly AppDbContext _db;
