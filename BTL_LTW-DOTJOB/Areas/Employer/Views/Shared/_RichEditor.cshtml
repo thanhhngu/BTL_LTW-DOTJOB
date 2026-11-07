@@ -1,0 +1,28 @@
+@* Gắn CKEditor cho mọi <textarea class="rich-editor">. Gọi trong @section Scripts của Create và Edit *@
+<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/49.0.0/ckeditor5.css" />
+<style>.ck-editor__editable_inline { min-height: 200px; }</style>
+<script src="https://cdn.ckeditor.com/ckeditor5/49.0.0/ckeditor5.umd.js"></script>
+<script>
+    const { ClassicEditor, Essentials, Paragraph, Heading, Bold, Italic, Underline, List, Link } = CKEDITOR;
+
+    document.querySelectorAll('textarea.rich-editor').forEach(textarea => {
+        // Ẩn textarea, tạo một div ngay sau nó để editor hiển thị vào đó
+        const holder = document.createElement('div');
+        textarea.insertAdjacentElement('afterend', holder);
+        textarea.style.display = 'none';
+
+        ClassicEditor.create({
+            attachTo: holder,
+            licenseKey: 'GPL',
+            plugins: [Essentials, Paragraph, Heading, Bold, Italic, Underline, List, Link],
+            toolbar: ['undo', 'redo', '|', 'heading', '|', 'bold', 'italic', 'underline', '|',
+                      'bulletedList', 'numberedList', '|', 'link'],
+            root: { initialData: textarea.value }
+        }).then(editor => {
+            // Mỗi lần gõ, chép HTML của editor vào textarea ẩn để gửi lên server
+            editor.model.document.on('change:data', () => {
+                textarea.value = editor.getData();
+            });
+        });
+    });
+</script>
