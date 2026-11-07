@@ -197,38 +197,6 @@
         }
     });
 
-    
-</script>
-
-<style>
-    [contenteditable="true"]:hover {
-        background-color: rgba(0, 177, 79, 0.03);
-        outline: 1px dashed #00b14f;
-        border-radius: 4px;
-        cursor: text;
-    }
-
-    [contenteditable="true"]:focus {
-        background-color: rgba(0, 177, 79, 0.05);
-        outline: 2px solid #00b14f;
-        border-radius: 4px;
-    }
-
-    #cv-paper {
-        box-sizing: border-box;
-        width: 210mm;
-        min-height: 296mm;
-        margin: 0;
-        box-shadow: none;
-    }
-    #avatarContainer {
-        cursor: pointer;
-    }
-</style>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
-
-
-<script>
     var cropper;
 
     // Bấm vào avatar -> mở hộp thoại chọn file
@@ -307,3 +275,31 @@
         box.querySelector('i').style.display = 'none';
     }
 </script>
+
+<style>
+    [contenteditable="true"]:hover {
+        background-color: rgba(0, 177, 79, 0.03);
+        outline: 1px dashed #00b14f;
+        border-radius: 4px;
+        cursor: text;
+    }
+
+    [contenteditable="true"]:focus {
+        background-color: rgba(0, 177, 79, 0.05);
+        outline: 2px solid #00b14f;
+        border-radius: 4px;
+    }
+
+    #cv-paper {
+        box-sizing: border-box;
+        width: 210mm;
+        min-height: 296mm;
+        margin: 0;
+        box-shadow: none;
+    }
+
+    #avatarContainer {
+        cursor: pointer;
+    }
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
