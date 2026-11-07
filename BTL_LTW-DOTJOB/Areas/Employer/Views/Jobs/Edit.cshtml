@@ -1,0 +1,78 @@
+@model BTL_LTW_DOTJOB.Areas.Employer.ViewModels.JobEditViewModel
+@{
+    ViewData["Title"] = "Sửa tin tuyển dụng";
+}
+
+<h2 class="mb-3">Sửa tin tuyển dụng</h2>
+
+<form asp-area="Employer" asp-controller="Jobs" asp-action="Edit" asp-route-id="@Model.Id" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="CategoryId" class="form-label"></label>
+            <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                <option value="">-- Chọn ngành nghề --</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="Location" class="form-label"></label>
+            <select asp-for="Location" asp-items="Model.Locations" class="form-select">
+                <option value="">-- Chọn địa điểm --</option>
+            </select>
+            <span asp-validation-for="Location" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="JobType" class="form-label"></label>
+            <select asp-for="JobType" asp-items="Model.JobTypes" class="form-select">
+                <option value="">-- Chọn hình thức --</option>
+            </select>
+            <span asp-validation-for="JobType" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="SalaryMin" class="form-label"></label>
+            <input asp-for="SalaryMin" type="number" min="0" step="1" asp-format="{0:0}" class="form-control" />
+            <span asp-validation-for="SalaryMin" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="SalaryMax" class="form-label"></label>
+            <input asp-for="SalaryMax" type="number" min="0" step="1" asp-format="{0:0}" class="form-control" />
+            <span asp-validation-for="SalaryMax" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="Deadline" class="form-label"></label>
+            <input asp-for="Deadline" class="form-control" />
+            <span asp-validation-for="Deadline" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control rich-editor" rows="8"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Requirements" class="form-label"></label>
+        <textarea asp-for="Requirements" class="form-control rich-editor" rows="8"></textarea>
+        <span asp-validation-for="Requirements" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+    <a asp-area="Employer" asp-controller="Jobs" asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_RichEditor" />
+}
