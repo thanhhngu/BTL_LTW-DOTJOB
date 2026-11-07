@@ -18,6 +18,7 @@ else
                     <th>Hạn nộp</th>
                     <th>Trạng thái</th>
                     <th class="text-center">Số CV</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -45,6 +46,10 @@ else
                             }
                         </td>
                         <td class="text-center">@job.Applications.Count</td>
+                        <td>
+                            <a asp-area="Employer" asp-controller="Jobs" asp-action="Edit" asp-route-id="@job.Id"
+                               class="btn btn-sm btn-outline-primary">Sửa</a>
+                        </td>
                     </tr>
                 }
             </tbody>
