@@ -1,0 +1,48 @@
+@using X.PagedList
+@model IPagedList<BTL_LTW_DOTJOB.Models.JobPosting>
+@{
+    ViewData["Title"] = "Tin tuyển dụng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h3 class="fw-bold m-0">Tin tuyển dụng</h3>
+    <a asp-area="Employer" asp-controller="Jobs" asp-action="Create" class="btn btn-success">Đăng tin mới</a>
+</div>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body row g-2">
+        <div class="col-12 col-md-4">
+            <select id="status" class="form-select" asp-items="ViewBag.StatusOptions" onchange="loadJobs(1)"></select>
+        </div>
+        <div class="col-12 col-md-4">
+            <select id="categoryId" class="form-select" asp-items="ViewBag.Categories" onchange="loadJobs(1)">
+                <option value="">Tất cả ngành nghề</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div id="job-list">
+        <partial name="_JobTable" model="Model" />
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function loadJobs(page) {
+            const status = document.getElementById('status').value;
+            const categoryId = document.getElementById('categoryId').value;
+            const url = `/Employer/Jobs?status=${encodeURIComponent(status)}&categoryId=${encodeURIComponent(categoryId)}&page=${page}`;
+
+            // Header X-Requested-With: server trả partial, và trả 401/403 thay vì chuyển hướng khi hết phiên
+            const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) {
+                location.reload();
+                return;
+            }
+
+            document.getElementById('job-list').innerHTML = await response.text();
+        }
+    </script>
+}

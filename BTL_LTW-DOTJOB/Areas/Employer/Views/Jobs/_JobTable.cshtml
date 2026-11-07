@@ -1,0 +1,64 @@
+@using X.PagedList
+@model IPagedList<BTL_LTW_DOTJOB.Models.JobPosting>
+
+@if (Model.Count == 0)
+{
+    <div class="text-center text-muted py-5">Chưa có tin tuyển dụng nào phù hợp.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Tiêu đề</th>
+                    <th>Ngành nghề</th>
+                    <th>Địa điểm</th>
+                    <th>Ngày đăng</th>
+                    <th>Hạn nộp</th>
+                    <th>Trạng thái</th>
+                    <th class="text-center">Số CV</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var job in Model)
+                {
+                    var expired = job.Deadline != null && job.Deadline < DateTime.Today;
+                    <tr>
+                        <td class="fw-semibold">@job.Title</td>
+                        <td>@job.Category?.Name</td>
+                        <td>@job.Location</td>
+                        <td>@job.CreatedAt.ToString("dd/MM/yyyy")</td>
+                        <td>@(job.Deadline?.ToString("dd/MM/yyyy") ?? "—")</td>
+                        <td>
+                            @if (!job.IsActive)
+                            {
+                                <span class="badge text-bg-secondary">Đã đóng</span>
+                            }
+                            else if (expired)
+                            {
+                                <span class="badge text-bg-warning">Hết hạn</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-success">Đang hiển thị</span>
+                            }
+                        </td>
+                        <td class="text-center">@job.Applications.Count</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center p-3 border-top">
+        <small class="text-muted">Tổng @Model.TotalItemCount tin</small>
+        <div class="d-flex align-items-center gap-3">
+            <button type="button" class="btn btn-outline-success btn-sm"
+                    onclick="loadJobs(@(Model.PageNumber - 1))" disabled="@(!Model.HasPreviousPage)">Trước</button>
+            <span class="text-muted">@Model.PageNumber / @Model.PageCount</span>
+            <button type="button" class="btn btn-outline-success btn-sm"
+                    onclick="loadJobs(@(Model.PageNumber + 1))" disabled="@(!Model.HasNextPage)">Sau</button>
+        </div>
+    </div>
+}
