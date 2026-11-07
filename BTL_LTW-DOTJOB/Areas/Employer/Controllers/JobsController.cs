@@ -260,5 +260,37 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
             TempData["Success"] = "Cập nhật tin tuyển dụng thành công.";
             return RedirectToAction(nameof(Index));
         }
+
+        // ===== M2-2: Đóng / Mở lại tin và Xoá tin =====
+
+        // POST: /Employer/Jobs/ToggleActive/{id}
+        // Đang mở thì đóng, đang đóng thì mở lại (đổi IsActive)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleActive(string id)
+        {
+            var companyId = await GetCompanyIdAsync();
+            var job = await _db.JobPostings
+                .FirstOrDefaultAsync(j => j.Id == id && j.CompanyId == companyId);
+
+            if (job == null)
+            {
+                return NotFound();
+            }
+
+            // Mở lại tin đã quá hạn thì ứng viên vẫn không nộp được, nên bắt HR sửa hạn nộp trước
+            var dangDong = !job.IsActive;
+            if (dangDong && job.Deadline.HasValue && job.Deadline.Value.Date < DateTime.Today)
+            {
+                TempData["Error"] = "Tin đã quá hạn nộp hồ sơ. Hãy sửa hạn nộp trước khi mở lại.";
+                return RedirectToAction(nameof(Edit), new { id });
+            }
+
+            job.IsActive = !job.IsActive;
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = job.IsActive ? "Đã mở lại tin tuyển dụng." : "Đã đóng tin tuyển dụng.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
