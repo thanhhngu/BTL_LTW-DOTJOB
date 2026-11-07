@@ -38,10 +38,11 @@
                                asp-area="Employer" asp-controller="Dashboard" asp-action="Index">
                                 <i class="fa-solid fa-chart-line me-2"></i> Tổng quan
                             </a>
-                            @* TODO: nối link khi có controller (#9 Tin tuyển dụng, Ứng viên, Hồ sơ công ty) *@
-                            <a class="list-group-item list-group-item-action disabled" href="#">
+                            <a class="list-group-item list-group-item-action"
+                               asp-area="Employer" asp-controller="Jobs" asp-action="Index">
                                 <i class="fa-solid fa-briefcase me-2"></i> Tin tuyển dụng
                             </a>
+                            @* TODO: nối link khi có controller (Ứng viên, Hồ sơ công ty) *@
                             <a class="list-group-item list-group-item-action disabled" href="#">
                                 <i class="fa-solid fa-users me-2"></i> Ứng viên
                             </a>
