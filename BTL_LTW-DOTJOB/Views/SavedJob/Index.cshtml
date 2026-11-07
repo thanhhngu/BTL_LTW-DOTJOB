@@ -1,0 +1,69 @@
+﻿@model BTL_LTW_DOTJOB.ViewModels.SavedJobs.MySavedJobsViewModel
+@{
+    ViewData["Title"] = "Việc làm đã lưu";
+}
+
+<div style="background-color: #f4f5f5;" class="py-4">
+    <div class="container" style="max-width: 1200px;">
+
+        <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">
+            Việc làm đã lưu
+            <span class="text-muted fs-6 fw-normal ms-2">(@Model.TotalCount)</span>
+        </h4>
+
+        @if (!Model.Items.Any())
+        {
+            <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
+                <i class="fa-regular fa-heart text-success fs-1 mb-3"></i>
+                <p class="text-muted mb-3">Bạn chưa lưu việc làm nào. Bấm biểu tượng trái tim ở tin tuyển dụng để lưu lại xem sau.</p>
+                <div>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-success rounded-3 px-4">Tìm việc ngay</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            @* data-remove-on-unsave: bỏ lưu xong thì thẻ biến mất khỏi danh sách (xử lý trong site.js) *@
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" data-remove-on-unsave>
+                @foreach (var job in Model.Items)
+                {
+                    <partial name="_JobCard" model="job" />
+                }
+            </div>
+
+            @if (Model.PageCount > 1)
+            {
+                <div class="d-flex justify-content-center align-items-center gap-3 mt-4 topcv-pagination">
+                    @if (Model.Page > 1)
+                    {
+                        <a href="@Url.Action("Index", "SavedJob", new { page = Model.Page - 1 })"
+                           class="btn btn-outline-success rounded-circle pagination-btn shadow-sm"><i class="fa-solid fa-angle-left"></i></a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-light bg-white border rounded-circle pagination-btn text-muted shadow-sm" disabled>
+                            <i class="fa-solid fa-angle-left"></i>
+                        </button>
+                    }
+
+                    <span class="text-muted fw-medium fs-5">
+                        <span style="color: #00b14f; font-weight: bold;">@Model.Page</span> / @Model.PageCount trang
+                    </span>
+
+                    @if (Model.Page < Model.PageCount)
+                    {
+                        <a href="@Url.Action("Index", "SavedJob", new { page = Model.Page + 1 })"
+                           class="btn btn-outline-success rounded-circle pagination-btn shadow-sm"><i class="fa-solid fa-angle-right"></i></a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-light bg-white border rounded-circle pagination-btn text-muted shadow-sm" disabled>
+                            <i class="fa-solid fa-angle-right"></i>
+                        </button>
+                    }
+                </div>
+            }
+        }
+
+    </div>
+</div>

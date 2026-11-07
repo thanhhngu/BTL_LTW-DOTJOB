@@ -1,4 +1,12 @@
 ﻿@model BTL_LTW_DOTJOB.Models.JobPosting
+@using System.Security.Claims
+@using BTL_LTW_DOTJOB.Services.SavedJobs
+@inject ISavedJobService SavedJobService
+@{
+    // Tin này đã được Candidate lưu chưa (để tô màu trái tim)
+    var savedIds = await SavedJobService.GetSavedJobIdsAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
+    var isSaved = savedIds.Contains(Model.Id);
+}
 
 <!-- Thẻ việc làm dùng cho trang kết quả tìm kiếm -->
 <div class="col">
@@ -19,7 +27,7 @@
                         <span class="badge bg-light text-dark fw-normal p-2 rounded-1 text-muted">@(Model.SalaryMin.HasValue && Model.SalaryMax.HasValue ? $"{Model.SalaryMin.Value / 1_000_000m:0.#} - {Model.SalaryMax.Value / 1_000_000m:0.#} triệu" : "Thỏa thuận")</span>
                         <span class="badge bg-light text-dark fw-normal p-2 rounded-1 text-muted">@Model.Location</span>
                     </div>
-                    <button class="btn btn-link text-muted p-0 btn-heart"><i class="fa-regular fa-heart fs-5"></i></button>
+                    <button type="button" class="btn btn-link p-0 btn-heart @(isSaved ? "" : "text-muted")" data-job-id="@Model.Id"><i class="@(isSaved ? "fa-solid text-danger" : "fa-regular") fa-heart fs-5"></i></button>
                 </div>
             </div>
         </div>

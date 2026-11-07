@@ -11,6 +11,7 @@ namespace BTL_LTW_DOTJOB.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<JobPosting> JobPostings { get; set; }
         public DbSet<Application> Applications { get; set; }
+        public DbSet<SavedJob> SavedJobs { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -49,6 +50,24 @@ namespace BTL_LTW_DOTJOB.Data
             // Mỗi Ứng viên chỉ nộp 1 đơn cho 1 tin tuyển dụng
             modelBuilder.Entity<Application>()
                 .HasIndex(a => new { a.JobPostingId, a.UserId })
+                .IsUnique();
+
+            // 4. Tin đã lưu: chặn Multiple Cascade Paths (User -> Company -> JobPosting -> SavedJob và User -> SavedJob)
+            modelBuilder.Entity<SavedJob>()
+                .HasOne(s => s.User)
+                .WithMany()
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SavedJob>()
+                .HasOne(s => s.JobPosting)
+                .WithMany()
+                .HasForeignKey(s => s.JobPostingId)
+                .OnDelete(DeleteBehavior.Cascade); // Tin bị xóa thì các lượt lưu tin đó cũng bị xóa
+
+            // Mỗi Ứng viên chỉ lưu 1 tin 1 lần
+            modelBuilder.Entity<SavedJob>()
+                .HasIndex(s => new { s.UserId, s.JobPostingId })
                 .IsUnique();
         }
 
