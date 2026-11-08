@@ -63,14 +63,28 @@
                         <div class="bg-light p-2 rounded-3 me-2 text-success"><i class="fa-regular fa-clock"></i></div>
                         <div>
                             <span class="d-block text-muted">Hạn ứng tuyển</span>
-                            <span class="fw-semibold text-dark">@(Model?.Deadline?.ToString("dd/MM/yyyy") ?? "Không thời hạn")</span>
+                            <span class="fw-semibold @(Model!.IsExpired ? "text-danger" : "text-dark")">
+                                @(Model.Deadline?.ToString("dd/MM/yyyy") ?? "Không thời hạn")
+                                @if (Model.IsExpired)
+                                {
+                                    <span class="badge bg-danger-subtle text-danger ms-1">Đã hết hạn</span>
+                                }
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Nút Ứng tuyển ngay & Lưu tin -->
                 <div class="d-flex gap-3">
-                    @if (!isAuthenticated)
+                    @if (Model.IsExpired)
+                    {
+                        <!-- Hết hạn: khóa nút ứng tuyển (server cũng chặn ở ApplicationService) -->
+                        <button class="btn btn-secondary flex-grow-1 py-3 fw-bold rounded-3" disabled
+                                title="Tin tuyển dụng đã hết hạn nộp hồ sơ">
+                            <i class="fa-regular fa-calendar-xmark me-2"></i> Đã hết hạn ứng tuyển
+                        </button>
+                    }
+                    else if (!isAuthenticated)
                     {
                         <!-- Chưa đăng nhập: chuyển sang trang đăng nhập rồi quay lại tin này -->
                         <a asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@Context.Request.Path.Value"

@@ -1,4 +1,5 @@
 ﻿using BTL_LTW_DOTJOB.Data;
+using BTL_LTW_DOTJOB.Helpers;
 using BTL_LTW_DOTJOB.Models;
 using BTL_LTW_DOTJOB.ViewModels.Job;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,7 @@ namespace BTL_LTW_DOTJOB.Services.Job
             var query = _db.JobPostings
                 .AsNoTracking()
                 .Include(job => job.Company)
-                .Where(job => job.IsActive);
+                .WhereOpen(); // chỉ tin đang bật và còn hạn nộp
 
             // 1. Từ khóa: tìm trong tên vị trí hoặc tên công ty, không phân biệt hoa thường và dấu
             var keyword = filter.Keyword?.Trim();
@@ -111,7 +112,8 @@ namespace BTL_LTW_DOTJOB.Services.Job
             // Địa điểm và hình thức lấy từ chính các tin đang hiển thị
             model.Locations = await _db.JobPostings
                 .AsNoTracking()
-                .Where(job => job.IsActive && job.Location != null)
+                .WhereOpen()
+                .Where(job => job.Location != null)
                 .Select(job => job.Location!)
                 .Distinct()
                 .OrderBy(location => location)
@@ -119,7 +121,8 @@ namespace BTL_LTW_DOTJOB.Services.Job
 
             model.JobTypes = await _db.JobPostings
                 .AsNoTracking()
-                .Where(job => job.IsActive && job.JobType != null)
+                .WhereOpen()
+                .Where(job => job.JobType != null)
                 .Select(job => job.JobType!)
                 .Distinct()
                 .OrderBy(type => type)

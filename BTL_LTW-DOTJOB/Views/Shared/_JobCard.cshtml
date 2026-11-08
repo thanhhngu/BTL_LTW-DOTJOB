@@ -36,7 +36,14 @@
                         }
                     </div>
                     <div class="job-info flex-grow-1">
-                        <span class="badge bg-danger-subtle text-danger mb-1" style="font-size: 0.65rem;">NỔI BẬT</span>
+                        @if (Model.IsExpired)
+                        {
+                            <span class="badge bg-secondary mb-1" style="font-size: 0.65rem;">ĐÃ HẾT HẠN</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger-subtle text-danger mb-1" style="font-size: 0.65rem;">NỔI BẬT</span>
+                        }
                         <h3 class="job-title text-dark fw-bold mb-1 line-clamp-2">
                             @Model.Title
                         </h3>

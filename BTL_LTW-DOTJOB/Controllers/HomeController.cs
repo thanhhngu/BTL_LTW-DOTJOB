@@ -1,4 +1,5 @@
 using BTL_LTW_DOTJOB.Data;
+using BTL_LTW_DOTJOB.Helpers;
 using BTL_LTW_DOTJOB.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ namespace BTL_LTW_DOTJOB.Controllers
             var jobs = _db.JobPostings
                 .AsNoTracking()
                 .Include(job => job.Company)
-                .Where(job => job.IsActive)
+                .WhereOpen() // chỉ tin đang bật và còn hạn nộp
                 .OrderByDescending(job => job.CreatedAt);
             var pagedJobs = jobs.ToPagedList(pageNumber, pageSize);
 
@@ -42,7 +43,7 @@ namespace BTL_LTW_DOTJOB.Controllers
             var jobs = _db.JobPostings
                 .AsNoTracking()
                 .Include(job => job.Company)
-                .Where(job => job.IsActive)
+                .WhereOpen() // chỉ tin đang bật và còn hạn nộp
                 .OrderByDescending(job => job.CreatedAt);
             var pagedJobs = jobs.ToPagedList(page, pageSize);
 

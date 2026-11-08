@@ -31,6 +31,9 @@ namespace BTL_LTW_DOTJOB.Models
 
         public DateTime? Deadline { get; set; }
 
+        // Đã quá hạn nộp hồ sơ (chỉ đọc, không lưu vào DB). Deadline = null là không thời hạn
+        public bool IsExpired => Deadline.HasValue && Deadline.Value < DateTime.Now;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsActive { get; set; } = true;
