@@ -166,6 +166,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Mã lỗi không kèm nội dung (404, 403, 405...) hiện trang báo lỗi thân thiện thay vì trang trắng
+app.UseStatusCodePagesWithReExecute("/Home/Status", "?code={0}");
+
 // Header bảo mật cơ bản cho mọi phản hồi (kể cả file CV tải về)
 app.Use(async (context, next) =>
 {
