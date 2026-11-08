@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Nav_Jobs" xml:space="preserve">
+    <value>Việc làm</value>
+  </data>
+  <data name="Nav_CreateCv" xml:space="preserve">
+    <value>Tạo CV</value>
+  </data>
+  <data name="Nav_Tools" xml:space="preserve">
+    <value>Công cụ</value>
+  </data>
+  <data name="Nav_Guide" xml:space="preserve">
+    <value>Cẩm nang nghề nghiệp</value>
+  </data>
+  <data name="Menu_Account" xml:space="preserve">
+    <value>Tài khoản</value>
+  </data>
+  <data name="Menu_Profile" xml:space="preserve">
+    <value>Hồ sơ cá nhân</value>
+  </data>
+  <data name="Menu_ChangePassword" xml:space="preserve">
+    <value>Đổi mật khẩu</value>
+  </data>
+  <data name="Menu_Applied" xml:space="preserve">
+    <value>Việc làm đã ứng tuyển</value>
+  </data>
+  <data name="Menu_Saved" xml:space="preserve">
+    <value>Việc làm đã lưu</value>
+  </data>
+  <data name="Menu_EmployerDashboard" xml:space="preserve">
+    <value>Tổng quan nhà tuyển dụng</value>
+  </data>
+  <data name="Menu_ManageJobs" xml:space="preserve">
+    <value>Quản lý tin tuyển dụng</value>
+  </data>
+  <data name="Menu_Logout" xml:space="preserve">
+    <value>Đăng xuất</value>
+  </data>
+  <data name="Menu_Login" xml:space="preserve">
+    <value>Đăng nhập</value>
+  </data>
+  <data name="Menu_Register" xml:space="preserve">
+    <value>Đăng ký</value>
+  </data>
+  <data name="Menu_AreYouEmployer" xml:space="preserve">
+    <value>Bạn là nhà tuyển dụng?</value>
+  </data>
+  <data name="Menu_Employer" xml:space="preserve">
+    <value>Nhà tuyển dụng</value>
+  </data>
+  <data name="Menu_PostJob" xml:space="preserve">
+    <value>Đăng tuyển ngay</value>
+  </data>
+  <data name="Lang_Vi" xml:space="preserve">
+    <value>Tiếng Việt</value>
+  </data>
+  <data name="Lang_En" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Emp_Brand" xml:space="preserve">
+    <value>Nhà tuyển dụng</value>
+  </data>
+  <data name="Emp_Home" xml:space="preserve">
+    <value>Trang chủ</value>
+  </data>
+  <data name="Emp_Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="Emp_Dashboard" xml:space="preserve">
+    <value>Tổng quan</value>
+  </data>
+  <data name="Emp_Jobs" xml:space="preserve">
+    <value>Tin tuyển dụng</value>
+  </data>
+  <data name="Emp_Applications" xml:space="preserve">
+    <value>Ứng viên</value>
+  </data>
+  <data name="Emp_Company" xml:space="preserve">
+    <value>Hồ sơ công ty</value>
+  </data>
+  <data name="Dash_Hello" xml:space="preserve">
+    <value>Xin chào, {0}</value>
+  </data>
+  <data name="Dash_Subtitle" xml:space="preserve">
+    <value>Quản lý tin tuyển dụng và hồ sơ ứng viên của {0} tại đây.</value>
+  </data>
+  <data name="Dash_NewJob" xml:space="preserve">
+    <value>Đăng tin mới</value>
+  </data>
+  <data name="Dash_OpenJobs" xml:space="preserve">
+    <value>Tin đang mở</value>
+  </data>
+  <data name="Dash_TotalCv" xml:space="preserve">
+    <value>Tổng số CV</value>
+  </data>
+  <data name="Dash_PendingCv" xml:space="preserve">
+    <value>CV chờ duyệt</value>
+  </data>
+  <data name="Dash_Recent" xml:space="preserve">
+    <value>Đơn ứng tuyển mới nhất</value>
+  </data>
+  <data name="Dash_ViewAll" xml:space="preserve">
+    <value>Xem tất cả</value>
+  </data>
+  <data name="Dash_Empty" xml:space="preserve">
+    <value>Chưa có ứng viên nào nộp hồ sơ.</value>
+  </data>
+  <data name="Dash_Candidate" xml:space="preserve">
+    <value>Ứng viên</value>
+  </data>
+  <data name="Dash_Position" xml:space="preserve">
+    <value>Vị trí</value>
+  </data>
+  <data name="Dash_AppliedDate" xml:space="preserve">
+    <value>Ngày nộp</value>
+  </data>
+  <data name="Dash_Status" xml:space="preserve">
+    <value>Trạng thái</value>
+  </data>
+</root>
