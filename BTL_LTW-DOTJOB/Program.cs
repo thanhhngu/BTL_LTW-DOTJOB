@@ -7,16 +7,45 @@ using BTL_LTW_DOTJOB.Services.SavedJobs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+// Mọi request POST/PUT/PATCH/DELETE đều tự kiểm tra anti-forgery token, kể cả action mới quên gắn [ValidateAntiForgeryToken].
+// Request AJAX/API phải gửi token trong header "RequestVerificationToken" (xem meta csrf-token ở _Layout)
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
 
 // Cache nhỏ dùng để kiểm tra trạng thái khóa tài khoản (IsActive) mà không truy vấn DB ở mọi request
 builder.Services.AddMemoryCache();
+
+// Giới hạn số lần gửi form đăng nhập: tối đa 10 lần/phút cho mỗi địa chỉ IP (chống dò mật khẩu).
+// Áp dụng bằng [EnableRateLimiting("login")] trên action Login (POST)
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("login", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        }));
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "text/plain; charset=utf-8";
+        await context.HttpContext.Response.WriteAsync(
+            "Bạn đã thử đăng nhập quá nhiều lần. Vui lòng đợi 1 phút rồi thử lại.", cancellationToken);
+    };
+});
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJobService, JobService>();
@@ -41,6 +70,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Auth/Login";
         options.AccessDeniedPath = "/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromDays(1);
+
+        // Cookie đăng nhập: JavaScript không đọc được, không gửi kèm request từ site khác,
+        // và chỉ đi qua HTTPS khi chạy thật (Development vẫn cho http để dùng profile "http")
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
 
         // AJAX chưa đăng nhập => trả 401 (JS tự xử lý), thay vì chuyển hướng 302 sang trang login
         options.Events.OnRedirectToLogin = context =>
@@ -129,9 +166,20 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Header bảo mật cơ bản cho mọi phản hồi (kể cả file CV tải về)
+app.Use(async (context, next) =>
+{
+    var headers = context.Response.Headers;
+    headers["X-Content-Type-Options"] = "nosniff";                          // trình duyệt không tự đoán lại loại file
+    headers["X-Frame-Options"] = "SAMEORIGIN";                              // chặn nhúng trang vào iframe của site khác
+    headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    await next();
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // phục vụ file tải lên lúc chạy (wwwroot/uploads: avatar, logo). MapStaticAssets chỉ phục vụ file có sẵn khi build
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

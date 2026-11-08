@@ -132,27 +132,16 @@
                 <!-- Mô tả công việc -->
                 <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">Mô tả công việc</h4>
                 <div class="text-secondary lh-lg mb-4">
-                    <p>@Model?.Description</p>
+                    @* Mô tả do HR soạn bằng editor (HTML): làm sạch rồi mới hiển thị, không dùng Html.Raw trần *@
+                    @Html.SafeHtml(Model?.Description)
                     <p>Phối hợp cùng các phòng ban liên quan để triển khai công việc hiệu quả, đảm bảo đúng tiến độ và chất lượng dự án được giao.</p>
                 </div>
 
                 <!-- Yêu cầu ứng viên -->
                 <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">Yêu cầu ứng viên</h4>
                 <div class="text-secondary lh-lg">
-                    <p>@Model?.Requirements</p>
-                    <ul class="ps-3">
-                        @{
-                            var requirements = (Model?.Requirements ?? "")
-                                               .Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-                            foreach (var req in requirements)
-                            {
-                                var trimmed = req.Trim();
-                                var capitalized = char.ToUpper(trimmed[0]) + trimmed.Substring(1);
-                                <li>@capitalized</li>
-                            }
-                        }
-                    </ul>
+                    @* Yêu cầu cũng là HTML từ editor nên hiển thị nguyên khối, không tách theo dấu chấm như trước *@
+                    @Html.SafeHtml(Model?.Requirements)
                 </div>
 
             </div>
