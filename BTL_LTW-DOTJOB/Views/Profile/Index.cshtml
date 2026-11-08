@@ -136,6 +136,11 @@
                                     }
                                     <input asp-for="LogoFile" type="file" accept=".jpg,.jpeg,.png" class="form-control" />
                                     <div class="form-text">JPG hoặc PNG, tối đa 2MB.</div>
+                                    <div id="logoError" class="text-danger small mt-1"></div>
+                                    <div id="logoPreviewBox" class="mt-2 d-none">
+                                        <div class="form-text mb-1">Logo mới (chưa lưu, bấm "Lưu thay đổi" để áp dụng):</div>
+                                        <img id="logoPreview" alt="Xem trước logo mới" class="border rounded" style="height: 64px;">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -279,5 +284,43 @@
             const placeholder = document.getElementById('avatarPlaceholder');
             if (placeholder) placeholder.classList.add('d-none');
         }
+    </script>
+    <script>
+        // Xem trước logo công ty ngay khi chọn file (chỉ Employer mới có ô này)
+        (function () {
+            const logoInput = document.getElementById('LogoFile');
+            if (!logoInput) return;
+
+            const box = document.getElementById('logoPreviewBox');
+            const img = document.getElementById('logoPreview');
+            const error = document.getElementById('logoError');
+            const maxBytes = 2 * 1024 * 1024;
+            let objectUrl = null;
+
+            logoInput.addEventListener('change', () => {
+                error.textContent = '';
+                box.classList.add('d-none');
+                if (objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl = null; }
+
+                const file = logoInput.files[0];
+                if (!file) return;
+
+                const name = file.name.toLowerCase();
+                if (!/\.(jpg|jpeg|png)$/.test(name)) {
+                    error.textContent = 'Chỉ chấp nhận ảnh JPG hoặc PNG.';
+                    logoInput.value = '';
+                    return;
+                }
+                if (file.size > maxBytes) {
+                    error.textContent = 'Logo tối đa 2MB.';
+                    logoInput.value = '';
+                    return;
+                }
+
+                objectUrl = URL.createObjectURL(file);
+                img.src = objectUrl;
+                box.classList.remove('d-none');
+            });
+        })();
     </script>
 }
