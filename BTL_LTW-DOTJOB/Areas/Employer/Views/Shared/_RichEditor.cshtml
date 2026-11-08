@@ -1,0 +1,41 @@
+@* Gắn CKEditor cho mọi <textarea class="rich-editor">. Gọi trong @section Scripts của Create và Edit.
+   Nếu editor không tải hoặc không khởi tạo được thì giữ nguyên textarea để vẫn nhập được (HTML thô). *@
+<link rel="stylesheet" href="~/lib/ckeditor5/ckeditor5.css" />
+<style>.ck-editor__editable_inline { min-height: 200px; }</style>
+<script src="~/lib/ckeditor5/ckeditor5.umd.js"></script>
+<script>
+    document.querySelectorAll('textarea.rich-editor').forEach(textarea => {
+        // Thư viện chưa tải được thì để nguyên textarea
+        if (typeof CKEDITOR === 'undefined') {
+            console.error('Không tải được CKEditor, kiểm tra file /lib/ckeditor5/ckeditor5.umd.js');
+            return;
+        }
+
+        const { ClassicEditor, Essentials, Paragraph, Heading, Bold, Italic, Underline, List, Link } = CKEDITOR;
+
+        // Div để editor hiển thị, đặt ngay sau textarea
+        const holder = document.createElement('div');
+        textarea.insertAdjacentElement('afterend', holder);
+
+        ClassicEditor.create({
+            attachTo: holder,
+            licenseKey: 'GPL',
+            plugins: [Essentials, Paragraph, Heading, Bold, Italic, Underline, List, Link],
+            toolbar: ['undo', 'redo', '|', 'heading', '|', 'bold', 'italic', 'underline', '|',
+                      'bulletedList', 'numberedList', '|', 'link'],
+            root: { initialData: textarea.value }
+        }).then(editor => {
+            // Chỉ ẩn textarea khi editor đã chạy
+            textarea.style.display = 'none';
+
+            // Mỗi lần gõ, chép HTML của editor vào textarea ẩn để gửi lên server
+            editor.model.document.on('change:data', () => {
+                textarea.value = editor.getData();
+            });
+        }).catch(error => {
+            // Lỗi thì bỏ khung rỗng, textarea vẫn dùng được
+            console.error('Không khởi tạo được CKEditor:', error);
+            holder.remove();
+        });
+    });
+</script>
