@@ -1,7 +1,9 @@
 ﻿@model BTL_LTW_DOTJOB.Models.JobPosting
 @using System.Security.Claims
 @using BTL_LTW_DOTJOB.Services.SavedJobs
+@using BTL_LTW_DOTJOB.Services.Application
 @inject ISavedJobService SavedJobService
+@inject IApplicationService AppService
 @{
     ViewData["Title"] = Model?.Title ?? "Chi tiết công việc";
 
@@ -15,6 +17,10 @@
     var isCandidate = User.IsInRole("Candidate");
 
     // Tin này đã được lưu chưa (để tô màu nút Lưu tin)
+    // Candidate đã nộp hồ sơ vào tin này chưa (để đổi nút Ứng tuyển thành Đã ứng tuyển)
+    var hasApplied = isCandidate
+        && await AppService.HasAppliedAsync(Model!.Id, User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty);
+
     var isSaved = (await SavedJobService.GetSavedJobIdsAsync(User.FindFirstValue(ClaimTypes.NameIdentifier))).Contains(Model!.Id);
 
 
@@ -76,7 +82,15 @@
 
                 <!-- Nút Ứng tuyển ngay & Lưu tin -->
                 <div class="d-flex gap-3">
-                    @if (Model.IsExpired)
+                    @if (hasApplied)
+                    {
+                        <!-- Đã nộp hồ sơ rồi: không cho nộp lại, dẫn sang danh sách đơn (ưu tiên hơn cả trạng thái hết hạn) -->
+                        <a asp-controller="Application" asp-action="Index"
+                           class="btn btn-outline-success flex-grow-1 py-3 fw-bold rounded-3">
+                            <i class="fa-solid fa-circle-check me-2"></i> Đã ứng tuyển · Xem đơn của tôi
+                        </a>
+                    }
+                    else if (Model.IsExpired)
                     {
                         <!-- Hết hạn: khóa nút ứng tuyển (server cũng chặn ở ApplicationService) -->
                         <button class="btn btn-secondary flex-grow-1 py-3 fw-bold rounded-3" disabled
@@ -95,7 +109,7 @@
                     }
                     else if (isCandidate)
                     {
-                        <button class="btn btn-success flex-grow-1 py-3 fw-bold rounded-3 shadow-sm"
+                        <button id="btnOpenApply" class="btn btn-success flex-grow-1 py-3 fw-bold rounded-3 shadow-sm"
                                 style="background-color: #00b14f;"
                                 data-bs-toggle="modal" data-bs-target="#applyModal">
                             <i class="fa-solid fa-paper-plane me-2"></i> Ứng tuyển ngay
@@ -243,6 +257,18 @@
         btnSubmit.disabled = !e.target.checked;
     });
 
+    // Nộp xong thì đổi nút "Ứng tuyển ngay" thành "Đã ứng tuyển" ngay trên trang, không cần tải lại
+    function markApplied() {
+        const openBtn = document.getElementById('btnOpenApply');
+        if (!openBtn) return;
+
+        const link = document.createElement('a');
+        link.href = '/applications';
+        link.className = 'btn btn-outline-success flex-grow-1 py-3 fw-bold rounded-3';
+        link.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i> Đã ứng tuyển · Xem đơn của tôi';
+        openBtn.replaceWith(link);
+    }
+
     applyForm.addEventListener('submit', async e => {
         e.preventDefault();
 
@@ -267,6 +293,7 @@
 
                 modalEl.addEventListener('hidden.bs.modal', () => {
                     Swal.fire('Thành công', data.message, 'success');
+                    markApplied();
                 }, { once: true });
 
                 applyForm.reset();

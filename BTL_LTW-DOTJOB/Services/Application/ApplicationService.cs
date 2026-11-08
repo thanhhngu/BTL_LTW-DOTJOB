@@ -44,10 +44,7 @@ namespace BTL_LTW_DOTJOB.Services.Application
                 return (false, "Tin tuyển dụng đã hết hạn ứng tuyển.");
 
             // 2. Kiểm tra xem user đã ứng tuyển job này trước đó chưa
-            var existingApp = await _db.Applications
-                .FirstOrDefaultAsync(a => a.JobPostingId == model.Id && a.UserId == userId);
-
-            if (existingApp != null)
+            if (await HasAppliedAsync(model.Id, userId))
                 return (false, "Bạn đã nộp hồ sơ cho vị trí này rồi.");
 
             // 3. Lưu file CV vào AppData/cvs (nằm ngoài wwwroot nên không thể truy cập trực tiếp bằng URL)
@@ -93,6 +90,13 @@ namespace BTL_LTW_DOTJOB.Services.Application
             }
 
             return (true, "Nộp hồ sơ thành công!");
+        }
+
+        public async Task<bool> HasAppliedAsync(string jobId, string userId)
+        {
+            return await _db.Applications
+                .AsNoTracking()
+                .AnyAsync(a => a.JobPostingId == jobId && a.UserId == userId);
         }
 
         public async Task<MyApplicationsViewModel> GetMyApplicationsAsync(string userId, string? status, int page)
