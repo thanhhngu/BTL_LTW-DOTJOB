@@ -42,11 +42,13 @@
                                asp-area="Employer" asp-controller="Jobs" asp-action="Index">
                                 <i class="fa-solid fa-briefcase me-2"></i> Tin tuyển dụng
                             </a>
-                            @* TODO: nối link khi có controller (Ứng viên, Hồ sơ công ty) *@
+                            @* TODO: nối link Ứng viên khi có controller *@
                             <a class="list-group-item list-group-item-action disabled" href="#">
                                 <i class="fa-solid fa-users me-2"></i> Ứng viên
                             </a>
-                            <a class="list-group-item list-group-item-action disabled" href="#">
+                            @* Thông tin công ty và logo sửa ở trang Hồ sơ cá nhân dùng chung (/profile) *@
+                            <a class="list-group-item list-group-item-action"
+                               asp-area="" asp-controller="Profile" asp-action="Index">
                                 <i class="fa-solid fa-building me-2"></i> Hồ sơ công ty
                             </a>
                         </div>
