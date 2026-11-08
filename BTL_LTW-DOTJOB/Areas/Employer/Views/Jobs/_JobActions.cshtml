@@ -1,0 +1,18 @@
+@* Các nút thao tác cho một tin tuyển dụng, dùng trong từng dòng của danh sách (_JobTable). *@
+@model BTL_LTW_DOTJOB.Models.JobPosting
+
+<div class="d-flex gap-1">
+    <a asp-area="Employer" asp-controller="Jobs" asp-action="Edit" asp-route-id="@Model.Id"
+       class="btn btn-sm btn-outline-primary">Sửa</a>
+
+    <form asp-area="Employer" asp-controller="Jobs" asp-action="ToggleActive" asp-route-id="@Model.Id" method="post">
+        <button type="submit" class="btn btn-sm @(Model.IsActive ? "btn-outline-warning" : "btn-outline-success")">
+            @(Model.IsActive ? "Đóng tin" : "Mở lại")
+        </button>
+    </form>
+
+    <form asp-area="Employer" asp-controller="Jobs" asp-action="Delete" asp-route-id="@Model.Id" method="post"
+          onsubmit="return confirm('Bạn có chắc muốn xoá tin này không? Hành động này không thể hoàn tác.');">
+        <button type="submit" class="btn btn-sm btn-outline-danger">Xoá</button>
+    </form>
+</div>

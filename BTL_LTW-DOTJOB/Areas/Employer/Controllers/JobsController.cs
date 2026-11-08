@@ -260,5 +260,75 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
             TempData["Success"] = "Cập nhật tin tuyển dụng thành công.";
             return RedirectToAction(nameof(Index));
         }
+
+        // ===== M2-2: Đóng / Mở lại tin và Xoá tin =====
+
+        // POST: /Employer/Jobs/ToggleActive/{id}
+        // Đang mở thì đóng, đang đóng thì mở lại (đổi IsActive)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleActive(string id)
+        {
+            var companyId = await GetCompanyIdAsync();
+            var job = await _db.JobPostings
+                .FirstOrDefaultAsync(j => j.Id == id && j.CompanyId == companyId);
+
+            if (job == null)
+            {
+                return NotFound();
+            }
+
+            // Mở lại tin đã quá hạn thì ứng viên vẫn không nộp được, nên bắt HR sửa hạn nộp trước
+            var dangDong = !job.IsActive;
+            if (dangDong && job.Deadline.HasValue && job.Deadline.Value.Date < DateTime.Today)
+            {
+                TempData["Error"] = "Tin đã quá hạn nộp hồ sơ. Hãy sửa hạn nộp trước khi mở lại.";
+                return RedirectToAction(nameof(Edit), new { id });
+            }
+
+            job.IsActive = !job.IsActive;
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = job.IsActive ? "Đã mở lại tin tuyển dụng." : "Đã đóng tin tuyển dụng.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // POST: /Employer/Jobs/Delete/{id}
+        // Chỉ xoá khi tin chưa có đơn ứng tuyển (xoá tin sẽ xoá luôn đơn, ứng viên mất lịch sử)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var companyId = await GetCompanyIdAsync();
+            var job = await _db.JobPostings
+                .FirstOrDefaultAsync(j => j.Id == id && j.CompanyId == companyId);
+
+            if (job == null)
+            {
+                return NotFound();
+            }
+
+            var coDon = await _db.Applications.AnyAsync(a => a.JobPostingId == id);
+            if (coDon)
+            {
+                TempData["Error"] = "Tin này đã có đơn ứng tuyển nên không thể xoá. Hãy dùng chức năng Đóng tin.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _db.JobPostings.Remove(job);
+            try
+            {
+                // Lượt "lưu tin" của ứng viên (SavedJob) bị xoá theo vì đã cấu hình Cascade
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                TempData["Error"] = "Không thể xoá tin này vì đang có dữ liệu liên quan.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            TempData["Success"] = "Đã xoá tin tuyển dụng.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
