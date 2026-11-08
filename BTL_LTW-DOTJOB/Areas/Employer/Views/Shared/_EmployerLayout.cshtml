@@ -1,3 +1,8 @@
+@{
+    // Tên controller hiện tại, dùng để tô sáng mục đang mở trong sidebar
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string controller) => currentController == controller ? "active" : "";
+}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -6,6 +11,10 @@
     <title>@ViewData["Title"] - DotJob Nhà tuyển dụng</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        /* Mục đang chọn trong sidebar dùng màu xanh của DotJob thay vì xanh dương mặc định */
+        .list-group-item.active { background-color: #198754; border-color: #198754; }
+    </style>
 </head>
 <body class="bg-light">
     <nav class="navbar navbar-dark bg-success px-3">
@@ -20,7 +29,12 @@
             <a class="text-white text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">
                 <i class="fa-solid fa-house"></i> Trang chủ
             </a>
-            <span><i class="fa-regular fa-circle-user"></i> @User.Identity?.Name</span>
+            <span class="d-none d-sm-inline"><i class="fa-regular fa-circle-user"></i> @User.Identity?.Name</span>
+            <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post" class="m-0">
+                <button type="submit" class="btn btn-sm btn-outline-light">
+                    <i class="fa-solid fa-right-from-bracket"></i> <span class="d-none d-sm-inline">Đăng xuất</span>
+                </button>
+            </form>
         </div>
     </nav>
 
@@ -34,11 +48,11 @@
                     </div>
                     <div class="offcanvas-body p-0">
                         <div class="list-group list-group-flush w-100">
-                            <a class="list-group-item list-group-item-action"
+                            <a class="list-group-item list-group-item-action @Active("Dashboard")"
                                asp-area="Employer" asp-controller="Dashboard" asp-action="Index">
                                 <i class="fa-solid fa-chart-line me-2"></i> Tổng quan
                             </a>
-                            <a class="list-group-item list-group-item-action"
+                            <a class="list-group-item list-group-item-action @Active("Jobs")"
                                asp-area="Employer" asp-controller="Jobs" asp-action="Index">
                                 <i class="fa-solid fa-briefcase me-2"></i> Tin tuyển dụng
                             </a>
