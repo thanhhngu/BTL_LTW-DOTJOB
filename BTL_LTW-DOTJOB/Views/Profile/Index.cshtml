@@ -112,7 +112,7 @@
                                 </div>
                                 <div class="col-12">
                                     <label asp-for="Description" class="form-label">Giới thiệu công ty</label>
-                                    <textarea asp-for="Description" rows="4" class="form-control"></textarea>
+                                    <textarea asp-for="Description" rows="6" class="form-control rich-editor"></textarea>
                                     <span asp-validation-for="Description" class="text-danger small"></span>
                                 </div>
                                 <div class="col-12">
@@ -172,6 +172,11 @@
 </div>
 
 @section Scripts {
+    @* Editor soạn thảo cho phần giới thiệu công ty, chỉ nạp với Employer *@
+    @if (isEmployer)
+    {
+        <partial name="_RichEditor" />
+    }
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
