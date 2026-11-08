@@ -1,18 +1,27 @@
-@* Các nút thao tác cho một tin tuyển dụng, dùng trong từng dòng của danh sách (_JobTable). *@
+@* Các nút thao tác cho một tin tuyển dụng, dùng trong từng dòng của danh sách (_JobTable).
+   Form có data-job-action sẽ được Index.cshtml gửi bằng fetch để giữ nguyên trang và bộ lọc đang xem. *@
 @model BTL_LTW_DOTJOB.Models.JobPosting
 
-<div class="d-flex gap-1">
+<div class="d-flex gap-1 flex-wrap">
+    @if (Model.IsActive)
+    {
+        @* Xem tin đúng như ứng viên thấy (tin đã đóng thì phía ứng viên không hiển thị nên không có nút) *@
+        <a asp-area="" asp-controller="Job" asp-action="Detail" asp-route-id="@Model.Id"
+           target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary">Xem</a>
+    }
+
     <a asp-area="Employer" asp-controller="Jobs" asp-action="Edit" asp-route-id="@Model.Id"
        class="btn btn-sm btn-outline-primary">Sửa</a>
 
-    <form asp-area="Employer" asp-controller="Jobs" asp-action="ToggleActive" asp-route-id="@Model.Id" method="post">
+    <form asp-area="Employer" asp-controller="Jobs" asp-action="ToggleActive" asp-route-id="@Model.Id" method="post"
+          data-job-action>
         <button type="submit" class="btn btn-sm @(Model.IsActive ? "btn-outline-warning" : "btn-outline-success")">
             @(Model.IsActive ? "Đóng tin" : "Mở lại")
         </button>
     </form>
 
     <form asp-area="Employer" asp-controller="Jobs" asp-action="Delete" asp-route-id="@Model.Id" method="post"
-          onsubmit="return confirm('Bạn có chắc muốn xoá tin này không? Hành động này không thể hoàn tác.');">
+          data-job-action data-confirm="Bạn có chắc muốn xoá tin này không? Hành động này không thể hoàn tác.">
         <button type="submit" class="btn btn-sm btn-outline-danger">Xoá</button>
     </form>
 </div>

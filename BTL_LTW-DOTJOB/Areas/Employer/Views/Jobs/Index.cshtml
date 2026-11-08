@@ -9,13 +9,20 @@
     <a asp-area="Employer" asp-controller="Jobs" asp-action="Create" class="btn btn-success">Đăng tin mới</a>
 </div>
 
+@* Thông báo kết quả của các thao tác Đóng / Mở lại / Xoá (gửi bằng AJAX) *@
+<div id="job-alert"></div>
+
 <div class="card shadow-sm mb-3">
     <div class="card-body row g-2">
         <div class="col-12 col-md-4">
-            <select id="status" class="form-select" asp-items="ViewBag.StatusOptions" onchange="loadJobs(1)"></select>
+            <input id="keyword" type="search" class="form-control" placeholder="Tìm theo tiêu đề tin..."
+                   value="@ViewBag.Keyword" autocomplete="off" />
         </div>
         <div class="col-12 col-md-4">
-            <select id="categoryId" class="form-select" asp-items="ViewBag.Categories" onchange="loadJobs(1)">
+            <select id="status" class="form-select" asp-items="ViewBag.StatusOptions"></select>
+        </div>
+        <div class="col-12 col-md-4">
+            <select id="categoryId" class="form-select" asp-items="ViewBag.Categories">
                 <option value="">Tất cả ngành nghề</option>
             </select>
         </div>
@@ -30,19 +37,132 @@
 
 @section Scripts {
     <script>
-        async function loadJobs(page) {
-            const status = document.getElementById('status').value;
-            const categoryId = document.getElementById('categoryId').value;
-            const url = `/Employer/Jobs?status=${encodeURIComponent(status)}&categoryId=${encodeURIComponent(categoryId)}&page=${page}`;
+        const jobsUrl = '@Url.Action("Index", "Jobs", new { area = "Employer" })';
+        const listEl = document.getElementById('job-list');
+        const alertEl = document.getElementById('job-alert');
+        const keywordInput = document.getElementById('keyword');
+        const statusSelect = document.getElementById('status');
+        const categorySelect = document.getElementById('categoryId');
 
-            // Header X-Requested-With: server trả partial, và trả 401/403 thay vì chuyển hướng khi hết phiên
-            const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            if (!response.ok) {
-                location.reload();
-                return;
-            }
+        let currentPage = @Model.PageNumber; // trang đang xem, để tải lại đúng trang sau khi đóng/xoá tin
+        let latestRequest = 0;               // bỏ qua kết quả của request cũ khi người dùng đổi bộ lọc liên tục
 
-            document.getElementById('job-list').innerHTML = await response.text();
+        // Ghép bộ lọc hiện tại thành chuỗi query, bỏ qua giá trị rỗng cho URL gọn
+        function buildQuery(page) {
+            const params = new URLSearchParams();
+            const keyword = keywordInput.value.trim();
+            if (keyword) params.set('keyword', keyword);
+            if (statusSelect.value) params.set('status', statusSelect.value);
+            if (categorySelect.value) params.set('categoryId', categorySelect.value);
+            if (page > 1) params.set('page', page);
+            const query = params.toString();
+            return query ? '?' + query : '';
         }
+
+        function showAlert(type, message) {
+            // Bỏ thông báo cũ còn sót từ lần chuyển trang trước (TempData)
+            document.querySelectorAll('main > .alert').forEach(alert => alert.remove());
+
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-' + type + ' alert-dismissible fade show';
+            alert.setAttribute('role', 'alert');
+            alert.append(message);
+
+            const closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.className = 'btn-close';
+            closeButton.setAttribute('data-bs-dismiss', 'alert');
+            alert.append(closeButton);
+
+            alertEl.replaceChildren(alert);
+            setTimeout(() => { if (alert.isConnected) bootstrap.Alert.getOrCreateInstance(alert).close(); }, 6000);
+        }
+
+        async function loadJobs(page) {
+            const requestId = ++latestRequest;
+            listEl.classList.add('opacity-50'); // báo đang tải
+
+            try {
+                // Header X-Requested-With: server trả partial, và trả 401/403 thay vì chuyển hướng khi hết phiên
+                const response = await fetch(jobsUrl + buildQuery(page), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (requestId !== latestRequest) return;
+
+                if (response.status === 401 || response.status === 403) {
+                    location.reload();
+                    return;
+                }
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+
+                listEl.innerHTML = await response.text();
+
+                // Server có thể đã đổi số trang (vd: lùi về trang trước khi trang cuối hết tin)
+                const pager = listEl.querySelector('[data-page-number]');
+                currentPage = pager ? Number(pager.dataset.pageNumber) : 1;
+
+                // Cập nhật URL để F5 / nút Quay lại / chia sẻ link vẫn giữ bộ lọc và trang
+                history.replaceState(null, '', jobsUrl + buildQuery(currentPage));
+            } catch (error) {
+                if (requestId === latestRequest) {
+                    showAlert('danger', 'Không tải được danh sách tin. Vui lòng thử lại.');
+                }
+            } finally {
+                if (requestId === latestRequest) listEl.classList.remove('opacity-50');
+            }
+        }
+
+        // Đổi bộ lọc thì về trang 1; ô tìm kiếm đợi người dùng ngừng gõ rồi mới tải
+        statusSelect.addEventListener('change', () => loadJobs(1));
+        categorySelect.addEventListener('change', () => loadJobs(1));
+
+        let keywordTimer;
+        keywordInput.addEventListener('input', () => {
+            clearTimeout(keywordTimer);
+            keywordTimer = setTimeout(() => loadJobs(1), 400);
+        });
+
+        // Đóng / Mở lại / Xoá: gửi bằng fetch rồi tải lại đúng trang và bộ lọc đang xem
+        listEl.addEventListener('submit', async event => {
+            const form = event.target.closest('form[data-job-action]');
+            if (!form) return;
+
+            event.preventDefault();
+
+            const confirmText = form.dataset.confirm;
+            if (confirmText && !confirm(confirmText)) return;
+
+            const button = form.querySelector('button[type="submit"]');
+            button.disabled = true; // chống bấm hai lần
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: new URLSearchParams(new FormData(form)) // gồm cả anti-forgery token trong form
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    location.reload();
+                    return;
+                }
+                if (response.status === 404) {
+                    showAlert('danger', 'Không tìm thấy tin này (có thể đã bị xoá).');
+                    await loadJobs(currentPage);
+                    return;
+                }
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+
+                const result = await response.json();
+                if (result.redirectUrl) {
+                    location.href = result.redirectUrl; // vd: mở lại tin quá hạn thì sang trang Sửa hạn nộp
+                    return;
+                }
+
+                showAlert(result.success ? 'success' : 'danger', result.message);
+                await loadJobs(currentPage);
+            } catch (error) {
+                showAlert('danger', 'Không thực hiện được thao tác. Vui lòng thử lại.');
+                button.disabled = false;
+            }
+        });
     </script>
 }
