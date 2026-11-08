@@ -1,6 +1,7 @@
 ﻿using BTL_LTW_DOTJOB.Data;
 using BTL_LTW_DOTJOB.Models;
 using BTL_LTW_DOTJOB.ViewModels.Profile;
+using Ganss.Xss;
 using Microsoft.EntityFrameworkCore;
 
 namespace BTL_LTW_DOTJOB.Services.Profile
@@ -12,6 +13,9 @@ namespace BTL_LTW_DOTJOB.Services.Profile
 
         private readonly AppDbContext _db;
         private readonly IWebHostEnvironment _env;
+
+        // Làm sạch HTML từ editor (xóa <script>, onerror=...) trước khi lưu phần giới thiệu công ty
+        private readonly HtmlSanitizer _sanitizer = new();
 
         public ProfileService(AppDbContext db, IWebHostEnvironment env)
         {
@@ -108,7 +112,7 @@ namespace BTL_LTW_DOTJOB.Services.Profile
                 company.WorkLocation = model.WorkLocation!.Trim();
                 company.CompanyAddress = model.CompanyAddress!.Trim();
                 company.Website = string.IsNullOrWhiteSpace(model.Website) ? null : model.Website.Trim();
-                company.Description = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim();
+                company.Description = string.IsNullOrWhiteSpace(model.Description) ? null : _sanitizer.Sanitize(model.Description.Trim());
 
                 if (model.LogoFile != null && model.LogoFile.Length > 0)
                 {
