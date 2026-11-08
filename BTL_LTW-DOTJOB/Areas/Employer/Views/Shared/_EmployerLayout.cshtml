@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DotJob Nhà tuyển dụng</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-success px-3">
+        <button class="btn btn-outline-light d-md-none me-2" type="button"
+                data-bs-toggle="offcanvas" data-bs-target="#employerSidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <a class="navbar-brand fw-bold" asp-area="Employer" asp-controller="Dashboard" asp-action="Index">
+            DOTJOB <small class="fw-normal">Nhà tuyển dụng</small>
+        </a>
+        <div class="ms-auto d-flex align-items-center gap-3 text-white">
+            <a class="text-white text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fa-solid fa-house"></i> Trang chủ
+            </a>
+            <span><i class="fa-regular fa-circle-user"></i> @User.Identity?.Name</span>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <aside class="col-md-3 col-lg-2 p-0 bg-white border-end">
+                <div class="offcanvas-md offcanvas-start" tabindex="-1" id="employerSidebar">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title">Menu</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#employerSidebar"></button>
+                    </div>
+                    <div class="offcanvas-body p-0">
+                        <div class="list-group list-group-flush w-100">
+                            <a class="list-group-item list-group-item-action"
+                               asp-area="Employer" asp-controller="Dashboard" asp-action="Index">
+                                <i class="fa-solid fa-chart-line me-2"></i> Tổng quan
+                            </a>
+                            @* TODO: nối link khi có controller (#9 Tin tuyển dụng, Ứng viên, Hồ sơ công ty) *@
+                            <a class="list-group-item list-group-item-action disabled" href="#">
+                                <i class="fa-solid fa-briefcase me-2"></i> Tin tuyển dụng
+                            </a>
+                            <a class="list-group-item list-group-item-action disabled" href="#">
+                                <i class="fa-solid fa-users me-2"></i> Ứng viên
+                            </a>
+                            <a class="list-group-item list-group-item-action disabled" href="#">
+                                <i class="fa-solid fa-building me-2"></i> Hồ sơ công ty
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="col-md-9 col-lg-10 py-4 px-4">
+                <partial name="_Alert" />
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
