@@ -1,0 +1,68 @@
+@using X.PagedList
+@model IPagedList<BTL_LTW_DOTJOB.Models.Application>
+@{
+    ViewData["Title"] = "Ứng viên";
+}
+
+<h3 class="fw-bold mb-3">Ứng viên</h3>
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body row g-2">
+        <div class="col-12 col-md-6">
+            <select id="jobId" class="form-select" asp-items="ViewBag.Jobs" onchange="loadApplications(1)">
+                <option value="">Tất cả tin tuyển dụng</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4">
+            <select id="status" class="form-select" asp-items="ViewBag.StatusOptions" onchange="loadApplications(1)"></select>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div id="application-list">
+        <partial name="_ApplicationTable" model="Model" />
+    </div>
+</div>
+
+@* Hộp hiển thị thư giới thiệu, nội dung được gán bằng textContent nên không chạy được HTML/script *@
+<div class="modal fade" id="coverLetterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="coverLetterTitle">Thư giới thiệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="coverLetterBody" style="white-space: pre-wrap;"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function loadApplications(page) {
+            const jobId = document.getElementById('jobId').value;
+            const status = document.getElementById('status').value;
+            const url = `/Employer/Applications?jobId=${encodeURIComponent(jobId)}&status=${encodeURIComponent(status)}&page=${page}`;
+
+            // Header X-Requested-With: server trả partial, và trả 401/403 thay vì chuyển hướng khi hết phiên
+            const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) {
+                location.reload();
+                return;
+            }
+
+            document.getElementById('application-list').innerHTML = await response.text();
+        }
+
+        // Bảng được nạp lại bằng AJAX nên gắn sự kiện ở document thay vì từng nút
+        document.addEventListener('click', function (e) {
+            const button = e.target.closest('.btn-cover-letter');
+            if (!button) return;
+
+            document.getElementById('coverLetterTitle').textContent = 'Thư giới thiệu - ' + button.dataset.name;
+            document.getElementById('coverLetterBody').textContent = button.dataset.cover;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('coverLetterModal')).show();
+        });
+    </script>
+}

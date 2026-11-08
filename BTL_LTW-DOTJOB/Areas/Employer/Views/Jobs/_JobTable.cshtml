@@ -45,7 +45,11 @@ else
                                 <span class="badge text-bg-success">Đang hiển thị</span>
                             }
                         </td>
-                        <td class="text-center">@job.Applications.Count</td>
+                        <td class="text-center">
+                            @* Bấm vào số CV để xem danh sách ứng viên của tin này *@
+                            <a asp-area="Employer" asp-controller="Applications" asp-action="Index"
+                               asp-route-jobId="@job.Id">@job.Applications.Count</a>
+                        </td>
                         <td><partial name="_JobActions" model="job" /></td>
                     </tr>
                 }
