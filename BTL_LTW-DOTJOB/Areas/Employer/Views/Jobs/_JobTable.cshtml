@@ -29,7 +29,7 @@ else
                         <td class="fw-semibold">@job.Title</td>
                         <td>@job.Category?.Name</td>
                         <td>@job.Location</td>
-                        <td>@job.CreatedAt.ToString("dd/MM/yyyy")</td>
+                        <td>@job.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
                         <td>@(job.Deadline?.ToString("dd/MM/yyyy") ?? "—")</td>
                         <td>
                             @if (!job.IsActive)
