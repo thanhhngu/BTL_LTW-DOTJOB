@@ -204,6 +204,7 @@ app.UseAuthentication();
 // hoặc người dùng chọn "Ghi nhớ đăng nhập") thì nạp lại Session["User"] từ thông tin trong cookie
 app.Use(async (context, next) =>
 {
+    await context.Session.LoadAsync(); // nạp Session bất đồng bộ trước khi đọc, tránh chặn luồng
     if (context.User.Identity?.IsAuthenticated == true && context.Session.GetUser() == null)
     {
         context.Session.SetUser(new SessionUser
