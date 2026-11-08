@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using X.PagedList;
+using X.PagedList.Extensions;
 
 namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
 {
@@ -18,6 +20,8 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
 
         // Làm sạch HTML từ editor (xóa <script>, onerror=...) trước khi lưu
         private readonly HtmlSanitizer _sanitizer = new();
+
+        private const int PageSize = 10;
 
         public JobsController(AppDbContext db)
         {
@@ -52,6 +56,69 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
             model.Locations = JobOptions.Locations
                 .Select(l => new SelectListItem { Value = l, Text = l })
                 .ToList();
+        }
+
+        // ===== M1-3: Danh sách tin của HR =====
+
+        // GET: /Employer/Jobs
+        // Gọi bằng fetch (header X-Requested-With) thì chỉ trả bảng tin, không kèm layout
+        [HttpGet]
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public async Task<IActionResult> Index(string? status, string? categoryId, int page = 1)
+        {
+            var companyId = await GetCompanyIdAsync();
+            if (companyId == null)
+            {
+                return Forbid();
+            }
+
+            var today = DateTime.Today;
+
+            // Chỉ lấy tin của công ty mình
+            var jobs = _db.JobPostings
+                .AsNoTracking()
+                .Include(j => j.Category)
+                .Include(j => j.Applications)
+                .Where(j => j.CompanyId == companyId);
+
+            if (status == "open")
+            {
+                jobs = jobs.Where(j => j.IsActive && (j.Deadline == null || j.Deadline >= today));
+            }
+            else if (status == "expired")
+            {
+                jobs = jobs.Where(j => j.IsActive && j.Deadline != null && j.Deadline < today);
+            }
+            else if (status == "closed")
+            {
+                jobs = jobs.Where(j => !j.IsActive);
+            }
+
+            if (!string.IsNullOrEmpty(categoryId))
+            {
+                jobs = jobs.Where(j => j.CategoryId == categoryId);
+            }
+
+            var pagedJobs = jobs
+                .OrderByDescending(j => j.CreatedAt)
+                .ToPagedList(Math.Max(page, 1), PageSize);
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_JobTable", pagedJobs);
+            }
+
+            ViewBag.Categories = new SelectList(
+                await _db.Categories.AsNoTracking().OrderBy(c => c.Name).ToListAsync(), "Id", "Name", categoryId);
+            ViewBag.StatusOptions = new SelectList(new[]
+            {
+                new { Value = "", Text = "Tất cả trạng thái" },
+                new { Value = "open", Text = "Đang hiển thị" },
+                new { Value = "expired", Text = "Hết hạn" },
+                new { Value = "closed", Text = "Đã đóng" }
+            }, "Value", "Text", status);
+
+            return View(pagedJobs);
         }
 
         // ===== M1-2: Tạo tin tuyển dụng =====
@@ -108,8 +175,7 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
             await _db.SaveChangesAsync();
 
             TempData["Success"] = "Đăng tin tuyển dụng thành công.";
-            // Tạm về Dashboard, đổi sang danh sách tin ở #9
-            return RedirectToAction("Index", "Dashboard");
+            return RedirectToAction(nameof(Index));
         }
     }
 }
