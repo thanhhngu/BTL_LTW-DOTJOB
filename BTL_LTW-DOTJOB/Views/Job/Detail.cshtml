@@ -161,10 +161,14 @@
                 <div class="text-start small text-secondary mb-4">
                     <p class="mb-2"><i class="fa-solid fa-users text-muted me-2"></i><strong>Quy mô:</strong> 100-499 nhân viên</p>
                     <p class="mb-2"><i class="fa-solid fa-location-dot text-muted me-2"></i><strong>Địa chỉ:</strong> @(Model?.Company?.CompanyAddress ?? Model?.Company?.WorkLocation ?? "Hà Nội")</p>
-                    <p class="mb-0"><i class="fa-solid fa-globe text-muted me-2"></i><strong>Website:</strong> <a href="@Model?.Company?.Website" target="_blank" class="text-success text-decoration-none">Xem trang web</a></p>
+                    @if (!string.IsNullOrWhiteSpace(Model?.Company?.Website))
+                    {
+                        <p class="mb-0"><i class="fa-solid fa-globe text-muted me-2"></i><strong>Website:</strong> <a href="@Model.Company.Website" target="_blank" rel="noopener noreferrer nofollow" class="text-success text-decoration-none">Xem trang web</a></p>
+                    }
                 </div>
 
-                <a href="#" class="btn btn-outline-success w-100 fw-semibold rounded-3 py-2">
+                <a asp-controller="Company" asp-action="Detail" asp-route-id="@Model?.CompanyId"
+                   class="btn btn-outline-success w-100 fw-semibold rounded-3 py-2">
                     Xem trang công ty <i class="fa-solid fa-arrow-up-right-from-square ms-1 small"></i>
                 </a>
             </div>
