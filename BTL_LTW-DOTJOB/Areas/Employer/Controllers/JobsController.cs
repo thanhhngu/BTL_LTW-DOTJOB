@@ -100,8 +100,6 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
             // Chỉ lấy tin của công ty mình
             var jobs = _db.JobPostings
                 .AsNoTracking()
-                .Include(j => j.Category)
-                .Include(j => j.Applications)
                 .Where(j => j.CompanyId == companyId);
 
             if (status == "open")
@@ -134,8 +132,21 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
             var pageCount = Math.Max((int)Math.Ceiling(totalCount / (double)PageSize), 1);
             page = Math.Clamp(page, 1, pageCount);
 
+            // ThenBy(Id) giữ thứ tự ổn định khi nhiều tin cùng giờ đăng; Select chỉ lấy cột cần dùng và đếm số CV bằng SQL
             var pagedJobs = jobs
                 .OrderByDescending(j => j.CreatedAt)
+                .ThenBy(j => j.Id)
+                .Select(j => new JobListItem
+                {
+                    Id = j.Id,
+                    Title = j.Title,
+                    CategoryName = j.Category != null ? j.Category.Name : null,
+                    Location = j.Location,
+                    CreatedAt = j.CreatedAt,
+                    Deadline = j.Deadline,
+                    IsActive = j.IsActive,
+                    ApplicationCount = j.Applications.Count
+                })
                 .ToPagedList(page, PageSize);
 
             if (IsAjax)
