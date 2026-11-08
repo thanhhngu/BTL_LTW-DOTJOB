@@ -49,6 +49,10 @@ Layout = null;
                 <input asp-for="Password" type="password" placeholder="Nhập mật khẩu" class="form-control">
                 <span asp-validation-for="Password" class="form-message"></span>
             </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                <input asp-for="RememberMe" type="checkbox" style="width: auto; margin: 0;">
+                <label asp-for="RememberMe" class="form-label" style="margin: 0; font-weight: normal;">Ghi nhớ đăng nhập (7 ngày)</label>
+            </div>
             <button value ="Login" class="form-submit">Login</button>
             <a id="link-tab" href="@Url.Action("Register", "Auth")">Create Now!!</a>
         </form>

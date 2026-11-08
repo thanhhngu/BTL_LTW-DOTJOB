@@ -1,4 +1,5 @@
-﻿using BTL_LTW_DOTJOB.Services.Auth;
+﻿using BTL_LTW_DOTJOB.Helpers;
+using BTL_LTW_DOTJOB.Services.Auth;
 using BTL_LTW_DOTJOB.ViewModels.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -87,9 +88,19 @@ namespace BTL_LTW_DOTJOB.Controllers
                 new ClaimsPrincipal(claimsIdentity),
                 new AuthenticationProperties
                 {
-                    IsPersistent = true,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                    // Có tích "Ghi nhớ đăng nhập": cookie lưu 7 ngày. Không tích: cookie phiên, đóng trình duyệt là phải đăng nhập lại
+                    IsPersistent = model.RememberMe,
+                    ExpiresUtc = model.RememberMe ? DateTimeOffset.UtcNow.AddDays(7) : null
                 });
+
+            // Session["User"]: thông tin người đăng nhập lưu phía server
+            HttpContext.Session.SetUser(new SessionUser
+            {
+                Id = user.Id.ToString(),
+                FullName = user.FullName,
+                Email = user.Email,
+                Role = roleName
+            });
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
@@ -111,6 +122,7 @@ namespace BTL_LTW_DOTJOB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
+            HttpContext.Session.Clear(); // xóa Session["User"]
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
