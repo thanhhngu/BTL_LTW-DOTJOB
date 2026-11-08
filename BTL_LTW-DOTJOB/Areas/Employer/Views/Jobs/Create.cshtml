@@ -5,7 +5,7 @@
 
 <h2 class="mb-3">Đăng tin tuyển dụng</h2>
 
-<form asp-area="Employer" asp-controller="Jobs" asp-action="Create" method="post">
+<form asp-area="Employer" asp-controller="Jobs" asp-action="Create" method="post" data-job-form novalidate>
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="mb-3">
@@ -41,17 +41,19 @@
     <div class="row">
         <div class="col-md-4 mb-3">
             <label asp-for="SalaryMin" class="form-label"></label>
-            <input asp-for="SalaryMin" type="number" min="0" step="1" asp-format="{0:0}" class="form-control" />
+            <input asp-for="SalaryMin" type="number" min="0" step="1" asp-format="{0:0}" class="form-control" placeholder="Để trống nếu thỏa thuận" />
+            <div class="form-text" data-salary-hint="SalaryMin"></div>
             <span asp-validation-for="SalaryMin" class="text-danger"></span>
         </div>
         <div class="col-md-4 mb-3">
             <label asp-for="SalaryMax" class="form-label"></label>
-            <input asp-for="SalaryMax" type="number" min="0" step="1" asp-format="{0:0}" class="form-control" />
+            <input asp-for="SalaryMax" type="number" min="0" step="1" asp-format="{0:0}" class="form-control" placeholder="Để trống nếu thỏa thuận" />
+            <div class="form-text" data-salary-hint="SalaryMax"></div>
             <span asp-validation-for="SalaryMax" class="text-danger"></span>
         </div>
         <div class="col-md-4 mb-3">
             <label asp-for="Deadline" class="form-label"></label>
-            <input asp-for="Deadline" class="form-control" />
+            <input asp-for="Deadline" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
             <span asp-validation-for="Deadline" class="text-danger"></span>
         </div>
     </div>
@@ -75,4 +77,5 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <partial name="_RichEditor" />
+    <partial name="_JobFormScripts" />
 }
