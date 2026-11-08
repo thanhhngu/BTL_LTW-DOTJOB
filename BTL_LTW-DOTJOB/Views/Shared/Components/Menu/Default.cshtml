@@ -1,4 +1,5 @@
-﻿@model BTL_LTW_DOTJOB.ViewModels.Profile.ProfileViewModel?
+﻿@using BTL_LTW_DOTJOB.Helpers
+@model BTL_LTW_DOTJOB.ViewModels.Profile.ProfileViewModel?
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 @* Không nạp thêm Bootstrap (CSS và bundle) ở đây: _Layout đã nạp bản trong ~/lib. Nạp trùng làm dropdown bị toggle nhiều lần nên không mở được: _Layout đã nạp 1 bản. Nạp trùng làm dropdown bị toggle nhiều lần nên không mở được *@
 <header>
@@ -37,7 +38,8 @@
                     <div class="vr mx-1"></div> 
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        var displayName = User.Identity?.Name ?? "Tài khoản";
+                        // Tên lấy từ Session["User"] (Session trống thì dùng tên trong cookie đăng nhập)
+                        var displayName = Context.Session.GetUser()?.FullName ?? User.Identity?.Name ?? "Tài khoản";
                         var initial = displayName.Trim().Length > 0 ? char.ToUpper(displayName.Trim()[0]).ToString() : "U";
 
                         <!-- Đã đăng nhập: avatar + menu tài khoản -->
