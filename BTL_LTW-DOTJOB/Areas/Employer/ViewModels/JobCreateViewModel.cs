@@ -82,6 +82,13 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.ViewModels
                     "Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.", new[] { nameof(SalaryMax) });
             }
 
+            // Lương 0 - 0 không có nghĩa: muốn thỏa thuận thì để trống cả hai ô
+            if (SalaryMax.HasValue && SalaryMax <= 0)
+            {
+                yield return new ValidationResult(
+                    "Lương tối đa phải lớn hơn 0, hoặc để trống cả hai ô nếu thỏa thuận.", new[] { nameof(SalaryMax) });
+            }
+
             if (Deadline.HasValue && Deadline.Value.Date < DateTime.Today)
             {
                 yield return new ValidationResult(
