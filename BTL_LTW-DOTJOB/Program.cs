@@ -1,4 +1,5 @@
 using BTL_LTW_DOTJOB.Data;
+using BTL_LTW_DOTJOB.Helpers;
 using BTL_LTW_DOTJOB.Services.Application;
 using BTL_LTW_DOTJOB.Services.Auth;
 using BTL_LTW_DOTJOB.Services.Job;
@@ -21,6 +22,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
+
+// Session["User"]: lưu thông tin người đăng nhập (id, tên, email, vai trò) phía server.
+// Session dùng bộ nhớ trong của server nên khởi động lại ứng dụng thì mất; cookie đăng nhập vẫn còn và Session được nạp lại (xem middleware bên dưới)
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.Name = ".DotJob.Session";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.IsEssential = true;
 });
 
 // Cache nhỏ dùng để kiểm tra trạng thái khóa tài khoản (IsActive) mà không truy vấn DB ở mọi request
@@ -184,7 +197,26 @@ app.UseStaticFiles(); // phục vụ file tải lên lúc chạy (wwwroot/upload
 app.UseRouting();
 app.UseRateLimiter();
 
+app.UseSession();
 app.UseAuthentication();
+
+// Đã đăng nhập (cookie) mà Session trống (hết 30 phút không hoạt động, hoặc ứng dụng vừa khởi động lại,
+// hoặc người dùng chọn "Ghi nhớ đăng nhập") thì nạp lại Session["User"] từ thông tin trong cookie
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true && context.Session.GetUser() == null)
+    {
+        context.Session.SetUser(new SessionUser
+        {
+            Id = context.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty,
+            FullName = context.User.FindFirstValue(ClaimTypes.Name) ?? string.Empty,
+            Email = context.User.FindFirstValue(ClaimTypes.Email) ?? string.Empty,
+            Role = context.User.FindFirstValue(ClaimTypes.Role) ?? string.Empty
+        });
+    }
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapStaticAssets().AllowAnonymous();
