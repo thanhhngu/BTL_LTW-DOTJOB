@@ -8,11 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\..\..\Downloads\tien-do-sua-loi.md" Link="tien-do-sua-loi.md" />
-    <None Include="..\..\LTW\.gitignore" Link=".gitignore" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageReference Include="HtmlSanitizer" Version="11.0.16" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
