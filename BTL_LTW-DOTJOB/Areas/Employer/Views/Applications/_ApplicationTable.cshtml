@@ -1,0 +1,74 @@
+@using X.PagedList
+@model IPagedList<BTL_LTW_DOTJOB.Models.Application>
+
+@if (Model.Count == 0)
+{
+    <div class="text-center text-muted py-5">Chưa có đơn ứng tuyển nào phù hợp.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Ứng viên</th>
+                    <th>Vị trí ứng tuyển</th>
+                    <th>Ngày nộp</th>
+                    <th>Trạng thái</th>
+                    <th>CV</th>
+                    <th>Thư giới thiệu</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var application in Model)
+                {
+                    // Hệ thống lưu "..." khi ứng viên không viết thư giới thiệu
+                    var coThuGioiThieu = !string.IsNullOrWhiteSpace(application.CoverLetter) && application.CoverLetter.Trim() != "...";
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@application.User?.FullName</div>
+                            <small class="text-muted d-block">@application.User?.Email</small>
+                            <small class="text-muted d-block">@application.User?.Phone</small>
+                        </td>
+                        <td>@application.JobPosting?.Title</td>
+                        <td>@application.AppliedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <span id="badge-@application.Id" class="badge @ApplicationStatus.BadgeClass(application.Status)">
+                                @ApplicationStatus.Label(application.Status)
+                            </span>
+                        </td>
+                        <td>
+                            @* CV nằm ngoài wwwroot, chỉ tải được qua CvFileController (có kiểm tra quyền) *@
+                            <a asp-area="" asp-controller="CvFile" asp-action="Download"
+                               asp-route-applicationId="@application.Id" target="_blank"
+                               class="btn btn-sm btn-outline-primary">Xem / tải CV</a>
+                        </td>
+                        <td>
+                            @if (coThuGioiThieu)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary btn-cover-letter"
+                                        data-name="@application.User?.FullName"
+                                        data-cover="@application.CoverLetter">Xem thư</button>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center p-3 border-top">
+        <small class="text-muted">Tổng @Model.TotalItemCount đơn</small>
+        <div class="d-flex align-items-center gap-3">
+            <button type="button" class="btn btn-outline-success btn-sm"
+                    onclick="loadApplications(@(Model.PageNumber - 1))" disabled="@(!Model.HasPreviousPage)">Trước</button>
+            <span class="text-muted">@Model.PageNumber / @Model.PageCount</span>
+            <button type="button" class="btn btn-outline-success btn-sm"
+                    onclick="loadApplications(@(Model.PageNumber + 1))" disabled="@(!Model.HasNextPage)">Sau</button>
+        </div>
+    </div>
+}
