@@ -17,6 +17,7 @@ else
                     <th>Trạng thái</th>
                     <th>CV</th>
                     <th>Thư giới thiệu</th>
+                    <th>Duyệt CV</th>
                 </tr>
             </thead>
             <tbody>
@@ -54,6 +55,20 @@ else
                             {
                                 <span class="text-muted">—</span>
                             }
+                        </td>
+                        <td>
+                            @* Nút đang trùng trạng thái hiện tại thì bị khoá; "Đặt lại" chỉ hiện khi đã Pass/Fail *@
+                            <div id="actions-@application.Id" class="d-flex gap-1">
+                                <button type="button" class="btn btn-sm btn-success" data-status="@ApplicationStatus.Accepted"
+                                        disabled="@(application.Status == ApplicationStatus.Accepted)"
+                                        onclick="updateStatus('@application.Id', '@ApplicationStatus.Accepted')">Pass</button>
+                                <button type="button" class="btn btn-sm btn-danger" data-status="@ApplicationStatus.Rejected"
+                                        disabled="@(application.Status == ApplicationStatus.Rejected)"
+                                        onclick="updateStatus('@application.Id', '@ApplicationStatus.Rejected')">Fail</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary @(application.Status == ApplicationStatus.Pending ? "d-none" : "")"
+                                        data-status="@ApplicationStatus.Pending"
+                                        onclick="updateStatus('@application.Id', '@ApplicationStatus.Pending')">Đặt lại</button>
+                            </div>
                         </td>
                     </tr>
                 }
