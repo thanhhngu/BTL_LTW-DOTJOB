@@ -1,0 +1,62 @@
+@model BTL_LTW_DOTJOB.ViewModels.Companies.CompanyDetailViewModel
+@{
+    var company = Model.Company;
+    ViewData["Title"] = company.CompanyName;
+    var initials = company.CompanyName.Length >= 3 ? company.CompanyName[..3].ToUpper() : company.CompanyName.ToUpper();
+}
+
+<div class="container py-4">
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+        <div class="d-flex gap-4 align-items-center flex-wrap">
+            @if (!string.IsNullOrEmpty(company.Logo))
+            {
+                <img src="@company.Logo" alt="Logo @company.CompanyName" class="rounded-3 border p-2 bg-white"
+                     style="width: 100px; height: 100px; object-fit: contain;">
+            }
+            else
+            {
+                <div class="rounded-3 border bg-white d-flex align-items-center justify-content-center fw-bold text-success"
+                     style="width: 100px; height: 100px;">@initials</div>
+            }
+            <div>
+                <h2 class="fw-bold mb-2">@company.CompanyName</h2>
+                <p class="text-secondary mb-1">
+                    <i class="fa-solid fa-location-dot text-muted me-2"></i>@(string.IsNullOrWhiteSpace(company.CompanyAddress) ? company.WorkLocation : company.CompanyAddress)
+                </p>
+                @if (!string.IsNullOrWhiteSpace(company.Website))
+                {
+                    <p class="mb-0">
+                        <i class="fa-solid fa-globe text-muted me-2"></i>
+                        <a href="@company.Website" target="_blank" rel="noopener noreferrer nofollow" class="text-success text-decoration-none">@company.Website</a>
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(company.Description))
+    {
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+            <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">Giới thiệu công ty</h4>
+            <div class="text-secondary lh-lg">
+                @* Giới thiệu do HR soạn bằng editor (HTML): làm sạch rồi mới hiển thị *@
+                @Html.SafeHtml(company.Description)
+            </div>
+        </div>
+    }
+
+    <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">Vị trí đang tuyển (@Model.Jobs.Count)</h4>
+    @if (Model.Jobs.Count == 0)
+    {
+        <div class="text-center text-muted py-4">Công ty hiện chưa có tin tuyển dụng nào đang mở.</div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            @foreach (var job in Model.Jobs)
+            {
+                <partial name="_JobCard" model="job" />
+            }
+        </div>
+    }
+</div>
