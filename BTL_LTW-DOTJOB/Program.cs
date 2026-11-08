@@ -28,9 +28,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Request gửi bằng fetch/AJAX kèm header X-Requested-With: XMLHttpRequest
+// Request gửi bằng fetch/AJAX kèm header X-Requested-With: XMLHttpRequest, hoặc gọi vào /api/...
+// (API luôn trả 401/403 thay vì chuyển hướng sang trang login)
 static bool IsAjaxRequest(HttpRequest request) =>
-    request.Headers["X-Requested-With"] == "XMLHttpRequest";
+    request.Headers["X-Requested-With"] == "XMLHttpRequest" || request.Path.StartsWithSegments("/api");
 
 //Cấu hình Cookie
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

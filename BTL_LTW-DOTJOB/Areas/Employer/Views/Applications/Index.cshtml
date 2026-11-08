@@ -6,6 +6,10 @@
 
 <h3 class="fw-bold mb-3">Ứng viên</h3>
 
+@* Chứa anti-forgery token để JS gửi kèm khi gọi API đổi trạng thái *@
+<div id="antiforgery">@Html.AntiForgeryToken()</div>
+<div id="api-alert"></div>
+
 <div class="card shadow-sm mb-3">
     <div class="card-body row g-2">
         <div class="col-12 col-md-6">
@@ -53,6 +57,67 @@
             }
 
             document.getElementById('application-list').innerHTML = await response.text();
+        }
+
+        // Hiện/xoá thông báo lỗi của API ở đầu trang
+        function showError(message) {
+            const box = document.getElementById('api-alert');
+            box.innerHTML = '';
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger alert-dismissible fade show';
+            alert.textContent = message;
+            const close = document.createElement('button');
+            close.type = 'button';
+            close.className = 'btn-close';
+            close.setAttribute('data-bs-dismiss', 'alert');
+            alert.appendChild(close);
+            box.appendChild(alert);
+        }
+
+        // Gọi PUT /api/applications/{id}/status rồi cập nhật badge và nút ngay trên trang (không reload)
+        async function updateStatus(id, status) {
+            const token = document.querySelector('#antiforgery input[name="__RequestVerificationToken"]').value;
+
+            const response = await fetch(`/api/applications/${id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify({ status })
+            });
+
+            if (response.status === 401) {
+                location.reload(); // hết phiên đăng nhập
+                return;
+            }
+
+            if (!response.ok) {
+                let message = 'Không thể cập nhật trạng thái. Vui lòng thử lại.';
+                try {
+                    const error = await response.json();
+                    if (error.message) message = error.message;
+                } catch { }
+                showError(message);
+                return;
+            }
+
+            const data = await response.json();
+
+            // Đổi màu và chữ của badge
+            const badgeClass = { Pending: 'text-bg-secondary', Accepted: 'text-bg-success', Rejected: 'text-bg-danger' };
+            const badge = document.getElementById('badge-' + id);
+            badge.className = 'badge ' + badgeClass[data.status];
+            badge.textContent = data.label;
+
+            // Khoá nút trùng trạng thái hiện tại, ẩn "Đặt lại" khi đang chờ duyệt
+            document.querySelectorAll('#actions-' + id + ' button').forEach(button => {
+                button.disabled = button.dataset.status === data.status;
+                if (button.dataset.status === 'Pending') {
+                    button.classList.toggle('d-none', data.status === 'Pending');
+                }
+            });
         }
 
         // Bảng được nạp lại bằng AJAX nên gắn sự kiện ở document thay vì từng nút
