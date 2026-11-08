@@ -1,5 +1,6 @@
 using BTL_LTW_DOTJOB.Areas.Employer.ViewModels;
 using BTL_LTW_DOTJOB.Data;
+using BTL_LTW_DOTJOB.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +46,7 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
                 OpenJobs = await _db.JobPostings.CountAsync(j =>
                     j.CompanyId == company.Id && j.IsActive && (j.Deadline == null || j.Deadline >= today)),
                 TotalApplications = await applications.CountAsync(),
-                PendingApplications = await applications.CountAsync(a => a.Status == "Pending"),
+                PendingApplications = await applications.CountAsync(a => a.Status == ApplicationStatus.Pending),
                 RecentApplications = await applications
                     .OrderByDescending(a => a.AppliedDate)
                     .Take(5)
