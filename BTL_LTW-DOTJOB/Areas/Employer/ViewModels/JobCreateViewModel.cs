@@ -59,6 +59,15 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.ViewModels
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
+            // StringLength(min 10) đếm cả khoảng trắng đầu/cuối, mà controller lại lưu Title.Trim().
+            // Chỉ báo thêm khi chuỗi gốc đủ 10 ký tự nhưng sau khi cắt khoảng trắng thì không đủ (tránh báo lỗi 2 lần)
+            var title = Title ?? string.Empty; // có thể null nếu form gửi chuỗi rỗng
+            if (title.Length >= 10 && title.Trim().Length < 10)
+            {
+                yield return new ValidationResult(
+                    "Tiêu đề phải từ 10 đến 255 ký tự (không tính khoảng trắng ở hai đầu).", new[] { nameof(Title) });
+            }
+
             // Phía ứng viên chỉ hiện lương khi có đủ hai đầu, nên nhập thiếu một đầu sẽ bị hiểu thành "Thỏa thuận"
             if (SalaryMin.HasValue != SalaryMax.HasValue)
             {
