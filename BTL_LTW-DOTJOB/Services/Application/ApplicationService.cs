@@ -1,4 +1,5 @@
 ﻿using BTL_LTW_DOTJOB.Data;
+using BTL_LTW_DOTJOB.Helpers;
 using BTL_LTW_DOTJOB.Models;
 using BTL_LTW_DOTJOB.ViewModels.Application;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,10 @@ namespace BTL_LTW_DOTJOB.Services.Application
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!AllowedExt.Contains(ext))
                 return (false, "Chỉ chấp nhận file PDF, DOC, DOCX.");
+
+            // Đuôi file có thể bị đổi tên (vd: virus.exe -> cv.pdf) nên kiểm tra thêm nội dung thật của file
+            if (!await UploadSignature.MatchesExtensionAsync(file, ext))
+                return (false, "Nội dung file không đúng định dạng PDF, DOC hoặc DOCX.");
 
             var job = await _db.JobPostings.FindAsync(model.Id);
             if (job == null || !job.IsActive)
