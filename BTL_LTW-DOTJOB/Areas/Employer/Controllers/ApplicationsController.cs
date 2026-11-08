@@ -73,9 +73,14 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
                 applications = applications.Where(a => a.Status == status);
             }
 
+            // Giữ số trang trong khoảng hợp lệ (vd: ?page=999 thì về trang cuối thay vì hiện bảng trống không có phân trang)
+            var totalCount = await applications.CountAsync();
+            var pageCount = Math.Max((int)Math.Ceiling(totalCount / (double)PageSize), 1);
+            page = Math.Clamp(page, 1, pageCount);
+
             var pagedApplications = applications
                 .OrderByDescending(a => a.AppliedDate)
-                .ToPagedList(Math.Max(page, 1), PageSize);
+                .ToPagedList(page, PageSize);
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
