@@ -1,24 +1,80 @@
+@model BTL_LTW_DOTJOB.Areas.Employer.ViewModels.DashboardViewModel
 @{
     ViewData["Title"] = "Tổng quan";
+
+    // Đổi trạng thái lưu trong DB thành chữ và màu hiển thị
+    (string Text, string Css) Badge(string status) => status switch
+    {
+        "Pending" => ("Chờ duyệt", "text-bg-warning"),
+        "Accepted" or "Passed" => ("Đạt", "text-bg-success"),
+        "Rejected" or "Failed" => ("Không đạt", "text-bg-danger"),
+        _ => (status, "text-bg-secondary")
+    };
 }
 
-<h3 class="fw-bold mb-1">Xin chào, @User.Identity?.Name</h3>
-<p class="text-muted">Quản lý tin tuyển dụng và hồ sơ ứng viên của bạn tại đây.</p>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div>
+        <h3 class="fw-bold mb-1">Xin chào, @User.Identity?.Name</h3>
+        <p class="text-muted mb-0">Quản lý tin tuyển dụng và hồ sơ ứng viên của @Model.CompanyName tại đây.</p>
+    </div>
+    <a asp-area="Employer" asp-controller="Jobs" asp-action="Create" class="btn btn-success">Đăng tin mới</a>
+</div>
 
-<div class="row g-3">
+<div class="row g-3 mb-4">
     <div class="col-12 col-md-4">
-        <div class="card shadow-sm"><div class="card-body">
-            <div class="text-muted">Tin đang mở</div><div class="fs-3 fw-bold">0</div>
+        <a asp-area="Employer" asp-controller="Jobs" asp-action="Index" asp-route-status="open"
+           class="card shadow-sm text-decoration-none text-body h-100">
+            <div class="card-body">
+                <div class="text-muted">Tin đang mở</div>
+                <div class="fs-3 fw-bold">@Model.OpenJobs</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm h-100"><div class="card-body">
+            <div class="text-muted">Tổng số CV</div>
+            <div class="fs-3 fw-bold">@Model.TotalApplications</div>
         </div></div>
     </div>
     <div class="col-12 col-md-4">
-        <div class="card shadow-sm"><div class="card-body">
-            <div class="text-muted">Tổng số CV</div><div class="fs-3 fw-bold">0</div>
+        <div class="card shadow-sm h-100"><div class="card-body">
+            <div class="text-muted">CV chờ duyệt</div>
+            <div class="fs-3 fw-bold">@Model.PendingApplications</div>
         </div></div>
     </div>
-    <div class="col-12 col-md-4">
-        <div class="card shadow-sm"><div class="card-body">
-            <div class="text-muted">CV chờ duyệt</div><div class="fs-3 fw-bold">0</div>
-        </div></div>
-    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold">Đơn ứng tuyển mới nhất</div>
+    @if (Model.RecentApplications.Count == 0)
+    {
+        <div class="text-center text-muted py-4">Chưa có ứng viên nào nộp hồ sơ.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ứng viên</th>
+                        <th>Vị trí</th>
+                        <th>Ngày nộp</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.RecentApplications)
+                    {
+                        var badge = Badge(item.Status);
+                        <tr>
+                            <td class="fw-semibold">@item.CandidateName</td>
+                            <td>@item.JobTitle</td>
+                            <td>@item.AppliedDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><span class="badge @badge.Css">@badge.Text</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
