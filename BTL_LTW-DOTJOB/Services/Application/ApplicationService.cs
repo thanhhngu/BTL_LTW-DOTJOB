@@ -34,7 +34,8 @@ namespace BTL_LTW_DOTJOB.Services.Application
             if (job == null || !job.IsActive)
                 return (false, "Tin tuyển dụng không tồn tại hoặc đã bị ẩn.");
 
-            if (job.Deadline < DateTime.UtcNow)
+            // Hạn nộp do HR chọn theo giờ máy (23:59:59), nên so với giờ máy chứ không phải UTC
+            if (job.Deadline < DateTime.Now)
                 return (false, "Tin tuyển dụng đã hết hạn ứng tuyển.");
 
             // 2. Kiểm tra xem user đã ứng tuyển job này trước đó chưa

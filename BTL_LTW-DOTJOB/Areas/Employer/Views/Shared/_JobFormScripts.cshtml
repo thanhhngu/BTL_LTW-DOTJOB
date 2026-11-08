@@ -1,0 +1,75 @@
+@* Script dùng chung cho form tạo/sửa tin (form có thuộc tính data-job-form). Gọi trong @section Scripts sau _RichEditor. *@
+<script>
+    (function () {
+        // Mặc định jQuery validate bỏ qua ô ẩn. Textarea của CKEditor bị ẩn nên cho kiểm tra cả ô ẩn
+        // (nội dung editor đã được chép vào textarea mỗi lần gõ)
+        if (window.jQuery && jQuery.validator) {
+            jQuery.validator.setDefaults({ ignore: [] });
+        }
+
+        const form = document.querySelector('form[data-job-form]');
+        if (!form) return;
+
+        const salaryMin = form.querySelector('[name="SalaryMin"]');
+        const salaryMax = form.querySelector('[name="SalaryMax"]');
+        const minMessage = form.querySelector('[data-valmsg-for="SalaryMin"]');
+        const maxMessage = form.querySelector('[data-valmsg-for="SalaryMax"]');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        // Hiện số lương đã ngăn cách hàng nghìn ngay dưới ô nhập, tránh nhập thừa/thiếu số 0
+        function showHint(input) {
+            const hint = form.querySelector('[data-salary-hint="' + input.name + '"]');
+            if (!hint) return;
+            hint.textContent = input.value.trim() === ''
+                ? ''
+                : Number(input.value).toLocaleString('vi-VN') + ' đ';
+        }
+
+        // Kiểm tra lương ở phía client giống quy tắc ở server
+        function checkSalary() {
+            const min = salaryMin.value.trim();
+            const max = salaryMax.value.trim();
+            let error = '';
+            let target = maxMessage;
+
+            if ((min === '') !== (max === '')) {
+                error = 'Vui lòng nhập cả lương tối thiểu và tối đa, hoặc để trống cả hai nếu thỏa thuận.';
+                target = min === '' ? minMessage : maxMessage;
+            } else if (min !== '' && Number(max) < Number(min)) {
+                error = 'Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.';
+            }
+
+            minMessage.textContent = '';
+            maxMessage.textContent = '';
+            salaryMin.classList.remove('is-invalid');
+            salaryMax.classList.remove('is-invalid');
+
+            if (error) {
+                target.textContent = error;
+                (target === minMessage ? salaryMin : salaryMax).classList.add('is-invalid');
+            }
+            return error === '';
+        }
+
+        [salaryMin, salaryMax].forEach(input => {
+            showHint(input);
+            input.addEventListener('input', () => { showHint(input); checkSalary(); });
+        });
+
+        form.addEventListener('submit', event => {
+            const salaryOk = checkSalary();
+            const formOk = !(window.jQuery && jQuery.fn.valid) || jQuery(form).valid();
+
+            if (!salaryOk || !formOk) {
+                event.preventDefault();
+                const firstError = form.querySelector('.is-invalid, .input-validation-error, .field-validation-error');
+                if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            // Chống bấm hai lần tạo ra hai tin
+            submitButton.disabled = true;
+            submitButton.textContent = 'Đang lưu...';
+        });
+    })();
+</script>

@@ -59,6 +59,14 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.ViewModels
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
+            // Phía ứng viên chỉ hiện lương khi có đủ hai đầu, nên nhập thiếu một đầu sẽ bị hiểu thành "Thỏa thuận"
+            if (SalaryMin.HasValue != SalaryMax.HasValue)
+            {
+                var thieu = SalaryMin.HasValue ? nameof(SalaryMax) : nameof(SalaryMin);
+                yield return new ValidationResult(
+                    "Vui lòng nhập cả lương tối thiểu và tối đa, hoặc để trống cả hai nếu thỏa thuận.", new[] { thieu });
+            }
+
             if (SalaryMin.HasValue && SalaryMax.HasValue && SalaryMax < SalaryMin)
             {
                 yield return new ValidationResult(

@@ -82,6 +82,20 @@
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                 }
+                                @if (User.IsInRole("Employer"))
+                                {
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Employer" asp-controller="Dashboard" asp-action="Index">
+                                            <i class="fa-solid fa-chart-line text-success me-2"></i>Tổng quan nhà tuyển dụng
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Employer" asp-controller="Jobs" asp-action="Index">
+                                            <i class="fa-solid fa-briefcase text-success me-2"></i>Quản lý tin tuyển dụng
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                }
                                 <li>
                                     <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
                                         <button type="submit" class="dropdown-item text-danger">
@@ -109,8 +123,7 @@
                     }
                     else if (User.IsInRole("Employer"))
                     {
-                        @* TODO: trỏ tới trang đăng tin trong Areas/Employer khi có *@
-                        <a href="#" class="text-decoration-none text-dark ms-2 text-end lh-sm">
+                        <a asp-area="Employer" asp-controller="Jobs" asp-action="Create" class="text-decoration-none text-dark ms-2 text-end lh-sm">
                             <small class="text-muted d-block" style="font-size: 0.75rem;">Nhà tuyển dụng</small>
                             <span class="fw-bold">Đăng tuyển ngay <i class="fa-solid fa-angle-right"></i></span>
                         </a>

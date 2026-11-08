@@ -58,13 +58,36 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
                 .ToList();
         }
 
+        // Request gửi bằng fetch kèm header X-Requested-With: XMLHttpRequest
+        private bool IsAjax => Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
+        // Kết quả của thao tác đóng/mở/xoá: AJAX nhận JSON (JS tự hiện thông báo và tải lại danh sách
+        // đúng trang đang xem), form thường thì lưu TempData rồi chuyển hướng như cũ
+        private IActionResult Done(bool success, string message, string action = nameof(Index), object? routeValues = null)
+        {
+            var toIndex = action == nameof(Index);
+
+            if (IsAjax)
+            {
+                // Nếu phải sang trang khác (vd: Edit) thì trang đó hiện thông báo từ TempData
+                if (!toIndex)
+                {
+                    TempData[success ? "Success" : "Error"] = message;
+                }
+                return Json(new { success, message, redirectUrl = toIndex ? null : Url.Action(action, routeValues) });
+            }
+
+            TempData[success ? "Success" : "Error"] = message;
+            return RedirectToAction(action, routeValues);
+        }
+
         // ===== M1-3: Danh sách tin của HR =====
 
         // GET: /Employer/Jobs
         // Gọi bằng fetch (header X-Requested-With) thì chỉ trả bảng tin, không kèm layout
         [HttpGet]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public async Task<IActionResult> Index(string? status, string? categoryId, int page = 1)
+        public async Task<IActionResult> Index(string? keyword, string? status, string? categoryId, int page = 1)
         {
             var companyId = await GetCompanyIdAsync();
             if (companyId == null)
@@ -99,14 +122,28 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
                 jobs = jobs.Where(j => j.CategoryId == categoryId);
             }
 
+            // Tìm theo tiêu đề, không phân biệt hoa thường và dấu (giống ô tìm kiếm phía ứng viên)
+            var kw = keyword?.Trim();
+            if (!string.IsNullOrEmpty(kw))
+            {
+                jobs = jobs.Where(j => EF.Functions.Collate(j.Title, "Vietnamese_CI_AI").Contains(kw));
+            }
+
+            // Giữ số trang trong khoảng hợp lệ (vd: vừa xoá hết tin ở trang cuối thì lùi về trang trước)
+            var totalCount = await jobs.CountAsync();
+            var pageCount = Math.Max((int)Math.Ceiling(totalCount / (double)PageSize), 1);
+            page = Math.Clamp(page, 1, pageCount);
+
             var pagedJobs = jobs
                 .OrderByDescending(j => j.CreatedAt)
-                .ToPagedList(Math.Max(page, 1), PageSize);
+                .ToPagedList(page, PageSize);
 
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if (IsAjax)
             {
                 return PartialView("_JobTable", pagedJobs);
             }
+
+            ViewBag.Keyword = kw;
 
             ViewBag.Categories = new SelectList(
                 await _db.Categories.AsNoTracking().OrderBy(c => c.Name).ToListAsync(), "Id", "Name", categoryId);
@@ -282,15 +319,13 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
             var dangDong = !job.IsActive;
             if (dangDong && job.Deadline.HasValue && job.Deadline.Value.Date < DateTime.Today)
             {
-                TempData["Error"] = "Tin đã quá hạn nộp hồ sơ. Hãy sửa hạn nộp trước khi mở lại.";
-                return RedirectToAction(nameof(Edit), new { id });
+                return Done(false, "Tin đã quá hạn nộp hồ sơ. Hãy sửa hạn nộp trước khi mở lại.", nameof(Edit), new { id });
             }
 
             job.IsActive = !job.IsActive;
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = job.IsActive ? "Đã mở lại tin tuyển dụng." : "Đã đóng tin tuyển dụng.";
-            return RedirectToAction(nameof(Index));
+            return Done(true, job.IsActive ? "Đã mở lại tin tuyển dụng." : "Đã đóng tin tuyển dụng.");
         }
 
         // POST: /Employer/Jobs/Delete/{id}
@@ -311,8 +346,7 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
             var coDon = await _db.Applications.AnyAsync(a => a.JobPostingId == id);
             if (coDon)
             {
-                TempData["Error"] = "Tin này đã có đơn ứng tuyển nên không thể xoá. Hãy dùng chức năng Đóng tin.";
-                return RedirectToAction(nameof(Index));
+                return Done(false, "Tin này đã có đơn ứng tuyển nên không thể xoá. Hãy dùng chức năng Đóng tin.");
             }
 
             _db.JobPostings.Remove(job);
@@ -323,12 +357,10 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
             }
             catch (DbUpdateException)
             {
-                TempData["Error"] = "Không thể xoá tin này vì đang có dữ liệu liên quan.";
-                return RedirectToAction(nameof(Index));
+                return Done(false, "Không thể xoá tin này vì đang có dữ liệu liên quan.");
             }
 
-            TempData["Success"] = "Đã xoá tin tuyển dụng.";
-            return RedirectToAction(nameof(Index));
+            return Done(true, "Đã xoá tin tuyển dụng.");
         }
     }
 }
