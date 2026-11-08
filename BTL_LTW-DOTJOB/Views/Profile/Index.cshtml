@@ -197,9 +197,13 @@
         var cropper;
         const avatarInput = document.getElementById('AvatarFile');
 
-        // Chọn ảnh => mở hộp thoại căn chỉnh trước khi đưa vào form
-        avatarInput.addEventListener('change', () => {
-            const file = avatarInput.files[0];
+        // Hàm dùng chung cho mọi ô chọn ảnh (Avatar, Logo,...)
+        function initImageCropper(inputId, previewId, placeholderId, title, fileName) {
+            const fileInput = document.getElementById(inputId);
+            if (!fileInput) return; // Nếu trang không có ô input này (ví dụ Candidate không có Logo) thì bỏ qua
+
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
             if (!file) return;
 
             if (!file.type.startsWith('image/')) {
