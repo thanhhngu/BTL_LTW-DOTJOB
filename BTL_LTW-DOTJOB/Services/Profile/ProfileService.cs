@@ -1,6 +1,7 @@
 ﻿using BTL_LTW_DOTJOB.Data;
 using BTL_LTW_DOTJOB.Models;
 using BTL_LTW_DOTJOB.ViewModels.Profile;
+using Ganss.Xss;
 using Microsoft.EntityFrameworkCore;
 
 namespace BTL_LTW_DOTJOB.Services.Profile
@@ -12,6 +13,9 @@ namespace BTL_LTW_DOTJOB.Services.Profile
 
         private readonly AppDbContext _db;
         private readonly IWebHostEnvironment _env;
+
+        // Làm sạch HTML từ editor (xóa <script>, onerror=...) trước khi lưu phần giới thiệu công ty
+        private readonly HtmlSanitizer _sanitizer = new();
 
         public ProfileService(AppDbContext db, IWebHostEnvironment env)
         {
@@ -78,7 +82,8 @@ namespace BTL_LTW_DOTJOB.Services.Profile
             var avatarError = ValidateImage(model.AvatarFile);
             if (avatarError != null) return (false, $"Ảnh đại diện: {avatarError}");
 
-            var logoError = isEmployer ? ValidateImage(model.LogoFile) : null;
+            // Logo công ty chỉ nhận JPG/PNG, ảnh đại diện nhận thêm WEBP
+            var logoError = isEmployer ? ValidateImage(model.LogoFile, allowWebp: false) : null;
             if (logoError != null) return (false, $"Logo công ty: {logoError}");
 
             // 2. Thông tin cá nhân (Email và vai trò không cho sửa ở đây)
@@ -107,7 +112,7 @@ namespace BTL_LTW_DOTJOB.Services.Profile
                 company.WorkLocation = model.WorkLocation!.Trim();
                 company.CompanyAddress = model.CompanyAddress!.Trim();
                 company.Website = string.IsNullOrWhiteSpace(model.Website) ? null : model.Website.Trim();
-                company.Description = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim();
+                company.Description = string.IsNullOrWhiteSpace(model.Description) ? null : _sanitizer.Sanitize(model.Description.Trim());
 
                 if (model.LogoFile != null && model.LogoFile.Length > 0)
                 {
@@ -166,18 +171,39 @@ namespace BTL_LTW_DOTJOB.Services.Profile
         // ===== Xử lý ảnh =====
 
         // Trả về thông báo lỗi, null nếu hợp lệ hoặc không có file
-        private static string? ValidateImage(IFormFile? file)
+        private static string? ValidateImage(IFormFile? file, bool allowWebp = true)
         {
             if (file == null || file.Length == 0) return null;
 
             if (file.Length > MaxImageSize)
                 return "không được vượt quá 2MB.";
 
+            var allowedExt = allowWebp ? AllowedImageExt : AllowedImageExt.Where(e => e != ".webp").ToArray();
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (!AllowedImageExt.Contains(ext))
-                return "chỉ chấp nhận JPG, PNG, WEBP.";
+            if (!allowedExt.Contains(ext))
+                return allowWebp ? "chỉ chấp nhận JPG, PNG, WEBP." : "chỉ chấp nhận JPG, PNG.";
+
+            // Kiểm tra thêm nội dung thật của file: đổi đuôi .exe thành .png vẫn bị chặn
+            if (!HasImageSignature(file, allowWebp))
+                return "nội dung file không phải ảnh hợp lệ.";
 
             return null;
+        }
+
+        // Đọc vài byte đầu của file để nhận biết JPG / PNG / WEBP thật
+        private static bool HasImageSignature(IFormFile file, bool allowWebp)
+        {
+            var header = new byte[12];
+            using var stream = file.OpenReadStream();
+            var read = stream.Read(header, 0, header.Length);
+
+            var isJpg = read >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
+            var isPng = read >= 4 && header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47;
+            var isWebp = allowWebp && read >= 12
+                && header[0] == 'R' && header[1] == 'I' && header[2] == 'F' && header[3] == 'F'
+                && header[8] == 'W' && header[9] == 'E' && header[10] == 'B' && header[11] == 'P';
+
+            return isJpg || isPng || isWebp;
         }
 
         // Lưu vào wwwroot/uploads/{folder}, trả về đường dẫn web (vd: /uploads/avatars/xxx.png)
