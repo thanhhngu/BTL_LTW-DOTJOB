@@ -1,0 +1,14 @@
+﻿@model BTL_LTW_DOTJOB.ViewModels.Admin.CategoryFormViewModel
+
+@* Các ô nhập dùng chung cho Thêm và Sửa danh mục *@
+<div class="mb-3">
+    <label asp-for="Name" class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+    <input asp-for="Name" class="form-control" placeholder="VD: Công nghệ thông tin" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Description" class="form-label">Mô tả</label>
+    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
+</div>

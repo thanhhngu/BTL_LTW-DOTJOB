@@ -1,0 +1,74 @@
+﻿@model BTL_LTW_DOTJOB.ViewModels.Admin.DashboardViewModel
+@{
+    ViewData["Title"] = "Tổng quan";
+}
+
+@* Mỗi ô: icon màu bên trái, nhãn + số liệu bên phải. Mã màu (green, blue...) định nghĩa trong _AdminLayout *@
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon green"><i class="bi bi-people-fill"></i></div>
+                <div>
+                    <div class="text-muted">Tổng người dùng</div>
+                    <div class="fs-2 fw-bold">@Model.TotalUsers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon blue"><i class="bi bi-person-badge-fill"></i></div>
+                <div>
+                    <div class="text-muted">Ứng viên</div>
+                    <div class="fs-2 fw-bold">@Model.TotalCandidates</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon orange"><i class="bi bi-building-fill"></i></div>
+                <div>
+                    <div class="text-muted">Nhà tuyển dụng</div>
+                    <div class="fs-2 fw-bold">@Model.TotalEmployers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon purple"><i class="bi bi-briefcase-fill"></i></div>
+                <div>
+                    <div class="text-muted">Tin tuyển dụng</div>
+                    <div class="fs-2 fw-bold">@Model.TotalJobs</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon teal"><i class="bi bi-file-earmark-text-fill"></i></div>
+                <div>
+                    <div class="text-muted">Đơn ứng tuyển</div>
+                    <div class="fs-2 fw-bold">@Model.TotalApplications</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon yellow"><i class="bi bi-tags-fill"></i></div>
+                <div>
+                    <div class="text-muted">Danh mục ngành nghề</div>
+                    <div class="fs-2 fw-bold">@Model.TotalCategories</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

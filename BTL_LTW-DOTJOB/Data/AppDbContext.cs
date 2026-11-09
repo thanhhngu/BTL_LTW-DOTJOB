@@ -52,6 +52,21 @@ namespace BTL_LTW_DOTJOB.Data
                 .HasIndex(a => new { a.JobPostingId, a.UserId })
                 .IsUnique();
 
+            // Không cho xóa Danh mục nếu vẫn còn tin tuyển dụng thuộc danh mục đó
+            // (mặc định cũ là Cascade: xóa danh mục sẽ xóa luôn toàn bộ tin + đơn ứng tuyển)
+            modelBuilder.Entity<JobPosting>()
+                .HasOne(j => j.Category)
+                .WithMany(c => c.JobPostings)
+                .HasForeignKey(j => j.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Tên danh mục không được trùng nhau (chặn ở mức Database)
+            modelBuilder.Entity<Category>()
+                .HasIndex(c => c.Name)
+                .IsUnique();
+
+
+
             // 4. Tin đã lưu: chặn Multiple Cascade Paths (User -> Company -> JobPosting -> SavedJob và User -> SavedJob)
             modelBuilder.Entity<SavedJob>()
                 .HasOne(s => s.User)

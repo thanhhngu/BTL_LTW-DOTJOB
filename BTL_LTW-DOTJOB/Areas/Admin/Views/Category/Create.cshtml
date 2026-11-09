@@ -1,0 +1,14 @@
+﻿@model BTL_LTW_DOTJOB.ViewModels.Admin.CategoryFormViewModel
+@{
+    ViewData["Title"] = "Thêm danh mục";
+}
+
+<div class="card shadow-sm border-0" style="max-width: 640px;">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <partial name="_CategoryForm" model="Model" />
+            <button type="submit" class="btn btn-success">Lưu</button>
+            <a asp-action="Index" class="btn btn-light">Hủy</a>
+        </form>
+    </div>
+</div>

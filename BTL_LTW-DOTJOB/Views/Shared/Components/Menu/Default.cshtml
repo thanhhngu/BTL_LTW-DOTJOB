@@ -57,12 +57,25 @@
                                 <span class="fw-medium d-none d-md-inline">@displayName</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3" aria-labelledby="userMenu">
+
+                                @*  mục vào trang quản trị, CHỈ hiện cho Admin  *@
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li>
+                                        <a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                            <i class="fa-solid fa-gauge-high text-success me-2"></i>Trang quản trị
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+
                                 <li>
                                     <a class="dropdown-item" asp-area="" asp-controller="Profile" asp-action="Index">
                                         <i class="fa-regular fa-user text-success me-2"></i>Hồ sơ cá nhân
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
+
                                 @if (User.IsInRole("Candidate"))
                                 {
                                     <li>
