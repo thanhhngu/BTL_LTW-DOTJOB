@@ -25,8 +25,6 @@
 
   <ItemGroup>
     <Folder Include="AppData\cvs\" />
-    <Folder Include="Areas\Admin\Controllers\" />
-    <Folder Include="Areas\Admin\Views\" />
     <Folder Include="Areas\Employer\Controllers\" />
     <Folder Include="Areas\Employer\Views\" />
   </ItemGroup>

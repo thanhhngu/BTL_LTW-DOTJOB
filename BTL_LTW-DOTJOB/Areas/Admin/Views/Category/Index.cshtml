@@ -1,0 +1,77 @@
+﻿@model List<BTL_LTW_DOTJOB.ViewModels.Admin.CategoryListItemViewModel>
+@{
+    ViewData["Title"] = "Danh mục ngành nghề";
+}
+
+@* Thông báo thành công / thất bại sau khi thêm, sửa, xóa *@
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <form method="get" class="d-flex gap-2">
+        <input type="text" name="keyword" value="@ViewData["Keyword"]" class="form-control" placeholder="Tìm theo tên..." />
+        <button type="submit" class="btn btn-outline-secondary">Tìm</button>
+    </form>
+    <a asp-action="Create" class="btn btn-success"><i class="bi bi-plus-lg me-1"></i>Thêm danh mục</a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:60px">#</th>
+                    <th>Tên danh mục</th>
+                    <th>Mô tả</th>
+                    <th class="text-center">Số tin</th>
+                    <th class="text-end" style="width:180px">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-4">Không có danh mục nào.</td></tr>
+                }
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var c = Model[i];
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td class="fw-semibold">@c.Name</td>
+                        <td class="text-muted">@c.Description</td>
+                        <td class="text-center">@c.JobCount</td>
+                        <td class="text-end">
+                            <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-primary">Sửa</a>
+                            <form asp-action="Delete" method="post" class="d-inline"
+                                  onsubmit="return confirm('Xóa danh mục &quot;@c.Name&quot;?');">
+                                <input type="hidden" name="id" value="@c.Id" />
+                                @* Còn tin tuyển dụng thì khóa nút xóa *@
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        disabled="@(c.JobCount > 0)"
+                                        title="@(c.JobCount > 0 ? "Còn tin tuyển dụng nên không thể xóa" : "Xóa")">
+                                    Xóa
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+}

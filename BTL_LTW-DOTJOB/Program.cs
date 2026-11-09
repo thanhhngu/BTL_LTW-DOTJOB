@@ -16,9 +16,25 @@ builder.Services.AddControllersWithViews();
 // Cache nhỏ dùng để kiểm tra trạng thái khóa tài khoản (IsActive) mà không truy vấn DB ở mọi request
 builder.Services.AddMemoryCache();
 
+// Session cần một nơi lưu dữ liệu; dùng bộ nhớ RAM của server (đủ cho đồ án)
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Không thao tác 30 phút thì Session hết hạn
+    options.Cookie.Name = "DotJobSession";
+    options.Cookie.HttpOnly = true;   // JavaScript không đọc được cookie này (chống XSS)
+    options.Cookie.IsEssential = true; // Luôn gửi cookie, không phụ thuộc cookie consent
+});
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
+
+//Service thống kê cho Dashboard của Admin
+builder.Services.AddScoped<BTL_LTW_DOTJOB.Services.Admin.IDashboardService, BTL_LTW_DOTJOB.Services.Admin.DashboardService>();
+//Service quản lý danh mục ngành nghề của Admin
+builder.Services.AddScoped<BTL_LTW_DOTJOB.Services.Admin.ICategoryService, BTL_LTW_DOTJOB.Services.Admin.CategoryService>();
+// Service quản lý người dùng (khóa / mở khóa) của Admin
+builder.Services.AddScoped<BTL_LTW_DOTJOB.Services.Admin.IUserManagementService, BTL_LTW_DOTJOB.Services.Admin.UserManagementService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -37,6 +53,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromDays(1);
 
+        options.Cookie.HttpOnly = true;                  // JavaScript không đọc được cookie đăng nhập
+        options.Cookie.SameSite = SameSiteMode.Lax;      // Hạn chế tấn công CSRF từ site khác
+        options.SlidingExpiration = true;                // Có hoạt động thì tự gia hạn thời gian đăng nhập
+        
         // AJAX chưa đăng nhập => trả 401 (JS tự xử lý), thay vì chuyển hướng 302 sang trang login
         options.Events.OnRedirectToLogin = context =>
         {
@@ -104,6 +124,9 @@ builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
+
+    //  policy chỉ cho Admin vào 
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 });
 
 var app = builder.Build();
@@ -126,11 +149,17 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets().AllowAnonymous();
+
+// route cho Area (Admin, Employer)
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.MapControllerRoute(
     name: "default",

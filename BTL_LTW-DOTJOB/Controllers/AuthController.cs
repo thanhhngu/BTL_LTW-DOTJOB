@@ -82,12 +82,21 @@ namespace BTL_LTW_DOTJOB.Controllers
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
+                new ClaimsPrincipal(claimsIdentity),    
                 new AuthenticationProperties
                 {
                     IsPersistent = true,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                    ExpiresUtc = model.RememberMe
+                        ? DateTimeOffset.UtcNow.AddDays(7)
+                        : DateTimeOffset.UtcNow.AddDays(1)
                 });
+
+            HttpContext.Session.SetUser(new SessionUser
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                Role = roleName
+            });
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
@@ -110,6 +119,8 @@ namespace BTL_LTW_DOTJOB.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            //xóa luôn Session["User"] để không còn dữ liệu của người vừa thoát
+            HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 
