@@ -30,9 +30,6 @@
   <data name="Menu_Profile" xml:space="preserve">
     <value>My profile</value>
   </data>
-  <data name="Menu_ChangePassword" xml:space="preserve">
-    <value>Change password</value>
-  </data>
   <data name="Menu_Applied" xml:space="preserve">
     <value>Applied jobs</value>
   </data>
