@@ -68,9 +68,9 @@ namespace BTL_LTW_DOTJOB.Services.Application
                 JobPostingId = model.Id,
                 UserId = userId,
                 CvFilePath = $"cvs/{uniqueFileName}", // Đường dẫn tương đối trong App_Data, tải qua CvFileController
-                CoverLetter = model.CoverLetter ?? "...",
+                CoverLetter = string.IsNullOrWhiteSpace(model.CoverLetter) ? null : model.CoverLetter.Trim(),
                 AppliedDate = DateTime.UtcNow,
-                Status = "Pending"
+                Status = ApplicationStatus.Pending
             };
 
             try

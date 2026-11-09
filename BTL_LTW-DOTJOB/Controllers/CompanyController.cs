@@ -1,4 +1,5 @@
 using BTL_LTW_DOTJOB.Data;
+using BTL_LTW_DOTJOB.Helpers;
 using BTL_LTW_DOTJOB.ViewModels.Companies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,12 +32,11 @@ namespace BTL_LTW_DOTJOB.Controllers
                 return NotFound();
             }
 
-            var today = DateTime.Today; // cùng cách tính "đang hiển thị" với trang HR
-
             var jobs = await _db.JobPostings
                 .AsNoTracking()
                 .Include(j => j.Company)
-                .Where(j => j.CompanyId == id && j.IsActive && (j.Deadline == null || j.Deadline >= today))
+                .Where(j => j.CompanyId == id)
+                .WhereOpen() // chỉ tin đang bật và còn hạn nộp, dùng chung với trang chủ và tìm kiếm
                 .OrderByDescending(j => j.CreatedAt)
                 .ThenBy(j => j.Id)
                 .Take(20)
