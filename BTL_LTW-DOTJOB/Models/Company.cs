@@ -28,7 +28,6 @@ namespace BTL_LTW_DOTJOB.Models
         [StringLength(255)]
         public string? Website { get; set; }
 
-        //
         [Required]
         public string UserId { get; set; } = string.Empty;
 

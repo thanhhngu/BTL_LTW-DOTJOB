@@ -1,13 +1,10 @@
 ﻿@using BTL_LTW_DOTJOB.Services.Auth
 @{
-    // Lấy thông tin người đăng nhập từ Session["User"]; nếu Session hết hạn thì dự phòng bằng Claims
     var me = Context.Session.GetUser();
     var email = me?.Email ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin";
 
-    // Chữ cái đầu của email để làm avatar tròn
     var initial = email.Substring(0, 1).ToUpper();
 
-    // Dùng để tô sáng mục menu đang mở
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
 }
 <!DOCTYPE html>
@@ -29,7 +26,6 @@
             background: #f4f6f9;
         }
 
-        /* ===== Thanh ngang phía trên ===== */
         .topbar {
             height: var(--topbar-h);
             background: var(--brand);
@@ -69,7 +65,6 @@
                 font-weight: 700;
             }
 
-        /* ===== Thanh bên trái (nằm dưới thanh ngang) ===== */
         .layout {
             display: flex;
             min-height: calc(100vh - var(--topbar-h));
@@ -110,7 +105,6 @@
             padding: 24px 28px;
         }
 
-        /* ===== Ô thống kê có icon (dùng ở trang Tổng quan) ===== */
         .stat-card {
             border: 0;
             border-radius: 14px;
@@ -160,7 +154,6 @@
     </style>
 </head>
 <body>
-    <!-- Thanh ngang trên cùng -->
     <header class="topbar d-flex justify-content-between align-items-center px-4">
         <div class="d-flex align-items-center gap-3">
             <a class="brand" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">DOTJOB</a>
@@ -183,7 +176,6 @@
     </header>
 
     <div class="layout">
-        <!-- Thanh bên trái -->
         <nav class="sidebar">
             <ul class="nav flex-column">
                 <li>
@@ -204,7 +196,6 @@
                         <i class="bi bi-people"></i>Người dùng
                     </a>
                 </li>
-                <!-- mục Báo cáo -->
                 <li>
                     <a class="nav-link @(controller == "Report" ? "active" : "")"
                        asp-area="Admin" asp-controller="Report" asp-action="Index">
@@ -214,7 +205,6 @@
             </ul>
         </nav>
 
-        <!-- Nội dung từng trang -->
         <main class="content">
             <h4 class="mb-4 fw-bold">@ViewData["Title"]</h4>
             @RenderBody()

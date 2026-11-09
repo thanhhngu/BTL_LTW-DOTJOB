@@ -11,8 +11,6 @@ namespace BTL_LTW_DOTJOB.Services.SavedJobs
 
         private readonly AppDbContext _db;
 
-        // Service đăng ký Scoped nên biến này chỉ sống trong 1 request:
-        // nhiều thẻ việc làm trên cùng 1 trang chỉ tốn 1 truy vấn
         private HashSet<string>? _savedIdsCache;
 
         public SavedJobService(AppDbContext db)
@@ -28,7 +26,6 @@ namespace BTL_LTW_DOTJOB.Services.SavedJobs
             bool saved;
             if (existing != null)
             {
-                // Đã lưu rồi => bỏ lưu
                 _db.SavedJobs.Remove(existing);
                 await _db.SaveChangesAsync();
                 saved = false;
@@ -46,7 +43,6 @@ namespace BTL_LTW_DOTJOB.Services.SavedJobs
                 }
                 catch (DbUpdateException)
                 {
-                    // Bấm 2 lần cùng lúc bị trùng (chặn bởi unique index) => coi như đã lưu
                 }
                 saved = true;
             }
@@ -58,7 +54,6 @@ namespace BTL_LTW_DOTJOB.Services.SavedJobs
 
         public async Task<MySavedJobsViewModel> GetMySavedJobsAsync(string userId, int page)
         {
-            // Luôn lọc theo userId của người đăng nhập, chỉ hiện tin còn hiển thị
             var query = _db.SavedJobs
                 .AsNoTracking()
                 .Where(s => s.UserId == userId && s.JobPosting!.IsActive);

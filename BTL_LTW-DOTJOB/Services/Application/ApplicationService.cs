@@ -31,7 +31,6 @@ namespace BTL_LTW_DOTJOB.Services.Application
             if (!AllowedExt.Contains(ext))
                 return (false, "Chỉ chấp nhận file PDF, DOC, DOCX.");
 
-            // Đuôi file có thể bị đổi tên (vd: virus.exe -> cv.pdf) nên kiểm tra thêm nội dung thật của file
             if (!await UploadSignature.MatchesExtensionAsync(file, ext))
                 return (false, "Nội dung file không đúng định dạng PDF, DOC hoặc DOCX.");
 
@@ -39,15 +38,12 @@ namespace BTL_LTW_DOTJOB.Services.Application
             if (job == null || !job.IsActive)
                 return (false, "Tin tuyển dụng không tồn tại hoặc đã bị ẩn.");
 
-            // Hạn nộp do HR chọn theo giờ máy (23:59:59), nên so với giờ máy chứ không phải UTC
             if (job.Deadline < DateTime.Now)
                 return (false, "Tin tuyển dụng đã hết hạn ứng tuyển.");
 
-            // 2. Kiểm tra xem user đã ứng tuyển job này trước đó chưa
             if (await HasAppliedAsync(model.Id, userId))
                 return (false, "Bạn đã nộp hồ sơ cho vị trí này rồi.");
 
-            // 3. Lưu file CV vào AppData/cvs (nằm ngoài wwwroot nên không thể truy cập trực tiếp bằng URL)
             var uploadsFolder = Path.Combine(_env.ContentRootPath, "AppData", "cvs");
             if (!Directory.Exists(uploadsFolder))
             {
@@ -62,12 +58,11 @@ namespace BTL_LTW_DOTJOB.Services.Application
                 await file.CopyToAsync(stream);
             }
 
-            // 4. Lưu thông tin vào Database
             var application = new Models.Application
             {
                 JobPostingId = model.Id,
                 UserId = userId,
-                CvFilePath = $"cvs/{uniqueFileName}", // Đường dẫn tương đối trong App_Data, tải qua CvFileController
+                CvFilePath = $"cvs/{uniqueFileName}",
                 CoverLetter = string.IsNullOrWhiteSpace(model.CoverLetter) ? null : model.CoverLetter.Trim(),
                 AppliedDate = DateTime.UtcNow,
                 Status = ApplicationStatus.Pending
@@ -80,7 +75,6 @@ namespace BTL_LTW_DOTJOB.Services.Application
             }
             catch (DbUpdateException ex)
             {
-                // Lưu DB lỗi (vd: bấm nộp 2 lần cùng lúc bị trùng đơn) => xóa file vừa lưu để không bị file rác
                 Console.WriteLine(ex.Message);
                 if (File.Exists(filePath))
                 {
@@ -101,7 +95,6 @@ namespace BTL_LTW_DOTJOB.Services.Application
 
         public async Task<MyApplicationsViewModel> GetMyApplicationsAsync(string userId, string? status, int page)
         {
-            // Luôn lọc theo userId của người đăng nhập, không nhận userId từ client (chống xem đơn của người khác)
             var query = _db.Applications
                 .AsNoTracking()
                 .Where(a => a.UserId == userId);
@@ -159,7 +152,6 @@ namespace BTL_LTW_DOTJOB.Services.Application
                 return null;
             }
 
-            // Phân quyền xem CV: Admin xem tất cả, Candidate chỉ xem CV của mình, Employer chỉ xem CV nộp vào tin của công ty mình
             var allowed = role switch
             {
                 "Admin" => true,
@@ -182,7 +174,6 @@ namespace BTL_LTW_DOTJOB.Services.Application
             return (physicalPath, $"CV-{applicationId[..8]}{Path.GetExtension(physicalPath)}");
         }
 
-        // Đổi đường dẫn lưu trong DB thành đường dẫn vật lý
         private string? ResolveCvPath(string storedPath)
         {
             var fullBase = Path.GetFullPath(Path.Combine(_env.ContentRootPath, "AppData"));

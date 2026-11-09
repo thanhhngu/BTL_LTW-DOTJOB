@@ -1,7 +1,5 @@
 namespace BTL_LTW_DOTJOB.Models
 {
-    // Các trạng thái của đơn ứng tuyển. Giá trị khớp chuỗi lưu trong cột Application.Status
-    // và trang "Việc làm đã ứng tuyển" của Candidate (không thêm/sửa cột nào nên không cần migration)
     public static class ApplicationStatus
     {
         public const string Pending = "Pending";

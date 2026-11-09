@@ -11,11 +11,5 @@ namespace BTL_LTW_DOTJOB.Controllers
             return View();
         }
 
-        //[HttpPost]
-        //[Route("cv/save")]
-        //public IActionResult SaveCV([FromBody] object cvData)
-        //{
-        //    return Json(new { success = true, message = "Lưu CV thành cônggggggggggg!" });
-        //}
     }
 }

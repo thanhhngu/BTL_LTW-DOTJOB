@@ -1,7 +1,5 @@
-﻿/* ========== IMPORTS ========== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* ========== RESET & BASE ========== */
 *,
 *::before,
 *::after {
@@ -35,7 +33,6 @@ html {
     color: #fff;
 }
 
-/* ========== LAYOUT ========== */
 .main {
     display: flex;
     justify-content: center;
@@ -70,7 +67,6 @@ html {
     }
 }
 
-/* Floating orbs overlay */
 .main::before {
     content: '';
     position: absolute;
@@ -121,7 +117,6 @@ html {
     z-index: 10;
 }
 
-/* ========== FORM CONTAINER (Glass) ========== */
 .form {
     position: relative;
     z-index: 1;
@@ -138,7 +133,6 @@ html {
     animation: formAppear 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-    /* Gradient border glow */
     .form::before {
         content: '';
         position: absolute;
@@ -180,7 +174,6 @@ html {
     }
 }
 
-/* ========== TEXT ========== */
 .form .heading {
     font-size: 2.6rem;
     font-weight: 800;
@@ -213,12 +206,10 @@ html {
     letter-spacing: 0.3px;
 }
 
-/* ========== SPACER ========== */
 .spacer {
     height: 8px;
 }
 
-/* ========== FORM INPUTS ========== */
 .form-group {
     margin-bottom: 18px;
     text-align: left;
@@ -259,7 +250,6 @@ html {
         font-size: 1.3rem;
     }
 
-/* ========== BUTTON ========== */
 .form-submit {
     width: 100%;
     padding: 14px;
@@ -280,7 +270,6 @@ html {
     box-shadow: 0 4px 20px var(--primary-glow);
 }
 
-    /* Light sweep effect */
     .form-submit::before {
         content: '';
         position: absolute;
@@ -306,7 +295,6 @@ html {
         transform: translateY(-1px);
     }
 
-/* ========== LINKS ========== */
 form a,
 #link-tab {
     display: inline-block;
@@ -342,7 +330,6 @@ form a,
             width: 100%;
         }
 
-/* ========== ERROR MESSAGE ========== */
 .form-message {
     display: block;
     font-size: 1.2rem;
@@ -352,7 +339,6 @@ form a,
     transition: var(--transition);
 }
 
-/* ========== FORM GROUP INVALID STATE ========== */
 .form-group.invalid .form-control {
     border-color: var(--danger);
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
@@ -362,7 +348,6 @@ form a,
     color: var(--danger);
 }
 
-/* ========== SCROLLBAR ========== */
 ::-webkit-scrollbar {
     width: 6px;
 }

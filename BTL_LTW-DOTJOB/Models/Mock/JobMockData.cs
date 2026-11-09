@@ -3,11 +3,11 @@ namespace BTL_LTW_DOTJOB.Models.Mock
     public class JobMockData
     {
         public string Id { get; set; }
-        public string LogoText { get; set; }          // Ví dụ: "PMEC"
-        public string Title { get; set; }             // Ví dụ: "Cán Bộ Kỹ Thuật / Kỹ Sư Hiện Trường - Khu Vực Hồ Chí Minh..."
-        public string CompanyName { get; set; }       // Ví dụ: "Công Ty Cổ Phần Kỹ Thuật Xây Dựng Phú Mỹ"
-        public string Salary { get; set; }            // Ví dụ: "Thoả thuận"
-        public string Location { get; set; }          // Ví dụ: "Hồ Chí Minh (mới)"
+        public string LogoText { get; set; }
+        public string Title { get; set; }
+        public string CompanyName { get; set; }
+        public string Salary { get; set; }
+        public string Location { get; set; }
 
         public List<JobMockData> GetJobs()
         {

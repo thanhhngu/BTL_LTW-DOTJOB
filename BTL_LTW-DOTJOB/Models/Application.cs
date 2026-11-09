@@ -10,13 +10,11 @@ namespace BTL_LTW_DOTJOB.Models
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
-        // 
         [Required]
         public string JobPostingId { get; set; } = string.Empty;
         [ForeignKey("JobPostingId")]
         public virtual JobPosting? JobPosting { get; set; }
 
-        // 
         [Required]
         public string UserId { get; set; } = string.Empty;
         [ForeignKey("UserId")]
@@ -31,6 +29,6 @@ namespace BTL_LTW_DOTJOB.Models
         public DateTime AppliedDate { get; set; } = DateTime.UtcNow;
 
         [StringLength(50)]
-        public string Status { get; set; } = "Pending"; // Trạng thái: Pending, Accepted, Rejected...
+        public string Status { get; set; } = "Pending";
     }
 }

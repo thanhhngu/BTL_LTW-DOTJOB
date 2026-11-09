@@ -3,7 +3,6 @@
 @using BTL_LTW_DOTJOB.Services.SavedJobs
 @inject ISavedJobService SavedJobService
 @{
-    // Tin này đã được Candidate lưu chưa (để tô màu trái tim)
     var savedIds = await SavedJobService.GetSavedJobIdsAsync(User.FindFirstValue(ClaimTypes.NameIdentifier));
     var isSaved = savedIds.Contains(Model.Id);
 
@@ -14,7 +13,6 @@
     bool hasLogo = !string.IsNullOrEmpty(logoPath);
 }
 
-<!-- Thẻ việc làm dùng cho trang kết quả tìm kiếm -->
 <div class="col">
     <a asp-controller="Job" asp-action="Detail" asp-route-id="@Model.Id" target="_blank" class="text-decoration-none">
         <div class="card h-100 job-card shadow-sm rounded-3">

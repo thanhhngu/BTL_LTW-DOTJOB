@@ -14,34 +14,29 @@
 @section Scripts {
     <script>
         let autoSlideTimer;
-        let isHovering = false; // chuột đang nằm trên một thẻ việc làm
+        let isHovering = false;
 
         const jobsContainer = document.getElementById('featured-jobs-container');
 
         function loadJobsAjax(page) {
-            // Hiển thị hiệu ứng mờ đi
             jobsContainer.style.opacity = '0.5';
 
             fetch(`/Home/LoadFeaturedJobs?page=${page}`)
                 .then(response => response.text())
                 .then(html => {
-                    // Đổ HTML mới vào khung chứa
                     jobsContainer.innerHTML = html;
                     jobsContainer.style.opacity = '1';
 
-                    // Thẻ cũ đã bị thay nên không còn sự kiện mouseout, đặt lại cờ cho chắc
                     isHovering = false;
 
-                    // Reset lại bộ đếm thời gian để không bị nhảy trang kép
                     startAutoSlide();
                 })
                 .catch(err => console.error('Lỗi khi tải việc làm:', err));
         }
 
-        // Tự động chuyển trang sau 10 giây, nhưng KHÔNG chạy khi chuột đang ở trên một thẻ việc làm
         function startAutoSlide() {
-            clearInterval(autoSlideTimer); // Xóa bộ đếm cũ
-            if (isHovering) return;        // Đang rê chuột trên thẻ: không đặt bộ đếm mới
+            clearInterval(autoSlideTimer);
+            if (isHovering) return;
 
             autoSlideTimer = setInterval(() => {
                 const next = document.getElementById('ajax-next-page');
@@ -49,9 +44,6 @@
             }, 3000);
         }
 
-        // Thẻ việc làm bị thay mới sau mỗi lần chuyển trang nên gắn sự kiện ở khung cha (event delegation)
-
-        // Chuột vào một thẻ: dừng tự chuyển trang
         jobsContainer.addEventListener('mouseover', e => {
             if (!e.target.closest('.job-card') || isHovering) return;
 
@@ -59,19 +51,16 @@
             clearInterval(autoSlideTimer);
         });
 
-        // Chuột rời khỏi thẻ: chạy lại
         jobsContainer.addEventListener('mouseout', e => {
             const leftCard = e.target.closest('.job-card');
             if (!leftCard) return;
 
-            // Chuột chỉ di chuyển giữa các phần tử bên TRONG cùng một thẻ thì vẫn coi là đang ở trên thẻ
             if (e.relatedTarget && leftCard.contains(e.relatedTarget)) return;
 
             isHovering = false;
             startAutoSlide();
         });
 
-        // Bắt đầu chạy khi trang vừa load xong
         startAutoSlide();
     </script>
 }

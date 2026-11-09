@@ -2,17 +2,13 @@
 
 namespace BTL_LTW_DOTJOB.ViewModels.Profile
 {
-    // Dữ liệu trang "Hồ sơ cá nhân" dùng chung cho Admin, Employer, Candidate.
-    // Phần công ty chỉ có ý nghĩa với Employer
     public class ProfileViewModel : IValidatableObject
     {
-        // ===== Chỉ hiển thị, luôn lấy từ DB / Claim, không nhận từ form =====
         public string Email { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public string? AvatarPath { get; set; }
         public string? LogoPath { get; set; }
 
-        // ===== Thông tin cá nhân (mọi vai trò đều sửa được) =====
         [Required(ErrorMessage = "Vui lòng nhập họ và tên.")]
         [StringLength(100, ErrorMessage = "Họ và tên không được vượt quá 100 ký tự.")]
         public string FullName { get; set; } = string.Empty;
@@ -24,7 +20,6 @@ namespace BTL_LTW_DOTJOB.ViewModels.Profile
 
         public IFormFile? AvatarFile { get; set; }
 
-        // ===== Thông tin công ty (chỉ Employer) =====
         [StringLength(255, ErrorMessage = "Tên công ty không được vượt quá 255 ký tự.")]
         public string? CompanyName { get; set; }
 
@@ -44,7 +39,6 @@ namespace BTL_LTW_DOTJOB.ViewModels.Profile
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Role do server gán từ Claim trước khi kiểm tra, không tin giá trị client gửi lên
             if (Role == "Employer")
             {
                 if (string.IsNullOrWhiteSpace(CompanyName))

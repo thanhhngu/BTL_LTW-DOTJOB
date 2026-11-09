@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = "Việc làm đã ứng tuyển";
 
-    // Các tab lọc theo trạng thái đơn
     var tabs = new[]
     {
         ("", "Tất cả"),
@@ -15,13 +14,11 @@
 <div style="background-color: #f4f5f5;" class="py-4">
     <div class="container">
 
-        <!-- 1. Tiêu đề -->
         <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">
             Việc làm đã ứng tuyển
             <span class="text-muted fs-6 fw-normal ms-2">(@Model.TotalCount)</span>
         </h4>
 
-        <!-- 2. Lọc theo trạng thái -->
         <div class="d-flex flex-wrap gap-2 mb-4">
             @foreach (var (value, label) in tabs)
             {
@@ -33,7 +30,6 @@
             }
         </div>
 
-        <!-- 3. Danh sách đơn ứng tuyển -->
         @if (!Model.Items.Any())
         {
             <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
@@ -78,7 +74,6 @@
                 </div>
             }
 
-            <!-- 4. Phân trang -->
             if (Model.PageCount > 1)
             {
                 <div class="d-flex justify-content-center align-items-center gap-3 mt-4 topcv-pagination">

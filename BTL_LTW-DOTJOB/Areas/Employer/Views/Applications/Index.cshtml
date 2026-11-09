@@ -6,7 +6,6 @@
 
 <h3 class="fw-bold mb-3">Ứng viên</h3>
 
-@* Chứa anti-forgery token để JS gửi kèm khi gọi API đổi trạng thái *@
 <div id="antiforgery">@Html.AntiForgeryToken()</div>
 <div id="api-alert"></div>
 
@@ -29,7 +28,6 @@
     </div>
 </div>
 
-@* Hộp hiển thị thư giới thiệu, nội dung được gán bằng textContent nên không chạy được HTML/script *@
 <div class="modal fade" id="coverLetterModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
@@ -42,7 +40,6 @@
     </div>
 </div>
 
-@* Hộp báo cáo ứng viên (nộp CV linh tinh, spam...). Admin sẽ xem xét và có thể khóa tài khoản *@
 <div class="modal fade" id="reportCandidateModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -72,9 +69,8 @@
 @section Scripts {
     <script>
         const listEl = document.getElementById('application-list');
-        let latestRequest = 0; // bỏ qua kết quả của request cũ khi người dùng đổi bộ lọc liên tục
+        let latestRequest = 0;
 
-        // Ghép bộ lọc hiện tại thành chuỗi query, bỏ qua giá trị rỗng cho URL gọn
         function buildQuery(page) {
             const params = new URLSearchParams();
             const jobId = document.getElementById('jobId').value;
@@ -88,26 +84,23 @@
 
         async function loadApplications(page) {
             const requestId = ++latestRequest;
-            listEl.classList.add('opacity-50'); // báo đang tải
+            listEl.classList.add('opacity-50');
 
             try {
-                // Header X-Requested-With: server trả partial, và trả 401/403 thay vì chuyển hướng khi hết phiên
                 const response = await fetch('/Employer/Applications' + buildQuery(page), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 if (requestId !== latestRequest) return;
 
                 if (response.status === 401 || response.status === 403) {
-                    location.reload(); // hết phiên đăng nhập
+                    location.reload();
                     return;
                 }
                 if (!response.ok) throw new Error('HTTP ' + response.status);
 
                 listEl.innerHTML = await response.text();
 
-                // Server có thể đã đổi số trang (vd: ?page=999 thì về trang cuối)
                 const pager = listEl.querySelector('[data-page-number]');
                 const currentPage = pager ? Number(pager.dataset.pageNumber) : 1;
 
-                // Cập nhật URL để F5 / nút Quay lại / chia sẻ link vẫn giữ bộ lọc và trang
                 history.replaceState(null, '', '/Employer/Applications' + buildQuery(currentPage));
             } catch (error) {
                 if (requestId === latestRequest) {
@@ -118,7 +111,6 @@
             }
         }
 
-        // Hiện/xoá thông báo của API ở đầu trang (type: danger | success)
         function showError(message) { showAlert(message, 'danger'); }
         function showSuccess(message) { showAlert(message, 'success'); }
 
@@ -136,11 +128,9 @@
             box.appendChild(alert);
         }
 
-        // Gọi PUT /api/applications/{id}/status rồi cập nhật badge và nút ngay trên trang (không reload)
         async function updateStatus(id, status) {
             const token = document.querySelector('#antiforgery input[name="__RequestVerificationToken"]').value;
 
-            // Khoá các nút của dòng này trong lúc chờ (chống bấm liên tục), lỗi thì trả về như cũ
             const buttons = [...document.querySelectorAll('#actions-' + id + ' button')];
             const previous = buttons.map(button => button.disabled);
             buttons.forEach(button => button.disabled = true);
@@ -158,14 +148,13 @@
                     body: JSON.stringify({ status })
                 });
             } catch (error) {
-                // Mất mạng hoặc server không phản hồi
                 restore();
                 showError('Không kết nối được máy chủ. Vui lòng thử lại.');
                 return;
             }
 
             if (response.status === 401) {
-                location.reload(); // hết phiên đăng nhập
+                location.reload();
                 return;
             }
 
@@ -182,13 +171,11 @@
 
             const data = await response.json();
 
-            // Đổi màu và chữ của badge
             const badgeClass = { Pending: 'text-bg-secondary', Accepted: 'text-bg-success', Rejected: 'text-bg-danger' };
             const badge = document.getElementById('badge-' + id);
             badge.className = 'badge ' + badgeClass[data.status];
             badge.textContent = data.label;
 
-            // Khoá nút trùng trạng thái hiện tại, ẩn "Đặt lại" khi đang chờ duyệt
             document.querySelectorAll('#actions-' + id + ' button').forEach(button => {
                 button.disabled = button.dataset.status === data.status;
                 if (button.dataset.status === 'Pending') {
@@ -197,14 +184,13 @@
             });
         }
 
-        // ===== Báo cáo ứng viên =====
         const reportForm = document.getElementById('reportCandidateForm');
         const reportContent = document.getElementById('reportCandidateContent');
         const reportCount = document.getElementById('reportCandidateCount');
         const reportError = document.getElementById('reportCandidateError');
         const reportButton = document.getElementById('btnSubmitReportCandidate');
         const reportModalEl = document.getElementById('reportCandidateModal');
-        let reportApplicationId = null; // đơn ứng tuyển đang được báo cáo
+        let reportApplicationId = null;
 
         reportContent.addEventListener('input', () => { reportCount.textContent = reportContent.value.length; });
 
@@ -232,7 +218,7 @@
                     bootstrap.Modal.getOrCreateInstance(reportModalEl).hide();
                     showSuccess(data.message);
                 } else if (response.status === 401 || response.status === 403) {
-                    location.reload(); // hết phiên đăng nhập
+                    location.reload();
                 } else {
                     reportError.textContent = await response.text();
                 }
@@ -243,7 +229,6 @@
             }
         });
 
-        // Bảng được nạp lại bằng AJAX nên gắn sự kiện ở document thay vì từng nút
         document.addEventListener('click', function (e) {
             const reportBtn = e.target.closest('.btn-report-candidate');
             if (!reportBtn) return;
@@ -256,7 +241,6 @@
             bootstrap.Modal.getOrCreateInstance(reportModalEl).show();
         });
 
-        // Bảng được nạp lại bằng AJAX nên gắn sự kiện ở document thay vì từng nút
         document.addEventListener('click', function (e) {
             const button = e.target.closest('.btn-cover-letter');
             if (!button) return;

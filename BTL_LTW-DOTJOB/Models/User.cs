@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-//using static System.Net.Mime.MediaTypeNames;
 
 namespace BTL_LTW_DOTJOB.Models
 {
@@ -39,7 +38,6 @@ namespace BTL_LTW_DOTJOB.Models
         public bool IsActive { get; set; } = true;
 
 
-        //relation
         public virtual Company? Company { get; set; }
         
         [ForeignKey("RoleId")]

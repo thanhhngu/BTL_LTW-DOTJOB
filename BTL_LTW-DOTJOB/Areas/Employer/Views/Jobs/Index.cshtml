@@ -9,7 +9,6 @@
     <a asp-area="Employer" asp-controller="Jobs" asp-action="Create" class="btn btn-success">Đăng tin mới</a>
 </div>
 
-@* Thông báo kết quả của các thao tác Đóng / Mở lại / Xoá (gửi bằng AJAX) *@
 <div id="job-alert"></div>
 
 <div class="card shadow-sm mb-3">
@@ -44,10 +43,9 @@
         const statusSelect = document.getElementById('status');
         const categorySelect = document.getElementById('categoryId');
 
-        let currentPage = @Model.PageNumber; // trang đang xem, để tải lại đúng trang sau khi đóng/xoá tin
-        let latestRequest = 0;               // bỏ qua kết quả của request cũ khi người dùng đổi bộ lọc liên tục
+        let currentPage = @Model.PageNumber;
+        let latestRequest = 0;
 
-        // Ghép bộ lọc hiện tại thành chuỗi query, bỏ qua giá trị rỗng cho URL gọn
         function buildQuery(page) {
             const params = new URLSearchParams();
             const keyword = keywordInput.value.trim();
@@ -60,7 +58,6 @@
         }
 
         function showAlert(type, message) {
-            // Bỏ thông báo cũ còn sót từ lần chuyển trang trước (TempData)
             document.querySelectorAll('main > .alert').forEach(alert => alert.remove());
 
             const alert = document.createElement('div');
@@ -80,10 +77,9 @@
 
         async function loadJobs(page) {
             const requestId = ++latestRequest;
-            listEl.classList.add('opacity-50'); // báo đang tải
+            listEl.classList.add('opacity-50');
 
             try {
-                // Header X-Requested-With: server trả partial, và trả 401/403 thay vì chuyển hướng khi hết phiên
                 const response = await fetch(jobsUrl + buildQuery(page), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
                 if (requestId !== latestRequest) return;
 
@@ -95,11 +91,9 @@
 
                 listEl.innerHTML = await response.text();
 
-                // Server có thể đã đổi số trang (vd: lùi về trang trước khi trang cuối hết tin)
                 const pager = listEl.querySelector('[data-page-number]');
                 currentPage = pager ? Number(pager.dataset.pageNumber) : 1;
 
-                // Cập nhật URL để F5 / nút Quay lại / chia sẻ link vẫn giữ bộ lọc và trang
                 history.replaceState(null, '', jobsUrl + buildQuery(currentPage));
             } catch (error) {
                 if (requestId === latestRequest) {
@@ -110,7 +104,6 @@
             }
         }
 
-        // Đổi bộ lọc thì về trang 1; ô tìm kiếm đợi người dùng ngừng gõ rồi mới tải
         statusSelect.addEventListener('change', () => loadJobs(1));
         categorySelect.addEventListener('change', () => loadJobs(1));
 
@@ -120,7 +113,6 @@
             keywordTimer = setTimeout(() => loadJobs(1), 400);
         });
 
-        // Đóng / Mở lại / Xoá: gửi bằng fetch rồi tải lại đúng trang và bộ lọc đang xem
         listEl.addEventListener('submit', async event => {
             const form = event.target.closest('form[data-job-action]');
             if (!form) return;
@@ -131,13 +123,13 @@
             if (confirmText && !confirm(confirmText)) return;
 
             const button = form.querySelector('button[type="submit"]');
-            button.disabled = true; // chống bấm hai lần
+            button.disabled = true;
 
             try {
                 const response = await fetch(form.action, {
                     method: 'POST',
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                    body: new URLSearchParams(new FormData(form)) // gồm cả anti-forgery token trong form
+                    body: new URLSearchParams(new FormData(form))
                 });
 
                 if (response.status === 401 || response.status === 403) {
@@ -153,7 +145,7 @@
 
                 const result = await response.json();
                 if (result.redirectUrl) {
-                    location.href = result.redirectUrl; // vd: mở lại tin quá hạn thì sang trang Sửa hạn nộp
+                    location.href = result.redirectUrl;
                     return;
                 }
 

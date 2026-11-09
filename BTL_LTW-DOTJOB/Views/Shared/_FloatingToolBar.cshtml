@@ -5,7 +5,6 @@
     var savedCount = (await SavedJobService.GetSavedJobIdsAsync(User.FindFirstValue(ClaimTypes.NameIdentifier))).Count;
 }
 <div class="floating-toolbar-wrapper">
-    <!-- 1. Việc làm đã lưu -->
     <a asp-controller="SavedJob" asp-action="Index" class="toolbar-item" title="Việc làm đã lưu">
         <i class="fa-solid fa-heart text-success"></i>
         <span class="badge bg-success rounded-circle toolbar-badge">@savedCount</span>
@@ -13,14 +12,12 @@
 
     <div class="toolbar-divider"></div>
 
-    <!-- 2. Quản lý tài khoản -->
     <a asp-controller="Profile" asp-action="Index"  class="toolbar-item" title="Tài khoản">
         <i class="fa-solid fa-user-plus text-success"></i>
     </a>
 
     <div class="toolbar-divider"></div>
 
-    @* 3. Góp ý / báo cáo tin: chỉ hiện ở trang chi tiết việc làm của Candidate (Detail.cshtml gán ViewData["ReportJobId"]) *@
     @if (ViewData["ReportJobId"] is string)
     {
         <a href="#reportModal" data-bs-toggle="modal" class="toolbar-item" title="Báo cáo tin tuyển dụng này">

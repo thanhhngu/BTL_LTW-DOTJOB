@@ -4,7 +4,6 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    @* Token chống giả mạo request, site.js đọc để gửi kèm khi gọi fetch POST (lưu tin) *@
     <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
     <title>@ViewData["Title"] - BTL_LTW_DOTJOB</title>
     <script type="importmap"></script>

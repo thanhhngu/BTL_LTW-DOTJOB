@@ -16,7 +16,6 @@ namespace BTL_LTW_DOTJOB.ViewComponents
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            // Khách chưa đăng nhập: không có hồ sơ, View vẫn hiện nút Đăng nhập / Đăng ký
             ProfileViewModel? model = null;
 
             var userId = UserClaimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);

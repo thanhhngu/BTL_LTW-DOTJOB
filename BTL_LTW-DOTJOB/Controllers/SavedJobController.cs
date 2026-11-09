@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace BTL_LTW_DOTJOB.Controllers
 {
-    [Authorize(Roles = "Candidate")] // Chỉ Ứng viên mới lưu tin
+    [Authorize(Roles = "Candidate")]
     public class SavedJobController : Controller
     {
         private readonly ISavedJobService _savedJobService;
@@ -15,7 +15,6 @@ namespace BTL_LTW_DOTJOB.Controllers
             _savedJobService = savedJobService;
         }
 
-        // GET: /saved-jobs - Việc làm đã lưu của tôi
         [HttpGet("saved-jobs")]
         public async Task<IActionResult> Index(int page = 1)
         {
@@ -29,7 +28,6 @@ namespace BTL_LTW_DOTJOB.Controllers
             return View(model);
         }
 
-        // POST: /saved-jobs/{jobId}/toggle - Lưu / bỏ lưu (gọi bằng fetch từ nút trái tim)
         [HttpPost("saved-jobs/{jobId}/toggle")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Toggle(string jobId)

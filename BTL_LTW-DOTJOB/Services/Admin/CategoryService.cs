@@ -18,7 +18,6 @@ namespace BTL_LTW_DOTJOB.Services.Admin
         {
             var query = _db.Categories.AsQueryable();
 
-            // Tìm theo tên (không phân biệt hoa thường theo collation mặc định của SQL Server)
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 var kw = keyword.Trim();
@@ -32,7 +31,7 @@ namespace BTL_LTW_DOTJOB.Services.Admin
                     Id = c.Id,
                     Name = c.Name,
                     Description = c.Description,
-                    JobCount = c.JobPostings.Count // EF tự dịch thành COUNT trong SQL
+                    JobCount = c.JobPostings.Count
                 })
                 .ToListAsync();
         }
@@ -54,7 +53,6 @@ namespace BTL_LTW_DOTJOB.Services.Admin
         {
             var name = model.Name.Trim();
 
-            // Chặn trùng tên trước khi lưu (DB cũng có unique index làm lớp bảo vệ thứ hai)
             if (await _db.Categories.AnyAsync(c => c.Name == name))
             {
                 return (false, "Tên danh mục này đã tồn tại.");
@@ -79,7 +77,6 @@ namespace BTL_LTW_DOTJOB.Services.Admin
 
             var name = model.Name.Trim();
 
-            // Trùng tên với một danh mục KHÁC (loại trừ chính nó)
             if (await _db.Categories.AnyAsync(c => c.Name == name && c.Id != model.Id))
             {
                 return (false, "Tên danh mục này đã tồn tại.");
@@ -99,7 +96,6 @@ namespace BTL_LTW_DOTJOB.Services.Admin
                 return (false, "Danh mục không tồn tại.");
             }
 
-            // Còn tin tuyển dụng thì không cho xóa (tránh mất dữ liệu của Nhà tuyển dụng)
             var jobCount = await _db.JobPostings.CountAsync(j => j.CategoryId == id);
             if (jobCount > 0)
             {

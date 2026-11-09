@@ -20,15 +20,10 @@ namespace BTL_LTW_DOTJOB.Controllers.Api
             _db = db;
         }
 
-        // PUT: /api/applications/{id}/status
-        // Body JSON: { "status": "Accepted" | "Rejected" | "Pending" }
-        // Cookie đăng nhập tự gửi kèm nên phải có anti-forgery token (header RequestVerificationToken) để chống CSRF
         [HttpPut("{id}/status")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(string id, [FromBody] UpdateStatusRequest request)
         {
-            // Thiếu body hoặc thiếu status: [ApiController] tự trả 400.
-            // Status phải là một trong các hằng số đã chốt, không nhận giá trị tự chế
             if (!ApplicationStatus.All.Contains(request.Status))
             {
                 return BadRequest(new { message = "Trạng thái không hợp lệ." });
@@ -36,8 +31,6 @@ namespace BTL_LTW_DOTJOB.Controllers.Api
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Chỉ tìm đơn nộp vào tin của công ty thuộc HR đang đăng nhập.
-            // Đơn của HR khác trả 404 như không tồn tại để không lộ việc đơn đó có thật
             var application = await _db.Applications
                 .FirstOrDefaultAsync(a => a.Id == id && a.JobPosting!.Company!.UserId == userId);
 
@@ -58,7 +51,6 @@ namespace BTL_LTW_DOTJOB.Controllers.Api
         }
     }
 
-    // Dữ liệu client gửi lên khi đổi trạng thái đơn
     public class UpdateStatusRequest
     {
         [Required(ErrorMessage = "Vui lòng cung cấp trạng thái.")]

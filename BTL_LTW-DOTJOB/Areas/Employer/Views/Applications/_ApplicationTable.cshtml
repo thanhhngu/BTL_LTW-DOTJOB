@@ -23,7 +23,6 @@ else
             <tbody>
                 @foreach (var application in Model)
                 {
-                    // Hệ thống lưu "..." khi ứng viên không viết thư giới thiệu
                     var coThuGioiThieu = !string.IsNullOrWhiteSpace(application.CoverLetter) && application.CoverLetter.Trim() != "...";
                     <tr>
                         <td>
@@ -39,7 +38,6 @@ else
                             </span>
                         </td>
                         <td>
-                            @* CV nằm ngoài wwwroot, chỉ tải được qua CvFileController (có kiểm tra quyền) *@
                             <a asp-area="" asp-controller="CvFile" asp-action="Download"
                                asp-route-applicationId="@application.Id" target="_blank"
                                class="btn btn-sm btn-outline-primary">Xem / tải CV</a>
@@ -57,7 +55,6 @@ else
                             }
                         </td>
                         <td>
-                            @* Nút đang trùng trạng thái hiện tại thì bị khoá; "Đặt lại" chỉ hiện khi đã Pass/Fail *@
                             <div id="actions-@application.Id" class="d-flex gap-1">
                                 <button type="button" class="btn btn-sm btn-success" data-status="@ApplicationStatus.Accepted"
                                         disabled="@(application.Status == ApplicationStatus.Accepted)"
@@ -68,7 +65,6 @@ else
                                 <button type="button" class="btn btn-sm btn-outline-secondary @(application.Status == ApplicationStatus.Pending ? "d-none" : "")"
                                         data-status="@ApplicationStatus.Pending"
                                         onclick="updateStatus('@application.Id', '@ApplicationStatus.Pending')">Đặt lại</button>
-                                @* Báo cáo ứng viên nộp CV linh tinh / spam để Admin xem xét (có thể khóa tài khoản) *@
                                 <button type="button" class="btn btn-sm btn-outline-danger btn-report-candidate"
                                         title="Báo cáo ứng viên này"
                                         data-application-id="@application.Id"

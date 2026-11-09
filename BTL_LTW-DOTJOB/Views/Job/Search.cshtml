@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = "Tìm kiếm việc làm";
 
-    // Các mức lương cho ô chọn (giá trị khớp với SearchJobViewModel.SalaryRange)
     var salaryOptions = new[]
     {
         ("", "Mức lương"),
@@ -14,7 +13,6 @@
 }
 
 @functions {
-    // Giữ nguyên các điều kiện lọc khi chuyển trang
     object RouteFor(int page) => new
     {
         keyword = Model.Keyword,
@@ -29,7 +27,6 @@
 <div style="background-color: #f4f5f5;" class="py-4">
     <div class="container" style="max-width: 1200px;">
 
-        <!-- 1. Form lọc -->
         <form asp-controller="Job" asp-action="Search" method="get" class="card border-0 shadow-sm rounded-4 p-3 mb-4">
             <div class="row g-2 align-items-center">
                 <div class="col-12 col-lg-3">
@@ -84,7 +81,6 @@
             </div>
         </form>
 
-        <!-- 2. Tiêu đề kết quả -->
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
             <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 m-0">
                 Tìm thấy <span class="text-success">@Model.TotalCount</span> việc làm phù hợp
@@ -97,7 +93,6 @@
             }
         </div>
 
-        <!-- 3. Danh sách việc làm -->
         @if (!Model.Items.Any())
         {
             <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
@@ -117,7 +112,6 @@
                 }
             </div>
 
-            <!-- 4. Phân trang -->
             @if (Model.PageCount > 1)
             {
                 <div class="d-flex justify-content-center align-items-center gap-3 mt-4 topcv-pagination">

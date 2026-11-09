@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BTL_LTW_DOTJOB.Controllers
 {
-    // Trang giới thiệu công ty cho mọi người xem (kể cả chưa đăng nhập), dữ liệu do HR nhập ở trang Hồ sơ
     [AllowAnonymous]
     [Route("companies")]
     public class CompanyController : Controller
@@ -19,7 +18,6 @@ namespace BTL_LTW_DOTJOB.Controllers
             _db = db;
         }
 
-        // GET: /companies/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> Detail(string id)
         {
@@ -36,7 +34,7 @@ namespace BTL_LTW_DOTJOB.Controllers
                 .AsNoTracking()
                 .Include(j => j.Company)
                 .Where(j => j.CompanyId == id)
-                .WhereOpen() // chỉ tin đang bật và còn hạn nộp, dùng chung với trang chủ và tìm kiếm
+                .WhereOpen()
                 .OrderByDescending(j => j.CreatedAt)
                 .ThenBy(j => j.Id)
                 .Take(20)

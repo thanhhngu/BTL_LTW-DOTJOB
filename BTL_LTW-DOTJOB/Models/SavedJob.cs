@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BTL_LTW_DOTJOB.Models
 {
-    // Tin tuyển dụng mà Ứng viên đã lưu (bấm trái tim)
     [Table("SavedJob")]
     public class SavedJob
     {

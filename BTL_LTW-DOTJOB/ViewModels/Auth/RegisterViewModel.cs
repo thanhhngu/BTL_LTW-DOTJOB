@@ -17,7 +17,6 @@ namespace BTL_LTW_DOTJOB.ViewModels.Auth
 
         [Required(ErrorMessage = "Vui lòng nhập số điện thoại.")]
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
-        //[RegularExpression(@"^(03|05|07|08|09)\d{8}$", ErrorMessage = "Số điện thoại phải gồm 10 số và bắt đầu bằng 03, 05, 07, 08 hoặc 09.")]
         public string Phone { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
@@ -34,7 +33,6 @@ namespace BTL_LTW_DOTJOB.ViewModels.Auth
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Chỉ cho tự đăng ký Candidate hoặc Employer (chặn sửa request để tạo Admin)
             if (RoleName != "Candidate" && RoleName != "Employer")
             {
                 yield return new ValidationResult("Vai trò không hợp lệ.", new[] { nameof(RoleName) });

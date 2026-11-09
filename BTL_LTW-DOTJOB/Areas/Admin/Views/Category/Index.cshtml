@@ -3,7 +3,6 @@
     ViewData["Title"] = "Danh mục ngành nghề";
 }
 
-@* Thông báo thành công / thất bại sau khi thêm, sửa, xóa *@
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show">
@@ -57,7 +56,6 @@
                             <form asp-action="Delete" method="post" class="d-inline"
                                   onsubmit="return confirm('Xóa danh mục &quot;@c.Name&quot;?');">
                                 <input type="hidden" name="id" value="@c.Id" />
-                                @* Còn tin tuyển dụng thì khóa nút xóa *@
                                 <button type="submit" class="btn btn-sm btn-outline-danger"
                                         disabled="@(c.JobCount > 0)"
                                         title="@(c.JobCount > 0 ? "Còn tin tuyển dụng nên không thể xóa" : "Xóa")">

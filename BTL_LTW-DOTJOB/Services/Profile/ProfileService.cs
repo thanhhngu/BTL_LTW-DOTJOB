@@ -14,7 +14,6 @@ namespace BTL_LTW_DOTJOB.Services.Profile
         private readonly AppDbContext _db;
         private readonly IWebHostEnvironment _env;
 
-        // Làm sạch HTML từ editor (xóa <script>, onerror=...) trước khi lưu phần giới thiệu công ty
         private readonly HtmlSanitizer _sanitizer = new();
 
         public ProfileService(AppDbContext db, IWebHostEnvironment env)
@@ -75,18 +74,14 @@ namespace BTL_LTW_DOTJOB.Services.Profile
             if (user == null)
                 return (false, "Không tìm thấy tài khoản.");
 
-            // Vai trò lấy từ DB, không lấy từ form => Candidate/Admin không thể sửa dữ liệu công ty bằng cách giả request
             var isEmployer = user.Role?.Name == "Employer";
 
-            // 1. Kiểm tra file ảnh trước khi ghi bất cứ thứ gì
             var avatarError = ValidateImage(model.AvatarFile);
             if (avatarError != null) return (false, $"Ảnh đại diện: {avatarError}");
 
-            // Logo công ty chỉ nhận JPG/PNG, ảnh đại diện nhận thêm WEBP
             var logoError = isEmployer ? ValidateImage(model.LogoFile, allowWebp: false) : null;
             if (logoError != null) return (false, $"Logo công ty: {logoError}");
 
-            // 2. Thông tin cá nhân (Email và vai trò không cho sửa ở đây)
             user.FullName = model.FullName.Trim();
             user.Phone = model.Phone.Trim();
 
@@ -96,7 +91,6 @@ namespace BTL_LTW_DOTJOB.Services.Profile
                 user.Avatar = await SaveImageAsync(model.AvatarFile, "avatars");
             }
 
-            // 3. Thông tin công ty (chỉ Employer)
             string? oldLogo = null;
             if (isEmployer)
             {
@@ -131,7 +125,6 @@ namespace BTL_LTW_DOTJOB.Services.Profile
                 return (false, "Không thể lưu thay đổi. Vui lòng thử lại.");
             }
 
-            // 4. Lưu DB thành công mới xóa ảnh cũ để không mất ảnh khi lỗi
             if (oldAvatar != user.Avatar) DeleteImage(oldAvatar);
             if (oldLogo != null) DeleteImage(oldLogo);
 
@@ -151,7 +144,6 @@ namespace BTL_LTW_DOTJOB.Services.Profile
             }
             catch (Exception ex)
             {
-                // PasswordHash không đúng định dạng BCrypt
                 Console.WriteLine(ex.Message);
                 currentOk = false;
             }
@@ -168,9 +160,6 @@ namespace BTL_LTW_DOTJOB.Services.Profile
             return (true, "Đổi mật khẩu thành công!");
         }
 
-        // ===== Xử lý ảnh =====
-
-        // Trả về thông báo lỗi, null nếu hợp lệ hoặc không có file
         private static string? ValidateImage(IFormFile? file, bool allowWebp = true)
         {
             if (file == null || file.Length == 0) return null;
@@ -183,14 +172,12 @@ namespace BTL_LTW_DOTJOB.Services.Profile
             if (!allowedExt.Contains(ext))
                 return allowWebp ? "chỉ chấp nhận JPG, PNG, WEBP." : "chỉ chấp nhận JPG, PNG.";
 
-            // Kiểm tra thêm nội dung thật của file: đổi đuôi .exe thành .png vẫn bị chặn
             if (!HasImageSignature(file, allowWebp))
                 return "nội dung file không phải ảnh hợp lệ.";
 
             return null;
         }
 
-        // Đọc vài byte đầu của file để nhận biết JPG / PNG / WEBP thật
         private static bool HasImageSignature(IFormFile file, bool allowWebp)
         {
             var header = new byte[12];
@@ -206,14 +193,13 @@ namespace BTL_LTW_DOTJOB.Services.Profile
             return isJpg || isPng || isWebp;
         }
 
-        // Lưu vào wwwroot/uploads/{folder}, trả về đường dẫn web (vd: /uploads/avatars/xxx.png)
         private async Task<string> SaveImageAsync(IFormFile file, string folder)
         {
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
             var dir = Path.Combine(_env.WebRootPath, "uploads", folder);
             Directory.CreateDirectory(dir);
 
-            var fileName = $"{Guid.NewGuid()}{ext}"; // tên ngẫu nhiên, không dùng tên file người dùng gửi
+            var fileName = $"{Guid.NewGuid()}{ext}";
             using (var stream = new FileStream(Path.Combine(dir, fileName), FileMode.Create))
             {
                 await file.CopyToAsync(stream);
@@ -222,7 +208,6 @@ namespace BTL_LTW_DOTJOB.Services.Profile
             return $"/uploads/{folder}/{fileName}";
         }
 
-        // Chỉ xóa file do chính chức năng này tạo ra (nằm trong wwwroot/uploads/avatars hoặc logos)
         private void DeleteImage(string? webPath)
         {
             if (string.IsNullOrEmpty(webPath)) return;

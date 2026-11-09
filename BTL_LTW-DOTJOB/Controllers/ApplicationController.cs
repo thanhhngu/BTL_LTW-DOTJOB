@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace BTL_LTW_DOTJOB.Controllers
 {
-    [Authorize(Roles = "Candidate")] // Chỉ Ứng viên mới có đơn ứng tuyển
+    [Authorize(Roles = "Candidate")]
     public class ApplicationController : Controller
     {
 
@@ -17,7 +17,6 @@ namespace BTL_LTW_DOTJOB.Controllers
             _applicationService = applicationService;
         }
 
-        // GET: /applications - Việc làm đã ứng tuyển của tôi
         [HttpGet("applications")]
         public async Task<IActionResult> Index(string? status, int page = 1)
         {
@@ -41,14 +40,12 @@ namespace BTL_LTW_DOTJOB.Controllers
                 return BadRequest(first);
             }
 
-            // Lấy ID của User đang đăng nhập thông qua Claims
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("Vui lòng đăng nhập lại.");
             }
 
-            // Gọi Service xử lý logic
             var (success, message) = await _applicationService.ApplyJobAsync(model, userId);
 
             if (!success)

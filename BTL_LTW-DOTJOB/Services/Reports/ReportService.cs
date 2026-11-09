@@ -19,12 +19,10 @@ namespace BTL_LTW_DOTJOB.Services.Reports
             if (content.Length < 10 || content.Length > 1000)
                 return (false, "Nội dung báo cáo từ 10 đến 1000 ký tự.");
 
-            // Chỉ báo cáo được tin đang hiển thị
             var jobExists = await _db.JobPostings.AnyAsync(j => j.Id == jobId && j.IsActive);
             if (!jobExists)
                 return (false, "Tin tuyển dụng không tồn tại hoặc đã bị ẩn.");
 
-            // Chặn gửi lặp: đã có báo cáo của người này cho tin này mà Admin chưa xử lý
             var alreadyReported = await _db.Reports.AnyAsync(r =>
                 r.ReporterId == reporterId
                 && r.JobPostingId == jobId
@@ -60,7 +58,6 @@ namespace BTL_LTW_DOTJOB.Services.Reports
             if (content.Length < 10 || content.Length > 1000)
                 return (false, "Nội dung báo cáo từ 10 đến 1000 ký tự.");
 
-            // Đơn phải nộp vào tin của công ty do chính HR này sở hữu (không tin Id ứng viên từ client)
             var targetUserId = await _db.Applications
                 .AsNoTracking()
                 .Where(a => a.Id == applicationId && a.JobPosting!.Company!.UserId == reporterId)
@@ -70,12 +67,10 @@ namespace BTL_LTW_DOTJOB.Services.Reports
             if (targetUserId == null)
                 return (false, "Đơn ứng tuyển không tồn tại hoặc không thuộc công ty của bạn.");
 
-            // Tài khoản ứng viên đã bị khóa thì không cần báo cáo nữa
             var targetActive = await _db.Users.AnyAsync(u => u.Id == targetUserId && u.IsActive);
             if (!targetActive)
                 return (false, "Tài khoản ứng viên này đã bị khóa.");
 
-            // Chặn gửi lặp: HR này đã báo cáo ứng viên này mà Admin chưa xử lý
             var alreadyReported = await _db.Reports.AnyAsync(r =>
                 r.ReporterId == reporterId
                 && r.TargetUserId == targetUserId

@@ -2,7 +2,6 @@
 
 namespace BTL_LTW_DOTJOB.ViewModels.Reports
 {
-    // Dữ liệu client gửi lên khi báo cáo
     public class CreateReportViewModel
     {
         [Required(ErrorMessage = "Vui lòng nhập nội dung báo cáo.")]

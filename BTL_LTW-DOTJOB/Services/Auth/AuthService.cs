@@ -11,7 +11,6 @@ namespace BTL_LTW_DOTJOB.Services.Auth
     {
         private readonly AppDbContext _db;
 
-        // Chỉ cho phép tự đăng ký 2 vai trò này. Admin chỉ được tạo từ SeedData
         private static readonly string[] RegisterableRoles = { "Candidate", "Employer" };
 
         public AuthService(AppDbContext db)
@@ -22,10 +21,8 @@ namespace BTL_LTW_DOTJOB.Services.Auth
         {
             return await _db.Users.AnyAsync(u => u.Email == email);
         }
-        //register user
         public async Task<bool> RegisterUserAsync(RegisterViewModel model)
         {
-            // Chặn vai trò ngoài danh sách cho phép (vd: Admin) dù ViewModel đã kiểm tra
             if (!RegisterableRoles.Contains(model.RoleName))
             {
                 return false;
@@ -39,13 +36,10 @@ namespace BTL_LTW_DOTJOB.Services.Auth
             var role = await _db.Roles.FirstOrDefaultAsync(r => r.Name == model.RoleName);
             if (role == null)
             {
-                // Chưa có Role trong DB (chưa chạy SeedData)
                 return false;
             }
 
-            //hash password
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.Password);
-            //create user object
 
             var newUser = new User
             {
@@ -83,7 +77,6 @@ namespace BTL_LTW_DOTJOB.Services.Auth
         }
         public async Task<User?> AuthenticateAsync(string username, string password)
         {
-            // Include Role để lấy tên quyền (Admin / Employer / Candidate) đưa vào Claim
             var user = await _db.Users
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Email == username);
@@ -99,7 +92,6 @@ namespace BTL_LTW_DOTJOB.Services.Auth
             }
             catch (Exception ex)
             {
-                // PasswordHash không đúng định dạng BCrypt (vd: dữ liệu cũ hash bằng thuật toán khác)
                 Console.WriteLine(ex.Message);
                 return null;
             }

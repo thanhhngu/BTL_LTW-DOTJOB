@@ -1,8 +1,5 @@
-@* Script dùng chung cho form tạo/sửa tin (form có thuộc tính data-job-form). Gọi trong @section Scripts sau _RichEditor. *@
 <script>
     (function () {
-        // Mặc định jQuery validate bỏ qua ô ẩn. Textarea của CKEditor bị ẩn nên cho kiểm tra cả ô ẩn
-        // (nội dung editor đã được chép vào textarea mỗi lần gõ)
         if (window.jQuery && jQuery.validator) {
             jQuery.validator.setDefaults({ ignore: [] });
         }
@@ -16,7 +13,6 @@
         const maxMessage = form.querySelector('[data-valmsg-for="SalaryMax"]');
         const submitButton = form.querySelector('button[type="submit"]');
 
-        // Hiện số lương đã ngăn cách hàng nghìn ngay dưới ô nhập, tránh nhập thừa/thiếu số 0
         function showHint(input) {
             const hint = form.querySelector('[data-salary-hint="' + input.name + '"]');
             if (!hint) return;
@@ -25,7 +21,6 @@
                 : Number(input.value).toLocaleString('vi-VN') + ' đ';
         }
 
-        // Kiểm tra lương ở phía client giống quy tắc ở server
         function checkSalary() {
             const min = salaryMin.value.trim();
             const max = salaryMax.value.trim();
@@ -69,7 +64,6 @@
                 return;
             }
 
-            // Chống bấm hai lần tạo ra hai tin
             submitButton.disabled = true;
             submitButton.textContent = 'Đang lưu...';
         });

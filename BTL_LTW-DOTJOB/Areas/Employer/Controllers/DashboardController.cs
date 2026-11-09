@@ -21,7 +21,6 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Chỉ thống kê dữ liệu của công ty HR đang đăng nhập
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var company = await _db.Companies
                 .AsNoTracking()
@@ -34,7 +33,7 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
                 return Forbid();
             }
 
-            var today = DateTime.Today; // cùng cách tính "đang hiển thị" với danh sách tin
+            var today = DateTime.Today;
 
             var applications = _db.Applications
                 .AsNoTracking()

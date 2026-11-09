@@ -1,6 +1,5 @@
 ﻿namespace BTL_LTW_DOTJOB.ViewModels.Application
 {
-    // Một dòng trong trang "Việc làm đã ứng tuyển"
     public class MyApplicationItemViewModel
     {
         public string ApplicationId { get; set; } = string.Empty;
@@ -12,7 +11,6 @@
         public string Status { get; set; } = "Pending";
     }
 
-    // Dữ liệu cả trang (kèm lọc theo trạng thái và phân trang)
     public class MyApplicationsViewModel
     {
         public List<MyApplicationItemViewModel> Items { get; set; } = new();

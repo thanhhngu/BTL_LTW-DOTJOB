@@ -1,13 +1,10 @@
 @{
-    // Tên controller hiện tại, dùng để tô sáng mục đang mở trong sidebar
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     string Active(string controller) => currentController == controller ? "active" : "";
 
-    // Dùng cho nút đổi ngôn ngữ: đổi xong quay lại đúng trang đang xem
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
     var isEnglish = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
 
-    // Chữ cái đầu của tên hiển thị trong ô avatar
     var userName = User.Identity?.Name?.Trim() ?? "";
     var userInitial = userName.Length > 0 ? char.ToUpper(userName[0]).ToString() : "U";
 }
@@ -77,7 +74,6 @@
                            asp-area="Employer" asp-controller="Applications" asp-action="Index">
                             <i class="fa-solid fa-users"></i> @Loc["Emp_Applications"]
                         </a>
-                        @* Thông tin công ty và logo sửa ở trang Hồ sơ cá nhân dùng chung (/profile) *@
                         <a class="emp-nav-link"
                            asp-area="" asp-controller="Profile" asp-action="Index">
                             <i class="fa-solid fa-building"></i> @Loc["Emp_Company"]

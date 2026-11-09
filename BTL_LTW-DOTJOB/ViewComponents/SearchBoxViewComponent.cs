@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BTL_LTW_DOTJOB.ViewComponents
 {
-    // Ô tìm kiếm ở trang chủ: danh mục và địa điểm lấy từ DB thay vì viết cứng
     public class SearchBoxViewComponent : ViewComponent
     {
         private readonly IJobService _jobService;

@@ -12,7 +12,7 @@ using X.PagedList.Extensions;
 
 namespace BTL_LTW_DOTJOB.Controllers
 {
-    [AllowAnonymous] // Trang chủ công khai, chưa đăng nhập vẫn xem được việc làm
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         private readonly AppDbContext _db;
@@ -22,13 +22,13 @@ namespace BTL_LTW_DOTJOB.Controllers
         }
         public IActionResult Index(int? page)
         {
-            int pageSize = 12; // 3 x 4
+            int pageSize = 12;
             int pageNumber = page ?? 1;
 
             var jobs = _db.JobPostings
                 .AsNoTracking()
                 .Include(job => job.Company)
-                .WhereOpen() // chỉ tin đang bật và còn hạn nộp
+                .WhereOpen()
                 .OrderByDescending(job => job.CreatedAt);
             var pagedJobs = jobs.ToPagedList(pageNumber, pageSize);
 
@@ -43,7 +43,7 @@ namespace BTL_LTW_DOTJOB.Controllers
             var jobs = _db.JobPostings
                 .AsNoTracking()
                 .Include(job => job.Company)
-                .WhereOpen() // chỉ tin đang bật và còn hạn nộp
+                .WhereOpen()
                 .OrderByDescending(job => job.CreatedAt);
             var pagedJobs = jobs.ToPagedList(page, pageSize);
 
@@ -61,9 +61,6 @@ namespace BTL_LTW_DOTJOB.Controllers
             return View();
         }
 
-        // Trang báo lỗi thân thiện cho các mã 400/403/404/405... (được UseStatusCodePagesWithReExecute gọi lại).
-        // Re-execute giữ nguyên phương thức gốc (có thể là POST) nên action này bỏ qua kiểm tra anti-forgery.
-        // Không đặt tên là StatusCode vì trùng với phương thức StatusCode(int) có sẵn của Controller
         [IgnoreAntiforgeryToken]
         public IActionResult Status(int code)
         {

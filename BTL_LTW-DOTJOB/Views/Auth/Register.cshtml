@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="~/css/StyleAuth.css">
     <title>Create</title>
     <style>
-            /* css loi do lib validation*/
             .field-validation-error {
                 color: var(--danger, #ef4444);
                 font-size: 1.2rem;
@@ -134,7 +133,6 @@
 
                 const workLocationSelect = document.getElementById('WorkLocation');
 
-                // Lưu lại tỉnh thành cũ nếu form bị lỗi
                 const selectedLocation = "@(Model?.WorkLocation ?? "")";
 
                 if (workLocationSelect) {

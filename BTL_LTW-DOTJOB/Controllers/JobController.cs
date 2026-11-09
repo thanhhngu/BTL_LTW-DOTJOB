@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BTL_LTW_DOTJOB.Controllers
 {
-    [AllowAnonymous] // Chi tiết việc làm công khai, chỉ hành động ứng tuyển mới yêu cầu đăng nhập
+    [AllowAnonymous]
     [Route("jobs")]
     public class JobController : Controller
     {
@@ -18,8 +18,6 @@ namespace BTL_LTW_DOTJOB.Controllers
             _jobService = jobService;
         }
 
-        // GET: /jobs/search?keyword=...&categoryId=...&location=...&salaryRange=...&jobType=...&page=1
-        // Đường dẫn "search" là chữ cố định nên được ưu tiên hơn "{id}"
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] SearchJobViewModel filter)
         {

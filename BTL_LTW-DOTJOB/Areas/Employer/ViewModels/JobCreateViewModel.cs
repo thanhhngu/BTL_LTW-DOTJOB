@@ -46,8 +46,6 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.ViewModels
         [Display(Name = "Yêu cầu ứng viên")]
         public string Requirements { get; set; } = string.Empty;
 
-        // Dữ liệu cho các ô chọn, không đến từ form. Phải có [ValidateNever] vì
-        // kiểu không-null được MVC mặc định coi là bắt buộc
         [ValidateNever]
         public IEnumerable<SelectListItem> Categories { get; set; } = Enumerable.Empty<SelectListItem>();
 
@@ -59,16 +57,13 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.ViewModels
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            // StringLength(min 10) đếm cả khoảng trắng đầu/cuối, mà controller lại lưu Title.Trim().
-            // Chỉ báo thêm khi chuỗi gốc đủ 10 ký tự nhưng sau khi cắt khoảng trắng thì không đủ (tránh báo lỗi 2 lần)
-            var title = Title ?? string.Empty; // có thể null nếu form gửi chuỗi rỗng
+            var title = Title ?? string.Empty;
             if (title.Length >= 10 && title.Trim().Length < 10)
             {
                 yield return new ValidationResult(
                     "Tiêu đề phải từ 10 đến 255 ký tự (không tính khoảng trắng ở hai đầu).", new[] { nameof(Title) });
             }
 
-            // Phía ứng viên chỉ hiện lương khi có đủ hai đầu, nên nhập thiếu một đầu sẽ bị hiểu thành "Thỏa thuận"
             if (SalaryMin.HasValue != SalaryMax.HasValue)
             {
                 var thieu = SalaryMin.HasValue ? nameof(SalaryMax) : nameof(SalaryMin);
@@ -82,7 +77,6 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.ViewModels
                     "Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.", new[] { nameof(SalaryMax) });
             }
 
-            // Lương 0 - 0 không có nghĩa: muốn thỏa thuận thì để trống cả hai ô
             if (SalaryMax.HasValue && SalaryMax <= 0)
             {
                 yield return new ValidationResult(
@@ -95,7 +89,6 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.ViewModels
                     "Hạn nộp hồ sơ không được ở quá khứ.", new[] { nameof(Deadline) });
             }
 
-            // Chặn giá trị tự chế (POST thủ công) làm bẩn bộ lọc phía Candidate
             if (!string.IsNullOrEmpty(JobType) && !JobOptions.JobTypes.Contains(JobType))
             {
                 yield return new ValidationResult("Hình thức làm việc không hợp lệ.", new[] { nameof(JobType) });
@@ -106,7 +99,6 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.ViewModels
                 yield return new ValidationResult("Địa điểm làm việc không hợp lệ.", new[] { nameof(Location) });
             }
 
-            // Editor có thể gửi "<p>&nbsp;</p>": qua được [Required] nhưng thực chất là trống
             if (IsHtmlBlank(Description))
             {
                 yield return new ValidationResult("Vui lòng nhập mô tả công việc.", new[] { nameof(Description) });

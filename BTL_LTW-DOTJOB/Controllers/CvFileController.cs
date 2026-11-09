@@ -6,7 +6,6 @@ using System.Security.Claims;
 
 namespace BTL_LTW_DOTJOB.Controllers
 {
-    // Tải/xem CV đã nộp. CV nằm ngoài wwwroot nên chỉ truy cập được qua action này (có kiểm tra quyền)
     [Authorize]
     public class CvFileController : Controller
     {
@@ -19,7 +18,6 @@ namespace BTL_LTW_DOTJOB.Controllers
             _applicationService = applicationService;
         }
 
-        // GET: /cv-files/{applicationId}
         [HttpGet("cv-files/{applicationId}")]
         public async Task<IActionResult> Download(string applicationId)
         {
@@ -32,7 +30,6 @@ namespace BTL_LTW_DOTJOB.Controllers
 
             var cv = await _applicationService.GetCvFileAsync(applicationId, userId, role);
 
-            // Không có quyền cũng trả 404 để không lộ việc đơn đó có tồn tại hay không
             if (cv == null)
             {
                 return NotFound();
@@ -45,7 +42,6 @@ namespace BTL_LTW_DOTJOB.Controllers
                 contentType = "application/octet-stream";
             }
 
-            // PDF mở xem trực tiếp trên trình duyệt, DOC/DOCX thì tải về
             if (Path.GetExtension(fileName).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
             {
                 return PhysicalFile(physicalPath, contentType);

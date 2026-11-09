@@ -14,22 +14,17 @@
     var match = System.Text.RegularExpressions.Regex.Match(requirement, @"\d+-\d+\s*năm");
     var experience = match.Success ? match.Value : "Không yêu cầu";
 
-    // Trạng thái đăng nhập để hiển thị nút ứng tuyển phù hợp
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     var isCandidate = User.IsInRole("Candidate");
 
-    // Candidate được báo cáo tin này: bật nút Góp ý ở thanh công cụ nổi (xem _FloatingToolBar)
     if (isCandidate)
     {
         ViewData["ReportJobId"] = Model!.Id;
     }
 
-    // Tin này đã được lưu chưa (để tô màu nút Lưu tin)
-    // Candidate đã nộp hồ sơ vào tin này chưa (để đổi nút Ứng tuyển thành Đã ứng tuyển)
     var hasApplied = isCandidate
         && await AppService.HasAppliedAsync(Model!.Id, User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty);
 
-    // Điền sẵn họ tên, email, SĐT vào form ứng tuyển từ hồ sơ của Candidate (chỉ lấy khi còn có thể ứng tuyển)
     var profile = isCandidate && !hasApplied && !Model!.IsExpired
         ? await ProfileService.GetProfileAsync(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty)
         : null;
@@ -51,10 +46,8 @@
 <div class="container my-4">
     <div class="row g-4">
         
-        <!-- CỘT BÊN TRÁI: Nội dung chính của Job (col-lg-8) -->
         <div class="col-lg-8">
             
-            <!-- 1. Tiêu đề và Nút ứng tuyển -->
             <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                 <h1 class="fw-bold fs-3 text-dark mb-2">@Model?.Title</h1>
                 
@@ -67,7 +60,6 @@
                     <span class="text-muted small">| Tra cứu lương thị trường việc làm</span>
                 </div>
 
-                <!-- Các thông tin nhanh: Địa điểm, Kinh nghiệm, Hạn ứng tuyển -->
                 <div class="row g-3 mb-4 text-secondary small">
                     <div class="col-md-4 d-flex align-items-center">
                         <div class="bg-light p-2 rounded-3 me-2 text-success"><i class="fa-solid fa-location-dot"></i></div>
@@ -102,11 +94,9 @@
                     </div>
                 </div>
 
-                <!-- Nút Ứng tuyển ngay & Lưu tin -->
                 <div class="d-flex gap-3">
                     @if (hasApplied)
                     {
-                        <!-- Đã nộp hồ sơ rồi: không cho nộp lại, dẫn sang danh sách đơn (ưu tiên hơn cả trạng thái hết hạn) -->
                         <a asp-controller="Application" asp-action="Index"
                            class="btn btn-outline-success flex-grow-1 py-3 fw-bold rounded-3">
                             <i class="fa-solid fa-circle-check me-2"></i> Đã ứng tuyển · Xem đơn của tôi
@@ -114,7 +104,6 @@
                     }
                     else if (Model.IsExpired)
                     {
-                        <!-- Hết hạn: khóa nút ứng tuyển (server cũng chặn ở ApplicationService) -->
                         <button class="btn btn-secondary flex-grow-1 py-3 fw-bold rounded-3" disabled
                                 title="Tin tuyển dụng đã hết hạn nộp hồ sơ">
                             <i class="fa-regular fa-calendar-xmark me-2"></i> Đã hết hạn ứng tuyển
@@ -122,7 +111,6 @@
                     }
                     else if (!isAuthenticated)
                     {
-                        <!-- Chưa đăng nhập: chuyển sang trang đăng nhập rồi quay lại tin này -->
                         <a asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@Context.Request.Path.Value"
                            class="btn btn-success flex-grow-1 py-3 fw-bold rounded-3 shadow-sm"
                            style="background-color: #00b14f;">
@@ -139,7 +127,6 @@
                     }
                     else
                     {
-                        <!-- Employer / Admin không được ứng tuyển -->
                         <button class="btn btn-secondary flex-grow-1 py-3 fw-bold rounded-3" disabled
                                 title="Chỉ tài khoản Ứng viên mới có thể ứng tuyển">
                             <i class="fa-solid fa-paper-plane me-2"></i> Chỉ dành cho Ứng viên
@@ -152,7 +139,6 @@
                 </div>
             </div>
 
-            <!-- 2. Phần đánh giá độ tin cậy (Giống hệt hình mẫu) -->
             <div class="alert bg-white border shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center">
                 <div class="text-success fs-4 me-3"><i class="fa-solid fa-shield-check"></i></div>
                 <div class="small text-secondary">
@@ -160,10 +146,8 @@
                 </div>
             </div>
 
-            <!-- 3. Khối Tổng quan và Mô tả công việc -->
             <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                 
-                <!-- Tổng quan -->
                 <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">Tổng quan</h4>
                 <div class="row g-3 mb-4">
                     <div class="col-sm-6">
@@ -179,28 +163,22 @@
 
                 <hr class="text-muted opacity-25 my-4">
 
-                <!-- Mô tả công việc -->
                 <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">Mô tả công việc</h4>
                 <div class="text-secondary lh-lg mb-4">
-                    @* Mô tả do HR soạn bằng editor (HTML): làm sạch rồi mới hiển thị, không dùng Html.Raw trần *@
                     @Html.SafeHtml(Model?.Description)
                     <p>Phối hợp cùng các phòng ban liên quan để triển khai công việc hiệu quả, đảm bảo đúng tiến độ và chất lượng dự án được giao.</p>
                 </div>
 
-                <!-- Yêu cầu ứng viên -->
                 <h4 class="fw-bold text-dark border-start border-success border-4 ps-3 mb-3">Yêu cầu ứng viên</h4>
                 <div class="text-secondary lh-lg">
-                    @* Yêu cầu cũng là HTML từ editor nên hiển thị nguyên khối, không tách theo dấu chấm như trước *@
                     @Html.SafeHtml(Model?.Requirements)
                 </div>
 
             </div>
         </div>
 
-        <!-- CỘT BÊN PHẢI: Thông tin công ty & Thông tin chung (col-lg-4) -->
         <div class="col-lg-4">
             
-            <!-- Card Thông tin Công ty -->
             <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 text-center">
                 <div class="mb-3">
                     <img src="@(string.IsNullOrEmpty(Model?.Company?.Logo) ? "/images/default-logo.png" : Model.Company.Logo)" 
@@ -223,7 +201,6 @@
                 </a>
             </div>
 
-            <!-- Card Thông tin chung -->
             <div class="card border-0 shadow-sm rounded-4 p-4">
                 <h5 class="fw-bold text-dark mb-3">Thông tin chung</h5>
                 
@@ -266,26 +243,21 @@
 
 
 
-@* Modal + script ứng tuyển chỉ dành cho Candidate (Employer/Admin/khách không có form nên không cần script) *@
 @if (isCandidate)
 {
-<!-- Modal Ứng tuyển -->
 <partial name="_ApplyModal" model="applyModel" />
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Modal báo cáo tin (mở từ nút Góp ý ở thanh công cụ nổi) -->
 <partial name="_ReportModal" model="Model.Id" />
 <script>
     const applyForm = document.getElementById('applyForm');
     const btnSubmit = document.getElementById('btnSubmitApply');
 
-    // Chỉ cho bấm nộp khi đã tích đồng ý
     document.getElementById('agreeTerms').addEventListener('change', e => {
         btnSubmit.disabled = !e.target.checked;
     });
 
-    // Nộp xong thì đổi nút "Ứng tuyển ngay" thành "Đã ứng tuyển" ngay trên trang, không cần tải lại
     function markApplied() {
         const openBtn = document.getElementById('btnOpenApply');
         if (!openBtn) return;
@@ -310,7 +282,7 @@
         try {
             const res = await fetch('/Application/Apply', {
                 method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }, // để server trả 401/403 thay vì chuyển hướng 302
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 body: new FormData(applyForm)
             });
 
@@ -327,7 +299,6 @@
                 applyForm.reset();
                 modal.hide();
             } else if (res.status === 401) {
-                // Hết phiên đăng nhập: chuyển sang trang đăng nhập rồi quay lại tin này
                 Swal.fire({
                     title: 'Cần đăng nhập',
                     text: 'Vui lòng đăng nhập để ứng tuyển.',

@@ -1,17 +1,14 @@
-/* Giao diện khu Nhà tuyển dụng (Areas/Employer). Dùng cùng màu xanh #198754 của DotJob */
 
 :root {
     --emp-green: #198754;
     --emp-green-soft: #e8f5ee;
     --emp-topbar-h: 60px;
     --emp-sidebar-w: 248px;
-    /* Khoảng cách từ mép trái tới icon/chữ: dùng chung cho logo và menu để hai bên thẳng hàng */
     --emp-gutter: 1.5rem;
 }
 
 body.emp-body { background-color: #f4f6f8; }
 
-/* ===== Thanh trên cùng ===== */
 .emp-topbar {
     height: var(--emp-topbar-h);
     padding: 0 1rem;
@@ -21,7 +18,6 @@ body.emp-body { background-color: #f4f6f8; }
     flex-wrap: nowrap;
 }
 
-/* Logo: DOTJOB + nhãn "Nhà tuyển dụng", canh giữa theo chiều dọc */
 .emp-brand {
     display: inline-flex;
     align-items: center;
@@ -75,20 +71,18 @@ body.emp-body { background-color: #f4f6f8; }
     font-size: .9rem;
 }
 
-/* ===== Khung chính: sidebar cao hết màn hình + nội dung ===== */
 .emp-shell {
     display: flex;
-    align-items: stretch; /* sidebar kéo dài bằng chiều cao nội dung, không bị cụt giữa chừng */
+    align-items: stretch;
     min-height: calc(100vh - var(--emp-topbar-h));
 }
 .emp-sidebar { flex: 0 0 auto; }
 .emp-main {
     flex: 1 1 auto;
-    min-width: 0; /* để bảng rộng cuộn ngang bên trong, không đẩy vỡ khung */
+    min-width: 0;
     padding: 1.75rem 2rem;
 }
 
-/* ===== Sidebar ===== */
 .emp-nav { padding: .75rem; display: flex; flex-direction: column; gap: .25rem; width: 100%; }
 .emp-nav-link {
     display: flex;
@@ -105,10 +99,9 @@ body.emp-body { background-color: #f4f6f8; }
 .emp-nav-link.active { background-color: var(--emp-green-soft); color: var(--emp-green); font-weight: 600; }
 .emp-nav-link.active i { color: var(--emp-green); }
 
-/* ===== Thẻ thống kê ở Tổng quan ===== */
 .emp-stat {
     display: flex;
-    flex-direction: row; /* .card của Bootstrap mặc định xếp dọc, ở đây icon nằm bên trái số liệu */
+    flex-direction: row;
     align-items: center;
     gap: 1rem;
     padding: 1.1rem 1.25rem;
@@ -135,13 +128,11 @@ body.emp-body { background-color: #f4f6f8; }
 
 .emp-panel { border: 0; border-radius: .75rem; overflow: hidden; }
 
-/* ===== Màn hình nhỏ (< 768px): sidebar thành menu trượt, bỏ khoảng canh lề rộng ===== */
 @media (max-width: 767.98px) {
     .emp-main { padding: 1.25rem 1rem; }
     .emp-brand-tag { display: none; }
 }
 
-/* ===== Từ 768px: sidebar cố định bên trái, logo canh thẳng với menu ===== */
 @media (min-width: 768px) {
     .emp-topbar { padding-left: 0; }
     .emp-brand { width: var(--emp-sidebar-w); padding-left: var(--emp-gutter); }
@@ -150,6 +141,5 @@ body.emp-body { background-color: #f4f6f8; }
         background-color: #fff;
         border-right: 1px solid #e3e6ea;
     }
-    /* Dính trên cùng khi cuộn nội dung dài */
     .emp-sidebar .offcanvas-body { position: sticky; top: 0; align-items: flex-start; }
 }

@@ -19,7 +19,6 @@ namespace BTL_LTW_DOTJOB.Controllers
             _authService = authService;
         }
 
-        // GET: /Auth/Login
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
@@ -30,15 +29,6 @@ namespace BTL_LTW_DOTJOB.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
-        //[HttpGet]
-        //public IActionResult Login()
-        //{
-        //    if (User.Identity != null && User.Identity.IsAuthenticated)
-        //    {
-        //        return RedirectToAction("Index", "Home");
-        //    }
-        //    return View();
-        //}
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -64,7 +54,6 @@ namespace BTL_LTW_DOTJOB.Controllers
                 return View(model);
             }
 
-            // Tên quyền (Admin / Employer / Candidate) lấy từ bảng Role
             var roleName = user.Role?.Name;
             if (string.IsNullOrEmpty(roleName))
             {
@@ -77,7 +66,7 @@ namespace BTL_LTW_DOTJOB.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, roleName) // Tên role, không phải RoleId, để [Authorize(Roles = "...")] hoạt động
+                new Claim(ClaimTypes.Role, roleName)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -88,7 +77,7 @@ namespace BTL_LTW_DOTJOB.Controllers
                 new AuthenticationProperties
                 {
                     IsPersistent = true,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7) // Cookie đăng nhập sống 7 ngày
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
                 });
 
             HttpContext.Session.SetUser(new SessionUser
@@ -103,7 +92,6 @@ namespace BTL_LTW_DOTJOB.Controllers
                 return LocalRedirect(returnUrl);
             }
 
-            // Mỗi role về một trang riêng sau khi đăng nhập
             return roleName switch
             {
                 "Admin"      => RedirectToAction("Index", "Dashboard", new { area = "Admin" }),
@@ -113,18 +101,15 @@ namespace BTL_LTW_DOTJOB.Controllers
             };
         }
 
-        // Logout action
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            //xóa luôn Session["User"] để không còn dữ liệu của người vừa thoát
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Auth/Register
         [HttpGet]
         public IActionResult Register()
         {

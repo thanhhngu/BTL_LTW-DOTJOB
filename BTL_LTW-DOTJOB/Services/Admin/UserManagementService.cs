@@ -20,20 +20,17 @@ namespace BTL_LTW_DOTJOB.Services.Admin
         {
             var query = _db.Users.AsNoTracking().AsQueryable();
 
-            // Tìm theo họ tên hoặc email
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 var kw = keyword.Trim();
                 query = query.Where(u => u.FullName.Contains(kw) || u.Email.Contains(kw));
             }
 
-            // Lọc theo vai trò (so sánh tên role)
             if (!string.IsNullOrWhiteSpace(role))
             {
                 query = query.Where(u => u.Role!.Name == role);
             }
 
-            // Lọc theo trạng thái
             if (status == "active") query = query.Where(u => u.IsActive);
             else if (status == "locked") query = query.Where(u => !u.IsActive);
 
@@ -49,8 +46,8 @@ namespace BTL_LTW_DOTJOB.Services.Admin
 
             model.Users = await query
                 .OrderByDescending(u => u.CreatedAt)
-                .Skip((model.Page - 1) * model.PageSize) // Bỏ qua các trang trước
-                .Take(model.PageSize)                    // Lấy đúng 1 trang
+                .Skip((model.Page - 1) * model.PageSize)
+                .Take(model.PageSize)
                 .Select(u => new UserListItemViewModel
                 {
                     Id = u.Id,
@@ -68,7 +65,6 @@ namespace BTL_LTW_DOTJOB.Services.Admin
 
         public async Task<(bool Success, string Message)> ToggleLockAsync(string userId, string currentAdminId)
         {
-            // Không cho Admin tự khóa chính mình (sẽ không ai vào được trang quản trị)
             if (userId == currentAdminId)
             {
                 return (false, "Bạn không thể khóa chính tài khoản của mình.");
@@ -80,7 +76,6 @@ namespace BTL_LTW_DOTJOB.Services.Admin
                 return (false, "Tài khoản không tồn tại.");
             }
 
-            // Không cho khóa tài khoản Admin khác
             if (user.Role?.Name == "Admin")
             {
                 return (false, "Không thể khóa tài khoản Admin.");
@@ -89,8 +84,6 @@ namespace BTL_LTW_DOTJOB.Services.Admin
             user.IsActive = !user.IsActive;
             await _db.SaveChangesAsync();
 
-            // Xóa cache kiểm tra IsActive (xem OnValidatePrincipal trong Program.cs)
-            // để người vừa bị khóa bị đăng xuất ngay ở request kế tiếp, không phải chờ hết 1 phút
             _cache.Remove($"user-active:{userId}");
 
             return (true, user.IsActive

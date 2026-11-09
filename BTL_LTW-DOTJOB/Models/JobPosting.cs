@@ -31,26 +31,22 @@ namespace BTL_LTW_DOTJOB.Models
 
         public DateTime? Deadline { get; set; }
 
-        // Đã quá hạn nộp hồ sơ (chỉ đọc, không lưu vào DB). Deadline = null là không thời hạn
         public bool IsExpired => Deadline.HasValue && Deadline.Value < DateTime.Now;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsActive { get; set; } = true;
 
-        //
         [Required]
         public string CategoryId { get; set; } = string.Empty;
         [ForeignKey("CategoryId")]
         public virtual Category? Category { get; set; }
 
-        //
         [Required]
         public string CompanyId { get; set; } = string.Empty;
         [ForeignKey("CompanyId")]
         public virtual Company? Company { get; set; }
 
-        //
         public virtual ICollection<Application> Applications { get; set; } = new List<Application>();
     }
 }

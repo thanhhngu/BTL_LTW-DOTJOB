@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 public static class SeedData
 {
-    // Mật khẩu chung cho toàn bộ tài khoản mẫu (đăng nhập bằng email + mật khẩu này)
     private const string DefaultPassword = "123456";
 
     public static void Initialize(IServiceProvider serviceProvider)
@@ -13,13 +12,11 @@ public static class SeedData
         FixMissingFiles(serviceProvider);
     }
 
-    // Dữ liệu mẫu (Role, tài khoản, danh mục, việc làm, đơn ứng tuyển)
     private static void SeedDatabase(IServiceProvider serviceProvider)
     {
         using var context = new AppDbContext(
             serviceProvider.GetRequiredService<DbContextOptions<AppDbContext>>());
 
-        // 1. Seed Roles
         var roleNames = new[] { "Admin", "Employer", "Candidate" };
         foreach (var roleName in roleNames)
         {
@@ -32,7 +29,6 @@ public static class SeedData
 
         var roleIds = context.Roles.ToDictionary(role => role.Name, role => role.Id);
 
-        // 2. Seed Categories (30 ngành nghề)
         if (!context.Categories.Any())
         {
             string[] categoryNames =
@@ -57,11 +53,8 @@ public static class SeedData
             context.SaveChanges();
         }
 
-        // 3. Seed Users: 1 Admin + 30 Employer (tương ứng 30 công ty) + 10 Candidate
-        // Hash BCrypt 1 lần dùng chung cho tài khoản mẫu (mỗi lần hash khá chậm). Phải dùng BCrypt vì AuthService xác thực bằng BCrypt
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(DefaultPassword);
 
-        // 3.1 Admin
         if (!context.Users.Any(user => user.RoleId == roleIds["Admin"]))
         {
             context.Users.Add(new User
@@ -77,7 +70,6 @@ public static class SeedData
             context.SaveChanges();
         }
 
-        // 3.2 Employer
         if (!context.Users.Any(user => user.RoleId == roleIds["Employer"]))
         {
             var employers = new List<User>();
@@ -100,7 +92,6 @@ public static class SeedData
             context.SaveChanges();
         }
 
-        // 3.3 Candidate (dùng để test phân quyền và luồng ứng tuyển)
         if (!context.Users.Any(user => user.RoleId == roleIds["Candidate"]))
         {
             var candidates = new List<User>();
@@ -123,9 +114,6 @@ public static class SeedData
             context.SaveChanges();
         }
 
-        // 3.4 Chuẩn hóa mật khẩu cho tài khoản đã tồn tại từ trước (BCrypt luôn bắt đầu bằng "$2")
-        // - Mật khẩu plain text (vd: "123456"): giữ nguyên mật khẩu đang dùng, chỉ hash lại bằng BCrypt
-        // - Hash Identity (bắt đầu "AQAAAA", do bản seed cũ tạo): không đảo ngược được, đặt lại mật khẩu mặc định
         var legacyUsers = context.Users
             .Where(user => !user.PasswordHash.StartsWith("$2"))
             .ToList();
@@ -143,7 +131,6 @@ public static class SeedData
             context.SaveChanges();
         }
 
-        // 4. Seed Companies (Đúng 30 Công ty, mỗi công ty gắn liền với 1 Employer duy nhất theo tỉ lệ 1-1)
         if (!context.Companies.Any())
         {
             string[] companyNames =
@@ -177,7 +164,7 @@ public static class SeedData
                         CompanyAddress = index % 2 == 0 ? "Cầu Giấy, Hà Nội" : "Quận 1, TP. Hồ Chí Minh",
                         Website = $"https://www.company-{index + 1}.vn",
                         Description = $"Thông tin chi tiết về quy mô, văn hóa và môi trường làm việc chuyên nghiệp tại {companyNames[index]}.",
-                        UserId = employerIds[index] // Khớp chính xác 1-1 với User thứ index
+                        UserId = employerIds[index]
                     });
                 }
 
@@ -186,7 +173,6 @@ public static class SeedData
             }
         }
 
-        // 5. Seed JobPostings (Đúng 30 việc làm phân bổ đều cho 30 công ty và danh mục)
         if (!context.JobPostings.Any())
         {
             string[] jobTitles =
@@ -253,7 +239,6 @@ public static class SeedData
             context.SaveChanges();
         }
 
-        // 6. Seed Applications (Tạo đơn ứng tuyển mẫu của các Candidate cho các Job)
         if (!context.Applications.Any())
         {
             var jobIds = context.JobPostings.Select(job => job.Id).ToList();
@@ -267,7 +252,6 @@ public static class SeedData
             string[] statuses = { "Pending", "Accepted", "Rejected" };
             var applications = new List<Application>();
 
-            // Mỗi Job chỉ có tối đa 1 đơn của 1 Candidate => không trùng cặp (JobPostingId, UserId)
             for (int i = 0; i < Math.Min(30, jobIds.Count); i++)
             {
                 applications.Add(new Application
@@ -286,15 +270,12 @@ public static class SeedData
         }
     }
 
-    // Để máy mới clone về chạy được ngay: bỏ đường dẫn ảnh trong DB trỏ tới file không tồn tại
-    // (wwwroot/uploads không nằm trong Git)
     private static void FixMissingFiles(IServiceProvider serviceProvider)
     {
         var env = serviceProvider.GetRequiredService<IWebHostEnvironment>();
         using var context = new AppDbContext(
             serviceProvider.GetRequiredService<DbContextOptions<AppDbContext>>());
 
-        // Avatar/logo cũ của bản seed trước (/images/...) không có file thật => để trống cho giao diện hiện ảnh mặc định
         var webRoot = env.WebRootPath;
         if (string.IsNullOrEmpty(webRoot))
         {

@@ -30,7 +30,6 @@
 
         <div class="row g-4">
 
-            <!-- 1. Cột trái: thẻ tóm tắt tài khoản -->
             <div class="col-lg-4">
                 <div class="card border-0 shadow-sm rounded-4 p-4 text-center">
                     @if (!string.IsNullOrEmpty(Model.AvatarPath))
@@ -51,13 +50,11 @@
                 </div>
             </div>
 
-            <!-- 2. Cột phải: các form chỉnh sửa -->
             <div class="col-lg-8">
 
                 <form asp-controller="Profile" asp-action="Update" method="post" enctype="multipart/form-data">
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 shadow-sm rounded-3"></div>
 
-                    <!-- Thông tin cá nhân (mọi vai trò) -->
                     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                         <h6 class="fw-bold mb-3"><i class="fa-regular fa-user text-success me-2"></i>Thông tin cá nhân</h6>
 
@@ -91,14 +88,12 @@
 
                     @if (isEmployer)
                     {
-                        // Dùng chung danh sách địa điểm với tin tuyển dụng; giữ lại giá trị cũ nếu công ty từng nhập tự do
                         var locations = BTL_LTW_DOTJOB.Areas.Employer.ViewModels.JobOptions.Locations.ToList();
                         if (!string.IsNullOrEmpty(Model.WorkLocation) && !locations.Contains(Model.WorkLocation))
                         {
                             locations.Add(Model.WorkLocation);
                         }
 
-                        <!-- Thông tin công ty (chỉ Employer) -->
                         <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                             <h6 class="fw-bold mb-3"><i class="fa-regular fa-building text-success me-2"></i>Thông tin công ty</h6>
 
@@ -168,7 +163,6 @@
                     </div>
                 </form>
 
-                <!-- Đổi mật khẩu (mọi vai trò) -->
                 <form asp-controller="Profile" asp-action="ChangePassword" method="post">
                     <div class="card border-0 shadow-sm rounded-4 p-4">
                         <h6 class="fw-bold mb-3"><i class="fa-solid fa-lock text-success me-2"></i>Đổi mật khẩu</h6>
@@ -204,7 +198,6 @@
     </div>
 </div>
 @section Scripts {
-    @* Editor soạn thảo cho phần giới thiệu công ty, chỉ nạp với Employer *@
     @if (isEmployer)
     {
         <partial name="_RichEditor" />
@@ -215,10 +208,9 @@
     <script>
         var cropper;
 
-        // Hàm dùng chung cho mọi ô chọn ảnh (Avatar, Logo,...)
         function initImageCropper(inputId, previewId, placeholderId, title, fileName) {
             const fileInput = document.getElementById(inputId);
-            if (!fileInput) return; // Nếu trang không có ô input này (ví dụ Candidate không có Logo) thì bỏ qua
+            if (!fileInput) return;
 
             fileInput.addEventListener('change', () => {
                 const file = fileInput.files[0];
@@ -241,7 +233,6 @@
             });
         }
 
-        // Hộp thoại căn chỉnh ảnh dùng chung
         function openCropperModal(src, fileInput, previewId, placeholderId, title, fileName) {
             Swal.fire({
                 title: title,
@@ -262,19 +253,18 @@
                 cancelButtonText: 'Hủy',
                 didOpen: () => {
                     cropper = new Cropper(document.getElementById('cropImage'), {
-                        aspectRatio: 1,       // khung vuông 1:1 cho cả Avatar và Logo
+                        aspectRatio: 1,
                         viewMode: 1,
-                        dragMode: 'move',     // kéo ảnh thay vì kéo khung
+                        dragMode: 'move',
                         autoCropArea: 1,
                         background: false
                     });
                 },
-                // Cắt ảnh 400x400 rồi đổi thành Blob JPEG (nhỏ gọn, luôn dưới giới hạn 2MB của server)
                 preConfirm: () => new Promise(resolve => {
                     cropper.getCroppedCanvas({
                         width: 400,
                         height: 400,
-                        fillColor: '#fff',    // ảnh PNG trong suốt sẽ có nền trắng thay vì nền đen
+                        fillColor: '#fff',
                         imageSmoothingQuality: 'high'
                     }).toBlob(blob => resolve(blob), 'image/jpeg', 0.9);
                 }),
@@ -283,12 +273,11 @@
                 if (result.isConfirmed && result.value) {
                     applyCroppedFile(result.value, fileInput, previewId, placeholderId, fileName);
                 } else {
-                    fileInput.value = ''; // Hủy => bỏ file đã chọn, không đổi ảnh
+                    fileInput.value = '';
                 }
             });
         }
 
-        // Thay file trong ô chọn bằng ảnh đã cắt và cập nhật ảnh xem trước
         function applyCroppedFile(blob, fileInput, previewId, placeholderId, fileName) {
             const file = new File([blob], fileName, { type: 'image/jpeg' });
             const transfer = new DataTransfer();
@@ -298,18 +287,17 @@
             const img = document.getElementById(previewId);
             if (img) {
                 img.src = URL.createObjectURL(file);
-                img.style.display = ''; // Bỏ display:none (nếu trước đó bị ẩn bởi onerror)
+                img.style.display = '';
                 img.classList.remove('d-none');
             }
 
             const placeholder = document.getElementById(placeholderId);
             if (placeholder) {
-                placeholder.style.display = 'none'; // Ẩn khung chữ VIE (kể cả khi đang để display:grid)
+                placeholder.style.display = 'none';
                 placeholder.classList.add('d-none');
             }
         }
 
-        // Kích hoạt cho cả Avatar và Logo chỉ bằng 2 dòng gọi hàm:
         initImageCropper('AvatarFile', 'avatarPreview', 'avatarPlaceholder', 'Căn chỉnh ảnh đại diện', 'avatar.jpg');
         initImageCropper('LogoFile', 'logoPreview', 'logoPlaceholder', 'Căn chỉnh logo công ty', 'logo.jpg');
     </script>

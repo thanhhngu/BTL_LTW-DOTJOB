@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace BTL_LTW_DOTJOB.Controllers
 {
-    [Authorize(Roles = "Candidate")] // Phía Candidate chỉ báo cáo tin tuyển dụng
+    [Authorize(Roles = "Candidate")]
     [Route("reports")]
     public class ReportController : Controller
     {
@@ -17,8 +17,6 @@ namespace BTL_LTW_DOTJOB.Controllers
             _reportService = reportService;
         }
 
-        // POST: /reports/job/{jobId} - Gửi báo cáo cho 1 tin tuyển dụng (gọi bằng fetch từ trang chi tiết)
-        // Anti-forgery token gửi trong header RequestVerificationToken (xem meta csrf-token ở _Layout)
         [HttpPost("job/{jobId}")]
         public async Task<IActionResult> ReportJob(string jobId, [FromForm] CreateReportViewModel model)
         {

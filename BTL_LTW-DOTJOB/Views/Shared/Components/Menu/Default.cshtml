@@ -1,11 +1,9 @@
 ﻿@model BTL_LTW_DOTJOB.ViewModels.Profile.ProfileViewModel?
 @{
-    // Dùng cho nút đổi ngôn ngữ: đổi xong quay lại đúng trang (và bộ lọc) đang xem
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
     var isEnglish = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-@* Không nạp thêm Bootstrap (CSS và bundle) ở đây: _Layout đã nạp bản trong ~/lib. Nạp trùng làm dropdown bị toggle nhiều lần nên không mở được: _Layout đã nạp 1 bản. Nạp trùng làm dropdown bị toggle nhiều lần nên không mở được *@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container-fluid px-4">
@@ -20,31 +18,15 @@
             <div class="collapse navbar-collapse" id="topcvNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-medium">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-success"@*data-bs-toggle="dropdown"*@ asp-area="" asp-controller="Home" asp-action="Index">@Loc["Nav_Jobs"]</a>
+                        <a class="nav-link dropdown-toggle text-success" asp-area="" asp-controller="Home" asp-action="Index">@Loc["Nav_Jobs"]</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@ asp-area="" asp-controller="CV" asp-action="Index">@Loc["Nav_CreateCv"]</a>
+                        <a class="nav-link dropdown-toggle" asp-area="" asp-controller="CV" asp-action="Index">@Loc["Nav_CreateCv"]</a>
                     </li>
-                    <!--
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@>@Loc["Nav_Tools"]</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@>@Loc["Nav_Guide"]</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-warning fw-bold">DOTJOB Pro</a>
-                    </li>
-                    -->
                 </ul>
 
                 <div class="d-flex align-items-center gap-3">
-                    <!--
-                    <a href="#" class="text-secondary fs-5"><i class="fa-regular fa-bell"></i></a>
-                    <a href="#" class="text-secondary fs-5"><i class="fa-regular fa-comment-dots"></i></a>
-                    -->
                     <div class="vr mx-1"></div> 
-                    @* Đổi ngôn ngữ: lưu bằng cookie rồi quay lại đúng trang đang xem *@
                     <div class="dropdown">
                         <a href="#" class="text-secondary text-decoration-none dropdown-toggle small" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fa-solid fa-globe me-1"></i>@(isEnglish ? "EN" : "VI")
@@ -56,11 +38,9 @@
                     </div>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        // Tên lấy từ cookie đăng nhập (Claim ClaimTypes.Name); Session["User"] của master không lưu FullName
                         var displayName = User.Identity?.Name ?? Loc["Menu_Account"].Value;
                         var initial = displayName.Trim().Length > 0 ? char.ToUpper(displayName.Trim()[0]).ToString() : "U";
 
-                        <!-- Đã đăng nhập: avatar + menu tài khoản -->
                         <div class="dropdown">
                             <a href="#" class="d-flex align-items-center text-decoration-none text-dark dropdown-toggle" id="userMenu"
                                data-bs-toggle="dropdown" aria-expanded="false">
@@ -77,7 +57,6 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3" aria-labelledby="userMenu">
 
-                                @*  mục vào trang quản trị, CHỈ hiện cho Admin  *@
                                 @if (User.IsInRole("Admin"))
                                 {
                                     <li>
@@ -140,12 +119,10 @@
                     }
                     else
                     {
-                        <!-- Chưa đăng nhập -->
                         <a asp-area="" asp-controller="Auth" asp-action="Login" class="btn btn-outline-success fw-semibold rounded-3 px-3">@Loc["Menu_Login"]</a>
                         <a asp-area="" asp-controller="Auth" asp-action="Register" class="btn btn-success fw-semibold rounded-3 px-3">@Loc["Menu_Register"]</a>
                     }
 
-                    @* Chỉ hiện cho khách và Employer (Candidate/Admin không cần) *@
                     @if (User.Identity?.IsAuthenticated != true)
                     {
                         <a asp-area="" asp-controller="Auth" asp-action="Register" class="text-decoration-none text-dark ms-2 text-end lh-sm">

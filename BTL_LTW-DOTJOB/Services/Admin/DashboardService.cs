@@ -16,7 +16,6 @@ namespace BTL_LTW_DOTJOB.Services.Admin
 
         public async Task<DashboardViewModel> GetStatsAsync()
         {
-            // Mỗi dòng là một câu COUNT trong SQL, không tải dữ liệu về bộ nhớ
             return new DashboardViewModel
             {
                 TotalUsers = await _db.Users.CountAsync(),

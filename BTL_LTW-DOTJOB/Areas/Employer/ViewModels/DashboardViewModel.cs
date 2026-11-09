@@ -1,6 +1,5 @@
 namespace BTL_LTW_DOTJOB.Areas.Employer.ViewModels
 {
-    // Số liệu hiển thị ở trang Tổng quan của nhà tuyển dụng
     public class DashboardViewModel
     {
         public string CompanyName { get; set; } = string.Empty;

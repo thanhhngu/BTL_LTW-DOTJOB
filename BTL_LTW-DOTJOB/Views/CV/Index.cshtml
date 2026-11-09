@@ -3,7 +3,6 @@
 }
 
 <div class="container my-5">
-    <!-- Thanh công cụ điều khiển phía trên -->
     <div class="card shadow-sm border-0 mb-4 p-3 bg-light rounded-4">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
@@ -27,14 +26,11 @@
         </div>
     </div>
 
-    <!-- KHUNG GIẤY A4 CHỨA CV (Đây là phần sẽ được xuất thành PDF) -->
     <div class="d-flex justify-content-center">
         <div id="cv-paper" class="bg-white shadow-lg p-5 rounded-3 position-relative" style="width: 210mm; min-height: 297mm; box-sizing: border-box;">
 
             <div class="row">
-                <!-- CỘT BÊN TRÁI (Thông tin cá nhân, Kỹ năng) -->
                 <div class="col-4 border-end pe-4">
-                    <!-- Ảnh đại diện -->
                     <div class="text-center mb-4">
                         <div id="avatarContainer" onclick="changeAvatar()" class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center" style="width:120px; height:120px; border-radius:50%; overflow:hidden; font-size:40px;">
                             <img src="/images/default-avatar.png" alt="Avatar" class="w-100 h-100 object-fit-cover" id="avatarPreview" onerror="this.style.display='none'">
@@ -43,13 +39,11 @@
                         </div>
                     </div>
 
-                    <!-- Họ tên & Vị trí -->
                     <div class="text-center mb-4">
                         <h4 contenteditable="true" class="fw-bold text-dark mb-1 outline-none" style="border-bottom: 1px dashed transparent;">NGUYỄN VĂN A</h4>
                         <p contenteditable="true" class="text-success fw-semibold mb-0">Kỹ Sư Phần Mềm .NET</p>
                     </div>
 
-                    <!-- Thông tin liên hệ -->
                     <div class="mb-4">
                         <h6 ondblclick = "addContactInfo()" class="fw-bold text-uppercase text-success border-bottom pb-2 mb-3 fs-6">Thông Tin Liên Hệ</h6>
                         <ul class="list-unstyled small text-secondary" id="addContact">
@@ -60,7 +54,6 @@
                         </ul>
                     </div>
 
-                    <!-- Kỹ năng -->
                     <div class="mb-4">
                         <h6 class="fw-bold text-uppercase text-success border-bottom pb-2 mb-3 fs-6">Kỹ Năng Chuyên Môn</h6>
                         <div contenteditable="true" class="small text-secondary lh-lg">
@@ -71,10 +64,8 @@
                     </div>
                 </div>
 
-                <!-- CỘT BÊN PHẢI (Mục tiêu, Kinh nghiệm, Học vấn) -->
                 <div class="col-8 ps-4">
 
-                    <!-- Mục tiêu nghề nghiệp -->
                     <div class="mb-4">
                         <h5 class="fw-bold text-uppercase text-success border-bottom pb-2 mb-3 fs-5"><i class="fa-solid fa-bullseye me-2"></i>Mục tiêu nghề nghiệp</h5>
                         <div contenteditable="true" class="text-secondary small lh-lg">
@@ -82,7 +73,6 @@
                         </div>
                     </div>
 
-                    <!-- Kinh nghiệm làm việc -->
                     <div class="mb-4">
                         <h5 class="fw-bold text-uppercase text-success border-bottom pb-2 mb-3 fs-5"><i class="fa-solid fa-briefcase me-2"></i>Kinh nghiệm làm việc</h5>
 
@@ -100,7 +90,6 @@
                         </div>
                     </div>
 
-                    <!-- Học vấn -->
                     <div class="mb-4">
                         <h5 class="fw-bold text-uppercase text-success border-bottom pb-2 mb-3 fs-5"><i class="fa-solid fa-graduation-cap me-2"></i>Học vấn</h5>
                         <div contenteditable="true" class="small">
@@ -120,13 +109,10 @@
     </div>
 </div>
 
-<!-- html2pdf.js from CDN and swal -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Cropper.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
-    //btn export
     function exportPDF() {
         const element = document.getElementById('cv-paper');
 
@@ -147,7 +133,6 @@
                     filename += '.pdf';
                 }
 
-				// Cấu hình html2pdf dinh dạng A4, chất lượng cao, không bị cắt nội dung
                 const options = {
                     margin: 0,
                     filename: filename,
@@ -169,7 +154,6 @@
             }
         });
     }
-	// ondblclick contact info
     function addContactInfo() {
         console.log("1111");
 		const contactList = document.getElementById('addContact');
@@ -179,7 +163,6 @@
         contactList.appendChild(newItem);
     }
 
-    //ctrl g
     document.getElementById('cv-paper').addEventListener('keydown', e => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'g') {
             e.preventDefault();
@@ -199,7 +182,6 @@
 
     var cropper;
 
-    // Bấm vào avatar -> mở hộp thoại chọn file
     function changeAvatar() {
         document.getElementById('avatarInput').click();
     }
@@ -220,10 +202,9 @@
         const reader = new FileReader();
         reader.onload = ev => openCropper(ev.target.result);
         reader.readAsDataURL(file);
-        e.target.value = '';   // cho phép chọn lại cùng một file
+        e.target.value = '';
     });
 
-    // Hộp thoại căn chỉnh
     function openCropper(src) {
         Swal.fire({
             title: 'Căn chỉnh ảnh đại diện',
@@ -244,9 +225,9 @@
             cancelButtonText: 'Hủy',
             didOpen: () => {
                 cropper = new Cropper(document.getElementById('cropImage'), {
-                    aspectRatio: 1,       // khung vuông, hiển thị tròn nhờ rounded-circle
+                    aspectRatio: 1,
                     viewMode: 1,
-                    dragMode: 'move',     // kéo ảnh thay vì kéo khung
+                    dragMode: 'move',
                     autoCropArea: 1,
                     background: false
                 });
@@ -262,14 +243,13 @@
         });
     }
 
-    // Gắn ảnh đã cắt vào CV
     function applyAvatar(dataUrl) {
         const box = document.getElementById('avatarContainer');
         box.style.backgroundImage = `url(${dataUrl})`;
         box.style.backgroundSize = 'cover';
         box.style.backgroundPosition = 'center';
         box.style.backgroundRepeat = 'no-repeat';
-        box.classList.remove('bg-secondary');          // bỏ nền xám
+        box.classList.remove('bg-secondary');
 
         document.getElementById('avatarPreview').style.display = 'none';
         box.querySelector('i').style.display = 'none';

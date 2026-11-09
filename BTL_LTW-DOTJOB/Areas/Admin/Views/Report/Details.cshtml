@@ -31,7 +31,6 @@
 <a asp-action="Index" class="btn btn-sm btn-light mb-3"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
 
 <div class="row g-3">
-    @* ===== Cột trái: thông tin báo cáo ===== *@
     <div class="col-lg-7">
         <div class="card shadow-sm border-0">
             <div class="card-body">
@@ -55,7 +54,6 @@
                             <div class="text-muted small">@Model.CompanyName</div>
                             @if (Model.JobIsActive)
                             {
-                                @* Chỉ tin đang hiển thị mới mở được ở trang công khai *@
                                 <a asp-area="" asp-controller="Job" asp-action="Detail" asp-route-id="@Model.JobPostingId"
                                    target="_blank" class="btn btn-sm btn-outline-success mt-1">
                                     <i class="bi bi-box-arrow-up-right me-1"></i>Mở tin
@@ -63,7 +61,6 @@
                             }
                             else
                             {
-                                @* Tin đang bị ẩn: hiện nhãn và nút hiện lại (có xác nhận) *@
                                 <div class="mt-1 d-flex align-items-center gap-2">
                                     <span class="badge bg-danger">Đã bị ẩn</span>
                                     <form asp-action="RestoreJob" method="post" class="d-inline"
@@ -87,7 +84,6 @@
                             {
                                 <span class="badge bg-danger">Đã khóa</span>
                             }
-                            @* Sang trang Người dùng, tìm sẵn theo email để khóa / mở khóa tài khoản *@
                             <a asp-area="Admin" asp-controller="User" asp-action="Index" asp-route-keyword="@Model.TargetUserEmail"
                                class="btn btn-sm btn-outline-danger mt-1">
                                 <i class="bi bi-person-lock me-1"></i>Tới trang Người dùng
@@ -98,13 +94,11 @@
 
                 <hr />
                 <div class="fw-semibold mb-1">Nội dung báo cáo</div>
-                @* white-space giữ nguyên xuống dòng người dùng nhập *@
                 <div class="p-3 bg-light rounded" style="white-space: pre-wrap;">@Model.Content</div>
             </div>
         </div>
     </div>
 
-    @* ===== Cột phải: xử lý ===== *@
     <div class="col-lg-5">
         <div class="card shadow-sm border-0">
             <div class="card-body">
@@ -160,7 +154,6 @@
                 }
                 else
                 {
-                    @* Đã xử lý: chỉ xem, không sửa lại để giữ lịch sử *@
                     <dl class="row mb-0">
                         <dt class="col-sm-4">Kết quả</dt>
                         <dd class="col-sm-8"><span class="badge @StatusBadge(Model.Status)">@ReportStatus.Label(Model.Status)</span></dd>
@@ -180,7 +173,6 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Xác nhận trước khi ẩn tin, vì ẩn xong Admin không tự hiện lại được trên trang này
         const handleForm = document.getElementById('handleForm');
         if (handleForm) {
             handleForm.addEventListener('submit', function(e) {

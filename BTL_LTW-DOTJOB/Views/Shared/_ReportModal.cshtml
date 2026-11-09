@@ -1,5 +1,4 @@
 ﻿@model string
-@* Model = Id của tin tuyển dụng bị báo cáo. Nút mở modal nằm ở _FloatingToolBar (mục Góp ý) *@
 
 <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -38,7 +37,6 @@
 
         content.addEventListener('input', () => { count.textContent = content.value.length; });
 
-        // Mở lại modal thì xóa nội dung và lỗi của lần trước
         modalEl.addEventListener('show.bs.modal', () => {
             content.value = '';
             count.textContent = '0';
@@ -60,8 +58,8 @@
                 const res = await fetch('/reports/job/@Model', {
                     method: 'POST',
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest', // để server trả 401/403 thay vì chuyển hướng 302
-                        'RequestVerificationToken': getCsrfToken() // hàm có sẵn trong site.js
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'RequestVerificationToken': getCsrfToken()
                     },
                     body: new URLSearchParams({ content: text })
                 });

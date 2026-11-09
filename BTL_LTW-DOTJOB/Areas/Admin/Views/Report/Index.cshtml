@@ -5,7 +5,6 @@
 }
 
 @functions {
-    // Màu nhãn theo trạng thái báo cáo
     string StatusBadge(string status) => status switch
     {
         ReportStatus.Resolved => "bg-success",
@@ -36,7 +35,6 @@
     </div>
 }
 
-@* Bộ lọc gửi bằng GET để phân trang giữ được bộ lọc *@
 <form method="get" class="row g-2 mb-3">
     <div class="col-md-4">
         <select name="status" class="form-select">
@@ -79,7 +77,6 @@
                 @foreach (var r in Model.Reports)
                 {
                     <tr>
-                        @* CreatedAt lưu giờ UTC nên đổi sang giờ máy chủ để hiển thị *@
                         <td class="text-nowrap">@r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                         <td>
                             <div class="fw-semibold">@r.ReporterName</div>

@@ -2,10 +2,9 @@
 
 namespace BTL_LTW_DOTJOB.ViewModels.Admin
 {
-    // Dữ liệu của form Thêm / Sửa danh mục
     public class CategoryFormViewModel
     {
-        public string? Id { get; set; } // null khi thêm mới, có giá trị khi sửa
+        public string? Id { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập tên danh mục.")]
         [StringLength(100, ErrorMessage = "Tên danh mục tối đa 100 ký tự.")]
