@@ -1,5 +1,7 @@
 using BTL_LTW_DOTJOB.Data;
 using BTL_LTW_DOTJOB.Models;
+using BTL_LTW_DOTJOB.Services.Reports;
+using BTL_LTW_DOTJOB.ViewModels.Reports;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -15,12 +17,14 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
     public class ApplicationsController : Controller
     {
         private readonly AppDbContext _db;
+        private readonly IReportService _reportService;
 
         private const int PageSize = 10;
 
-        public ApplicationsController(AppDbContext db)
+        public ApplicationsController(AppDbContext db, IReportService reportService)
         {
             _db = db;
+            _reportService = reportService;
         }
 
         // Lấy Id công ty của HR đang đăng nhập (không nhận từ form hay URL)
@@ -104,6 +108,32 @@ namespace BTL_LTW_DOTJOB.Areas.Employer.Controllers
             }, "Value", "Text", status);
 
             return View(pagedApplications);
+        }
+
+        // POST: /Employer/Applications/ReportCandidate/{id} - HR báo cáo ứng viên của 1 đơn ứng tuyển (vd: nộp CV linh tinh)
+        // Gọi bằng fetch, anti-forgery token gửi trong header RequestVerificationToken. Chỉ Admin mới có quyền khóa tài khoản
+        [HttpPost]
+        public async Task<IActionResult> ReportCandidate(string id, [FromForm] CreateReportViewModel model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Vui lòng đăng nhập lại.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState.Values.SelectMany(v => v.Errors).First().ErrorMessage);
+            }
+
+            var (success, message) = await _reportService.CreateUserReportAsync(userId, id, model.Content);
+
+            if (!success)
+            {
+                return BadRequest(message);
+            }
+
+            return Ok(new { message });
         }
     }
 }

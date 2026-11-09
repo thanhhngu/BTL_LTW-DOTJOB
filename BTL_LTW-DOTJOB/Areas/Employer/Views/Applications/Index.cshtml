@@ -42,6 +42,33 @@
     </div>
 </div>
 
+@* Hộp báo cáo ứng viên (nộp CV linh tinh, spam...). Admin sẽ xem xét và có thể khóa tài khoản *@
+<div class="modal fade" id="reportCandidateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="reportCandidateForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportCandidateTitle">Báo cáo ứng viên</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-2">Mô tả lý do (nộp CV không liên quan, spam, thông tin giả mạo...). Quản trị viên sẽ xem xét và quyết định có khóa tài khoản hay không.</p>
+                    <textarea id="reportCandidateContent" class="form-control" rows="5" maxlength="1000"
+                              placeholder="Tối thiểu 10 ký tự"></textarea>
+                    <div class="d-flex justify-content-between mt-1">
+                        <span id="reportCandidateError" class="text-danger small"></span>
+                        <span class="text-muted small"><span id="reportCandidateCount">0</span>/1000</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" id="btnSubmitReportCandidate" class="btn btn-danger">Gửi báo cáo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         const listEl = document.getElementById('application-list');
@@ -91,12 +118,15 @@
             }
         }
 
-        // Hiện/xoá thông báo lỗi của API ở đầu trang
-        function showError(message) {
+        // Hiện/xoá thông báo của API ở đầu trang (type: danger | success)
+        function showError(message) { showAlert(message, 'danger'); }
+        function showSuccess(message) { showAlert(message, 'success'); }
+
+        function showAlert(message, type) {
             const box = document.getElementById('api-alert');
             box.innerHTML = '';
             const alert = document.createElement('div');
-            alert.className = 'alert alert-danger alert-dismissible fade show';
+            alert.className = 'alert alert-' + type + ' alert-dismissible fade show';
             alert.textContent = message;
             const close = document.createElement('button');
             close.type = 'button';
@@ -166,6 +196,65 @@
                 }
             });
         }
+
+        // ===== Báo cáo ứng viên =====
+        const reportForm = document.getElementById('reportCandidateForm');
+        const reportContent = document.getElementById('reportCandidateContent');
+        const reportCount = document.getElementById('reportCandidateCount');
+        const reportError = document.getElementById('reportCandidateError');
+        const reportButton = document.getElementById('btnSubmitReportCandidate');
+        const reportModalEl = document.getElementById('reportCandidateModal');
+        let reportApplicationId = null; // đơn ứng tuyển đang được báo cáo
+
+        reportContent.addEventListener('input', () => { reportCount.textContent = reportContent.value.length; });
+
+        reportForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            reportError.textContent = '';
+
+            const text = reportContent.value.trim();
+            if (text.length < 10) {
+                reportError.textContent = 'Nội dung báo cáo tối thiểu 10 ký tự.';
+                return;
+            }
+
+            const token = document.querySelector('#antiforgery input[name="__RequestVerificationToken"]').value;
+            reportButton.disabled = true;
+            try {
+                const response = await fetch('/Employer/Applications/ReportCandidate/' + encodeURIComponent(reportApplicationId), {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'RequestVerificationToken': token },
+                    body: new URLSearchParams({ content: text })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    bootstrap.Modal.getOrCreateInstance(reportModalEl).hide();
+                    showSuccess(data.message);
+                } else if (response.status === 401 || response.status === 403) {
+                    location.reload(); // hết phiên đăng nhập
+                } else {
+                    reportError.textContent = await response.text();
+                }
+            } catch {
+                reportError.textContent = 'Không kết nối được máy chủ.';
+            } finally {
+                reportButton.disabled = false;
+            }
+        });
+
+        // Bảng được nạp lại bằng AJAX nên gắn sự kiện ở document thay vì từng nút
+        document.addEventListener('click', function (e) {
+            const reportBtn = e.target.closest('.btn-report-candidate');
+            if (!reportBtn) return;
+
+            reportApplicationId = reportBtn.dataset.applicationId;
+            document.getElementById('reportCandidateTitle').textContent = 'Báo cáo ứng viên - ' + reportBtn.dataset.name;
+            reportContent.value = '';
+            reportCount.textContent = '0';
+            reportError.textContent = '';
+            bootstrap.Modal.getOrCreateInstance(reportModalEl).show();
+        });
 
         // Bảng được nạp lại bằng AJAX nên gắn sự kiện ở document thay vì từng nút
         document.addEventListener('click', function (e) {

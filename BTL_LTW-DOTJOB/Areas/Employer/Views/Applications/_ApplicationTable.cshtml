@@ -68,6 +68,13 @@ else
                                 <button type="button" class="btn btn-sm btn-outline-secondary @(application.Status == ApplicationStatus.Pending ? "d-none" : "")"
                                         data-status="@ApplicationStatus.Pending"
                                         onclick="updateStatus('@application.Id', '@ApplicationStatus.Pending')">Đặt lại</button>
+                                @* Báo cáo ứng viên nộp CV linh tinh / spam để Admin xem xét (có thể khóa tài khoản) *@
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-report-candidate"
+                                        title="Báo cáo ứng viên này"
+                                        data-application-id="@application.Id"
+                                        data-name="@application.User?.FullName">
+                                    <i class="fa-regular fa-flag"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
