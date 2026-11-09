@@ -7,10 +7,12 @@ using BTL_LTW_DOTJOB.Services.SavedJobs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using System.Globalization;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 
@@ -21,6 +23,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
+
+// Đa ngôn ngữ (quốc tế hóa): mặc định tiếng Việt, đổi sang tiếng Anh bằng cookie (xem CultureController).
+// Chuỗi giao diện nằm trong Resources/SharedResource.resx (vi) và SharedResource.en.resx (en).
+// Culture cũng quyết định cách hiển thị ngày giờ, số, tiền (vd: 1.000.000 hay 1,000,000)
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { new CultureInfo("vi-VN"), new CultureInfo("en-US") };
+    options.DefaultRequestCulture = new RequestCulture("vi-VN");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+
+    // Chỉ theo lựa chọn của người dùng (cookie), bỏ qua ngôn ngữ trình duyệt để mặc định luôn là tiếng Việt,
+    // và không phụ thuộc cài đặt Region của máy chạy ứng dụng
+    options.RequestCultureProviders = new List<IRequestCultureProvider> { new CookieRequestCultureProvider() };
 });
 
 // Cache nhỏ dùng để kiểm tra trạng thái khóa tài khoản (IsActive) mà không truy vấn DB ở mọi request
@@ -185,6 +203,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Mã lỗi không kèm nội dung (404, 403, 405...) hiện trang báo lỗi thân thiện thay vì trang trắng
+app.UseStatusCodePagesWithReExecute("/Home/Status", "?code={0}");
+
 // Header bảo mật cơ bản cho mọi phản hồi (kể cả file CV tải về)
 app.Use(async (context, next) =>
 {
@@ -197,6 +218,7 @@ app.Use(async (context, next) =>
 
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // phục vụ file tải lên lúc chạy (wwwroot/uploads: avatar, logo). MapStaticAssets chỉ phục vụ file có sẵn khi build
+app.UseRequestLocalization();
 app.UseRouting();
 app.UseRateLimiter();
 app.UseSession();

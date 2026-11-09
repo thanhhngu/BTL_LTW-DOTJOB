@@ -37,6 +37,8 @@
                 target = min === '' ? minMessage : maxMessage;
             } else if (min !== '' && Number(max) < Number(min)) {
                 error = 'Lương tối đa phải lớn hơn hoặc bằng lương tối thiểu.';
+            } else if (max !== '' && Number(max) <= 0) {
+                error = 'Lương tối đa phải lớn hơn 0, hoặc để trống cả hai ô nếu thỏa thuận.';
             }
 
             minMessage.textContent = '';

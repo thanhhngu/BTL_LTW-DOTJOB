@@ -44,19 +44,51 @@
 
 @section Scripts {
     <script>
-        async function loadApplications(page) {
+        const listEl = document.getElementById('application-list');
+        let latestRequest = 0; // bỏ qua kết quả của request cũ khi người dùng đổi bộ lọc liên tục
+
+        // Ghép bộ lọc hiện tại thành chuỗi query, bỏ qua giá trị rỗng cho URL gọn
+        function buildQuery(page) {
+            const params = new URLSearchParams();
             const jobId = document.getElementById('jobId').value;
             const status = document.getElementById('status').value;
-            const url = `/Employer/Applications?jobId=${encodeURIComponent(jobId)}&status=${encodeURIComponent(status)}&page=${page}`;
+            if (jobId) params.set('jobId', jobId);
+            if (status) params.set('status', status);
+            if (page > 1) params.set('page', page);
+            const query = params.toString();
+            return query ? '?' + query : '';
+        }
 
-            // Header X-Requested-With: server trả partial, và trả 401/403 thay vì chuyển hướng khi hết phiên
-            const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            if (!response.ok) {
-                location.reload();
-                return;
+        async function loadApplications(page) {
+            const requestId = ++latestRequest;
+            listEl.classList.add('opacity-50'); // báo đang tải
+
+            try {
+                // Header X-Requested-With: server trả partial, và trả 401/403 thay vì chuyển hướng khi hết phiên
+                const response = await fetch('/Employer/Applications' + buildQuery(page), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (requestId !== latestRequest) return;
+
+                if (response.status === 401 || response.status === 403) {
+                    location.reload(); // hết phiên đăng nhập
+                    return;
+                }
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+
+                listEl.innerHTML = await response.text();
+
+                // Server có thể đã đổi số trang (vd: ?page=999 thì về trang cuối)
+                const pager = listEl.querySelector('[data-page-number]');
+                const currentPage = pager ? Number(pager.dataset.pageNumber) : 1;
+
+                // Cập nhật URL để F5 / nút Quay lại / chia sẻ link vẫn giữ bộ lọc và trang
+                history.replaceState(null, '', '/Employer/Applications' + buildQuery(currentPage));
+            } catch (error) {
+                if (requestId === latestRequest) {
+                    showError('Không tải được danh sách ứng viên. Vui lòng thử lại.');
+                }
+            } finally {
+                if (requestId === latestRequest) listEl.classList.remove('opacity-50');
             }
-
-            document.getElementById('application-list').innerHTML = await response.text();
         }
 
         // Hiện/xoá thông báo lỗi của API ở đầu trang
@@ -78,15 +110,29 @@
         async function updateStatus(id, status) {
             const token = document.querySelector('#antiforgery input[name="__RequestVerificationToken"]').value;
 
-            const response = await fetch(`/api/applications/${id}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'RequestVerificationToken': token
-                },
-                body: JSON.stringify({ status })
-            });
+            // Khoá các nút của dòng này trong lúc chờ (chống bấm liên tục), lỗi thì trả về như cũ
+            const buttons = [...document.querySelectorAll('#actions-' + id + ' button')];
+            const previous = buttons.map(button => button.disabled);
+            buttons.forEach(button => button.disabled = true);
+            const restore = () => buttons.forEach((button, i) => button.disabled = previous[i]);
+
+            let response;
+            try {
+                response = await fetch(`/api/applications/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ status })
+                });
+            } catch (error) {
+                // Mất mạng hoặc server không phản hồi
+                restore();
+                showError('Không kết nối được máy chủ. Vui lòng thử lại.');
+                return;
+            }
 
             if (response.status === 401) {
                 location.reload(); // hết phiên đăng nhập
@@ -94,6 +140,7 @@
             }
 
             if (!response.ok) {
+                restore();
                 let message = 'Không thể cập nhật trạng thái. Vui lòng thử lại.';
                 try {
                     const error = await response.json();

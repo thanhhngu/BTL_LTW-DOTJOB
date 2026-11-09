@@ -1,6 +1,6 @@
 @* Các nút thao tác cho một tin tuyển dụng, dùng trong từng dòng của danh sách (_JobTable).
    Form có data-job-action sẽ được Index.cshtml gửi bằng fetch để giữ nguyên trang và bộ lọc đang xem. *@
-@model BTL_LTW_DOTJOB.Models.JobPosting
+@model BTL_LTW_DOTJOB.Areas.Employer.ViewModels.JobListItem
 
 <div class="d-flex gap-1 flex-wrap">
     @if (Model.IsActive)
