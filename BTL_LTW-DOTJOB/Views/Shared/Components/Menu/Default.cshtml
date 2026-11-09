@@ -1,5 +1,4 @@
-﻿@using BTL_LTW_DOTJOB.Helpers
-@model BTL_LTW_DOTJOB.ViewModels.Profile.ProfileViewModel?
+﻿@model BTL_LTW_DOTJOB.ViewModels.Profile.ProfileViewModel?
 @{
     // Dùng cho nút đổi ngôn ngữ: đổi xong quay lại đúng trang (và bộ lọc) đang xem
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
@@ -53,8 +52,8 @@
                     </div>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        // Tên lấy từ Session["User"] (Session trống thì dùng tên trong cookie đăng nhập)
-                        var displayName = Context.Session.GetUser()?.FullName ?? User.Identity?.Name ?? Loc["Menu_Account"].Value;
+                        // Tên lấy từ cookie đăng nhập (Claim ClaimTypes.Name); Session["User"] của master không lưu FullName
+                        var displayName = User.Identity?.Name ?? Loc["Menu_Account"].Value;
                         var initial = displayName.Trim().Length > 0 ? char.ToUpper(displayName.Trim()[0]).ToString() : "U";
 
                         <!-- Đã đăng nhập: avatar + menu tài khoản -->
