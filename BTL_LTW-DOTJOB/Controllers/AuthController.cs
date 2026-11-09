@@ -88,9 +88,7 @@ namespace BTL_LTW_DOTJOB.Controllers
                 new AuthenticationProperties
                 {
                     IsPersistent = true,
-                    ExpiresUtc = model.RememberMe
-                        ? DateTimeOffset.UtcNow.AddDays(7)
-                        : DateTimeOffset.UtcNow.AddDays(1)
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7) // Cookie đăng nhập sống 7 ngày
                 });
 
             HttpContext.Session.SetUser(new SessionUser

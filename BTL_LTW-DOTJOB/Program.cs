@@ -107,7 +107,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.Name = "DotJobAuthCookie";
         options.LoginPath = "/Auth/Login";
         options.AccessDeniedPath = "/Auth/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromDays(1);
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
 
         // Cookie đăng nhập: JavaScript không đọc được, không gửi kèm request từ site khác,
         // và chỉ đi qua HTTPS khi chạy thật (Development vẫn cho http để dùng profile "http")

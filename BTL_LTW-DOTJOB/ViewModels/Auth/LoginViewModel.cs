@@ -11,7 +11,5 @@ namespace BTL_LTW_DOTJOB.ViewModels.Auth
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
         [MinLength(6, ErrorMessage = "Mật khẩu tối thiểu 6 ký tự.")]
         public string Password { get; set; }
-
-        public bool RememberMe { get; set; }
     }
 }

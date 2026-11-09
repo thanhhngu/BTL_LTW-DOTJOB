@@ -50,12 +50,6 @@ Layout = null;
                 <span asp-validation-for="Password" class="form-message"></span>
             </div>
 
-            <div class="form-group">
-                <label>
-                    <input asp-for="RememberMe" type="checkbox" /> Ghi nhớ đăng nhập
-                </label>
-            </div>
-
             <button value ="Login" class="form-submit">Login</button>
             <a id="link-tab" href="@Url.Action("Register", "Auth")">Create Now!!</a>
         </form>
