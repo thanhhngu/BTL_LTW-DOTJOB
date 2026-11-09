@@ -1,4 +1,5 @@
-﻿using BTL_LTW_DOTJOB.Services.Profile;
+﻿using BTL_LTW_DOTJOB.Helpers;
+using BTL_LTW_DOTJOB.Services.Profile;
 using BTL_LTW_DOTJOB.ViewModels.Profile;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -100,6 +101,9 @@ namespace BTL_LTW_DOTJOB.Controllers
 
         private async Task RefreshSignInAsync(string fullName)
         {
+            // Giữ nguyên kiểu đăng nhập hiện tại (có hay không "Ghi nhớ đăng nhập") và thời hạn cũ của cookie
+            var current = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
             var claims = User.Claims
                 .Where(c => c.Type != ClaimTypes.Name)
                 .Append(new Claim(ClaimTypes.Name, fullName));
@@ -111,9 +115,17 @@ namespace BTL_LTW_DOTJOB.Controllers
                 new ClaimsPrincipal(identity),
                 new AuthenticationProperties
                 {
-                    IsPersistent = true,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                    IsPersistent = current.Properties?.IsPersistent ?? false,
+                    ExpiresUtc = current.Properties?.ExpiresUtc
                 });
+
+            // Cập nhật luôn tên trong Session["User"]
+            var sessionUser = HttpContext.Session.GetUser();
+            if (sessionUser != null)
+            {
+                sessionUser.FullName = fullName;
+                HttpContext.Session.SetUser(sessionUser);
+            }
         }
     }
 }

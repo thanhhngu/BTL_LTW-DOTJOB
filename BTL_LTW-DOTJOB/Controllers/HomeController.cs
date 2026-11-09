@@ -61,6 +61,24 @@ namespace BTL_LTW_DOTJOB.Controllers
             return View();
         }
 
+        // Trang báo lỗi thân thiện cho các mã 400/403/404/405... (được UseStatusCodePagesWithReExecute gọi lại).
+        // Re-execute giữ nguyên phương thức gốc (có thể là POST) nên action này bỏ qua kiểm tra anti-forgery.
+        // Không đặt tên là StatusCode vì trùng với phương thức StatusCode(int) có sẵn của Controller
+        [IgnoreAntiforgeryToken]
+        public IActionResult Status(int code)
+        {
+            ViewBag.Code = code;
+            ViewBag.Message = code switch
+            {
+                400 => "Yêu cầu không hợp lệ. Có thể phiên làm việc đã hết hạn, hãy tải lại trang rồi thử lại.",
+                403 => "Bạn không có quyền truy cập trang này.",
+                404 => "Không tìm thấy trang bạn cần. Đường dẫn có thể sai hoặc nội dung đã bị xóa.",
+                405 => "Thao tác này không được hỗ trợ khi mở trực tiếp bằng đường dẫn.",
+                _ => "Có lỗi xảy ra khi xử lý yêu cầu."
+            };
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

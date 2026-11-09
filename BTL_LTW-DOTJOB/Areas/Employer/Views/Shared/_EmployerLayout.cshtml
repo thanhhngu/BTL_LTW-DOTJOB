@@ -2,79 +2,95 @@
     // Tên controller hiện tại, dùng để tô sáng mục đang mở trong sidebar
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     string Active(string controller) => currentController == controller ? "active" : "";
+
+    // Dùng cho nút đổi ngôn ngữ: đổi xong quay lại đúng trang đang xem
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var isEnglish = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
+
+    // Chữ cái đầu của tên hiển thị trong ô avatar
+    var userName = User.Identity?.Name?.Trim() ?? "";
+    var userInitial = userName.Length > 0 ? char.ToUpper(userName[0]).ToString() : "U";
 }
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - DotJob Nhà tuyển dụng</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <style>
-        /* Mục đang chọn trong sidebar dùng màu xanh của DotJob thay vì xanh dương mặc định */
-        .list-group-item.active { background-color: #198754; border-color: #198754; }
-    </style>
+    <link rel="stylesheet" href="~/css/employer.css" asp-append-version="true" />
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-dark bg-success px-3">
-        <button class="btn btn-outline-light d-md-none me-2" type="button"
-                data-bs-toggle="offcanvas" data-bs-target="#employerSidebar">
+<body class="emp-body">
+    <nav class="emp-topbar">
+        <button class="btn btn-outline-light d-md-none emp-toggle" type="button"
+                data-bs-toggle="offcanvas" data-bs-target="#employerSidebar" aria-label="Menu">
             <i class="fa-solid fa-bars"></i>
         </button>
-        <a class="navbar-brand fw-bold" asp-area="Employer" asp-controller="Dashboard" asp-action="Index">
-            DOTJOB <small class="fw-normal">Nhà tuyển dụng</small>
+        <a class="emp-brand" asp-area="Employer" asp-controller="Dashboard" asp-action="Index">
+            <span class="emp-brand-name">DOTJOB</span>
+            <span class="emp-brand-tag">@Loc["Emp_Brand"]</span>
         </a>
-        <div class="ms-auto d-flex align-items-center gap-3 text-white">
-            <a class="text-white text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">
-                <i class="fa-solid fa-house"></i> Trang chủ
+        <div class="emp-topbar-right">
+            <a asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="fa-solid fa-house"></i> <span class="d-none d-sm-inline">@Loc["Emp_Home"]</span>
             </a>
-            <span class="d-none d-sm-inline"><i class="fa-regular fa-circle-user"></i> @User.Identity?.Name</span>
+            <div class="dropdown">
+                <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa-solid fa-globe"></i> @(isEnglish ? "EN" : "VI")
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                    <li><a class="dropdown-item @(isEnglish ? "" : "fw-bold")" asp-area="" asp-controller="Culture" asp-action="Set" asp-route-culture="vi-VN" asp-route-returnUrl="@returnUrl">Tiếng Việt</a></li>
+                    <li><a class="dropdown-item @(isEnglish ? "fw-bold" : "")" asp-area="" asp-controller="Culture" asp-action="Set" asp-route-culture="en-US" asp-route-returnUrl="@returnUrl">English</a></li>
+                </ul>
+            </div>
+            <span class="emp-user">
+                <span class="emp-avatar">@userInitial</span>
+                <span class="d-none d-md-inline">@User.Identity?.Name</span>
+            </span>
             <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post" class="m-0">
                 <button type="submit" class="btn btn-sm btn-outline-light">
-                    <i class="fa-solid fa-right-from-bracket"></i> <span class="d-none d-sm-inline">Đăng xuất</span>
+                    <i class="fa-solid fa-right-from-bracket"></i> <span class="d-none d-sm-inline">@Loc["Menu_Logout"]</span>
                 </button>
             </form>
         </div>
     </nav>
 
-    <div class="container-fluid">
-        <div class="row">
-            <aside class="col-md-3 col-lg-2 p-0 bg-white border-end">
-                <div class="offcanvas-md offcanvas-start" tabindex="-1" id="employerSidebar">
-                    <div class="offcanvas-header">
-                        <h5 class="offcanvas-title">Menu</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#employerSidebar"></button>
-                    </div>
-                    <div class="offcanvas-body p-0">
-                        <div class="list-group list-group-flush w-100">
-                            <a class="list-group-item list-group-item-action @Active("Dashboard")"
-                               asp-area="Employer" asp-controller="Dashboard" asp-action="Index">
-                                <i class="fa-solid fa-chart-line me-2"></i> Tổng quan
-                            </a>
-                            <a class="list-group-item list-group-item-action @Active("Jobs")"
-                               asp-area="Employer" asp-controller="Jobs" asp-action="Index">
-                                <i class="fa-solid fa-briefcase me-2"></i> Tin tuyển dụng
-                            </a>
-                            <a class="list-group-item list-group-item-action @Active("Applications")"
-                               asp-area="Employer" asp-controller="Applications" asp-action="Index">
-                                <i class="fa-solid fa-users me-2"></i> Ứng viên
-                            </a>
-                            @* Thông tin công ty và logo sửa ở trang Hồ sơ cá nhân dùng chung (/profile) *@
-                            <a class="list-group-item list-group-item-action"
-                               asp-area="" asp-controller="Profile" asp-action="Index">
-                                <i class="fa-solid fa-building me-2"></i> Hồ sơ công ty
-                            </a>
-                        </div>
-                    </div>
+    <div class="emp-shell">
+        <aside class="emp-sidebar">
+            <div class="offcanvas-md offcanvas-start" tabindex="-1" id="employerSidebar">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">@Loc["Emp_Menu"]</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#employerSidebar"></button>
                 </div>
-            </aside>
+                <div class="offcanvas-body p-0">
+                    <nav class="emp-nav">
+                        <a class="emp-nav-link @Active("Dashboard")"
+                           asp-area="Employer" asp-controller="Dashboard" asp-action="Index">
+                            <i class="fa-solid fa-chart-line"></i> @Loc["Emp_Dashboard"]
+                        </a>
+                        <a class="emp-nav-link @Active("Jobs")"
+                           asp-area="Employer" asp-controller="Jobs" asp-action="Index">
+                            <i class="fa-solid fa-briefcase"></i> @Loc["Emp_Jobs"]
+                        </a>
+                        <a class="emp-nav-link @Active("Applications")"
+                           asp-area="Employer" asp-controller="Applications" asp-action="Index">
+                            <i class="fa-solid fa-users"></i> @Loc["Emp_Applications"]
+                        </a>
+                        @* Thông tin công ty và logo sửa ở trang Hồ sơ cá nhân dùng chung (/profile) *@
+                        <a class="emp-nav-link"
+                           asp-area="" asp-controller="Profile" asp-action="Index">
+                            <i class="fa-solid fa-building"></i> @Loc["Emp_Company"]
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </aside>
 
-            <main class="col-md-9 col-lg-10 py-4 px-4">
-                <partial name="_Alert" />
-                @RenderBody()
-            </main>
-        </div>
+        <main class="emp-main">
+            <partial name="_Alert" />
+            @RenderBody()
+        </main>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

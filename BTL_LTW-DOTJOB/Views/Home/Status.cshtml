@@ -1,0 +1,9 @@
+@{
+    ViewData["Title"] = "Có lỗi xảy ra";
+}
+
+<div class="container text-center py-5">
+    <h1 class="text-success fw-bold display-3">@ViewBag.Code</h1>
+    <h4 class="mb-3">@ViewBag.Message</h4>
+    <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-success mt-2">Quay lại Trang chủ</a>
+</div>

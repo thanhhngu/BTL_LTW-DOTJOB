@@ -1,7 +1,12 @@
-﻿@model BTL_LTW_DOTJOB.ViewModels.Profile.ProfileViewModel?
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+﻿@using BTL_LTW_DOTJOB.Helpers
+@model BTL_LTW_DOTJOB.ViewModels.Profile.ProfileViewModel?
+@{
+    // Dùng cho nút đổi ngôn ngữ: đổi xong quay lại đúng trang (và bộ lọc) đang xem
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var isEnglish = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en";
+}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-@* Không nạp thêm bootstrap.bundle ở đây: _Layout đã nạp 1 bản. Nạp trùng làm dropdown bị toggle nhiều lần nên không mở được *@
+@* Không nạp thêm Bootstrap (CSS và bundle) ở đây: _Layout đã nạp bản trong ~/lib. Nạp trùng làm dropdown bị toggle nhiều lần nên không mở được: _Layout đã nạp 1 bản. Nạp trùng làm dropdown bị toggle nhiều lần nên không mở được *@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container-fluid px-4">
@@ -16,16 +21,16 @@
             <div class="collapse navbar-collapse" id="topcvNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-medium">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-success"@*data-bs-toggle="dropdown"*@ asp-area="" asp-controller="Home" asp-action="Index">Việc làm</a>
+                        <a class="nav-link dropdown-toggle text-success"@*data-bs-toggle="dropdown"*@ asp-area="" asp-controller="Home" asp-action="Index">@Loc["Nav_Jobs"]</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@ asp-area="" asp-controller="CV" asp-action="Index">Tạo CV</a>
+                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@ asp-area="" asp-controller="CV" asp-action="Index">@Loc["Nav_CreateCv"]</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@>Công cụ</a>
+                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@>@Loc["Nav_Tools"]</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@>Cẩm nang nghề nghiệp</a>
+                        <a class="nav-link dropdown-toggle"@*data-bs-toggle="dropdown"*@>@Loc["Nav_Guide"]</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-warning fw-bold">DOTJOB Pro</a>
@@ -36,9 +41,20 @@
                     <a href="#" class="text-secondary fs-5"><i class="fa-regular fa-bell"></i></a>
                     <a href="#" class="text-secondary fs-5"><i class="fa-regular fa-comment-dots"></i></a>
                     <div class="vr mx-1"></div> 
+                    @* Đổi ngôn ngữ: lưu bằng cookie rồi quay lại đúng trang đang xem *@
+                    <div class="dropdown">
+                        <a href="#" class="text-secondary text-decoration-none dropdown-toggle small" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-globe me-1"></i>@(isEnglish ? "EN" : "VI")
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                            <li><a class="dropdown-item @(isEnglish ? "" : "fw-bold")" asp-area="" asp-controller="Culture" asp-action="Set" asp-route-culture="vi-VN" asp-route-returnUrl="@returnUrl">Tiếng Việt</a></li>
+                            <li><a class="dropdown-item @(isEnglish ? "fw-bold" : "")" asp-area="" asp-controller="Culture" asp-action="Set" asp-route-culture="en-US" asp-route-returnUrl="@returnUrl">English</a></li>
+                        </ul>
+                    </div>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        var displayName = User.Identity?.Name ?? "Tài khoản";
+                        // Tên lấy từ Session["User"] (Session trống thì dùng tên trong cookie đăng nhập)
+                        var displayName = Context.Session.GetUser()?.FullName ?? User.Identity?.Name ?? Loc["Menu_Account"].Value;
                         var initial = displayName.Trim().Length > 0 ? char.ToUpper(displayName.Trim()[0]).ToString() : "U";
 
                         <!-- Đã đăng nhập: avatar + menu tài khoản -->
@@ -71,7 +87,7 @@
 
                                 <li>
                                     <a class="dropdown-item" asp-area="" asp-controller="Profile" asp-action="Index">
-                                        <i class="fa-regular fa-user text-success me-2"></i>Hồ sơ cá nhân
+                                        <i class="fa-regular fa-user text-success me-2"></i>@Loc["Menu_Profile"]
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
@@ -80,17 +96,17 @@
                                 {
                                     <li>
                                         <a class="dropdown-item" asp-area="" asp-controller="Application" asp-action="Index">
-                                            <i class="fa-regular fa-file-lines text-success me-2"></i>Việc làm đã ứng tuyển
+                                            <i class="fa-regular fa-file-lines text-success me-2"></i>@Loc["Menu_Applied"]
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-area="" asp-controller="SavedJob" asp-action="Index">
-                                            <i class="fa-regular fa-heart text-success me-2"></i>Việc làm đã lưu
+                                            <i class="fa-regular fa-heart text-success me-2"></i>@Loc["Menu_Saved"]
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-area="" asp-controller="CV" asp-action="Index">
-                                            <i class="fa-regular fa-id-card text-success me-2"></i>Tạo CV
+                                            <i class="fa-regular fa-id-card text-success me-2"></i>@Loc["Nav_CreateCv"]
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
@@ -99,12 +115,12 @@
                                 {
                                     <li>
                                         <a class="dropdown-item" asp-area="Employer" asp-controller="Dashboard" asp-action="Index">
-                                            <i class="fa-solid fa-chart-line text-success me-2"></i>Tổng quan nhà tuyển dụng
+                                            <i class="fa-solid fa-chart-line text-success me-2"></i>@Loc["Menu_EmployerDashboard"]
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-area="Employer" asp-controller="Jobs" asp-action="Index">
-                                            <i class="fa-solid fa-briefcase text-success me-2"></i>Quản lý tin tuyển dụng
+                                            <i class="fa-solid fa-briefcase text-success me-2"></i>@Loc["Menu_ManageJobs"]
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
@@ -112,7 +128,7 @@
                                 <li>
                                     <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
                                         <button type="submit" class="dropdown-item text-danger">
-                                            <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
+                                            <i class="fa-solid fa-right-from-bracket me-2"></i>@Loc["Menu_Logout"]
                                         </button>
                                     </form>
                                 </li>
@@ -122,23 +138,23 @@
                     else
                     {
                         <!-- Chưa đăng nhập -->
-                        <a asp-area="" asp-controller="Auth" asp-action="Login" class="btn btn-outline-success fw-semibold rounded-3 px-3">Đăng nhập</a>
-                        <a asp-area="" asp-controller="Auth" asp-action="Register" class="btn btn-success fw-semibold rounded-3 px-3">Đăng ký</a>
+                        <a asp-area="" asp-controller="Auth" asp-action="Login" class="btn btn-outline-success fw-semibold rounded-3 px-3">@Loc["Menu_Login"]</a>
+                        <a asp-area="" asp-controller="Auth" asp-action="Register" class="btn btn-success fw-semibold rounded-3 px-3">@Loc["Menu_Register"]</a>
                     }
 
                     @* Chỉ hiện cho khách và Employer (Candidate/Admin không cần) *@
                     @if (User.Identity?.IsAuthenticated != true)
                     {
                         <a asp-area="" asp-controller="Auth" asp-action="Register" class="text-decoration-none text-dark ms-2 text-end lh-sm">
-                            <small class="text-muted d-block" style="font-size: 0.75rem;">Bạn là nhà tuyển dụng?</small>
-                            <span class="fw-bold">Đăng tuyển ngay <i class="fa-solid fa-angle-right"></i></span>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">@Loc["Menu_AreYouEmployer"]</small>
+                            <span class="fw-bold">@Loc["Menu_PostJob"] <i class="fa-solid fa-angle-right"></i></span>
                         </a>
                     }
                     else if (User.IsInRole("Employer"))
                     {
                         <a asp-area="Employer" asp-controller="Jobs" asp-action="Create" class="text-decoration-none text-dark ms-2 text-end lh-sm">
-                            <small class="text-muted d-block" style="font-size: 0.75rem;">Nhà tuyển dụng</small>
-                            <span class="fw-bold">Đăng tuyển ngay <i class="fa-solid fa-angle-right"></i></span>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">@Loc["Menu_Employer"]</small>
+                            <span class="fw-bold">@Loc["Menu_PostJob"] <i class="fa-solid fa-angle-right"></i></span>
                         </a>
                     }
                 </div>
