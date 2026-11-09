@@ -76,6 +76,9 @@ namespace BTL_LTW_DOTJOB.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Category");
                 });
 
@@ -305,7 +308,7 @@ namespace BTL_LTW_DOTJOB.Migrations
                     b.HasOne("BTL_LTW_DOTJOB.Models.Category", "Category")
                         .WithMany("JobPostings")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("BTL_LTW_DOTJOB.Models.Company", "Company")
