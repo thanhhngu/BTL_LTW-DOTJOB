@@ -16,5 +16,8 @@ namespace BTL_LTW_DOTJOB.ViewModels.Admin
 
         // Chỉ có tác dụng với báo cáo tin tuyển dụng đã xử lý: ẩn tin khỏi trang công khai
         public bool HideJob { get; set; }
+
+        // Chỉ có tác dụng với báo cáo người dùng (ứng viên) đã xử lý: khóa tài khoản bị báo cáo
+        public bool BanUser { get; set; }
     }
 }

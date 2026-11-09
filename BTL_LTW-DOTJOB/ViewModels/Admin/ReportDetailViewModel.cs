@@ -21,6 +21,8 @@
         public string? TargetUserId { get; set; }
         public string? TargetUserName { get; set; }
         public string? TargetUserEmail { get; set; }
+        public bool TargetUserIsActive { get; set; } // false = tài khoản đã bị khóa
+        public string? TargetUserRole { get; set; }
 
         public string Content { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }

@@ -83,7 +83,11 @@
                         <dd class="col-sm-8">
                             <div class="fw-semibold">@Model.TargetUserName</div>
                             <div class="text-muted small">@Model.TargetUserEmail</div>
-                            @* Sang trang Người dùng, tìm sẵn theo email để khóa tài khoản nếu cần *@
+                            @if (!Model.TargetUserIsActive)
+                            {
+                                <span class="badge bg-danger">Đã khóa</span>
+                            }
+                            @* Sang trang Người dùng, tìm sẵn theo email để khóa / mở khóa tài khoản *@
                             <a asp-area="Admin" asp-controller="User" asp-action="Index" asp-route-keyword="@Model.TargetUserEmail"
                                class="btn btn-sm btn-outline-danger mt-1">
                                 <i class="bi bi-person-lock me-1"></i>Tới trang Người dùng
@@ -140,6 +144,17 @@
                             </div>
                         }
 
+                        @if (Model.TargetType == ReportTargetType.User && Model.TargetUserIsActive && Model.TargetUserRole != "Admin")
+                        {
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="BanUser" id="BanUser" value="true" />
+                                <label class="form-check-label text-danger" for="BanUser">
+                                    Khóa tài khoản người bị báo cáo
+                                    <div class="text-muted small">Chỉ áp dụng khi chọn "Đã xử lý". Mở khóa lại ở trang Người dùng.</div>
+                                </label>
+                            </div>
+                        }
+
                         <button type="submit" class="btn btn-success w-100">Lưu kết quả xử lý</button>
                     </form>
                 }
@@ -173,6 +188,10 @@
                 const resolved = document.getElementById('stResolved');
                 if (hide && hide.checked && resolved.checked) {
                     if (!confirm('Ẩn tin tuyển dụng này khỏi trang công khai?')) e.preventDefault();
+                }
+                const ban = document.getElementById('BanUser');
+                if (ban && ban.checked && resolved.checked) {
+                    if (!confirm('Khóa tài khoản người bị báo cáo?')) e.preventDefault();
                 }
             });
         }

@@ -2,16 +2,19 @@
 using BTL_LTW_DOTJOB.Models;
 using BTL_LTW_DOTJOB.ViewModels.Admin;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BTL_LTW_DOTJOB.Services.Admin
 {
     public class ReportManagementService : IReportManagementService
     {
         private readonly AppDbContext _db;
+        private readonly IMemoryCache _cache;
 
-        public ReportManagementService(AppDbContext db)
+        public ReportManagementService(AppDbContext db, IMemoryCache cache)
         {
             _db = db;
+            _cache = cache;
         }
 
         public async Task<ReportListViewModel> GetPagedAsync(string? status, string? targetType, int page)
@@ -86,6 +89,8 @@ namespace BTL_LTW_DOTJOB.Services.Admin
                     TargetUserId = r.TargetUserId,
                     TargetUserName = r.TargetUser!.FullName,
                     TargetUserEmail = r.TargetUser!.Email,
+                    TargetUserIsActive = r.TargetUser != null && r.TargetUser.IsActive,
+                    TargetUserRole = r.TargetUser!.Role!.Name,
 
                     Content = r.Content,
                     CreatedAt = r.CreatedAt,
@@ -106,6 +111,7 @@ namespace BTL_LTW_DOTJOB.Services.Admin
 
             var report = await _db.Reports
                 .Include(r => r.JobPosting)
+                .Include(r => r.TargetUser).ThenInclude(u => u!.Role)
                 .FirstOrDefaultAsync(r => r.Id == model.Id);
 
             if (report == null)
@@ -117,6 +123,39 @@ namespace BTL_LTW_DOTJOB.Services.Admin
             if (report.Status != ReportStatus.Pending)
             {
                 return (false, "Báo cáo này đã được xử lý trước đó.");
+            }
+
+            // Khóa tài khoản chỉ áp dụng khi chấp nhận báo cáo về người dùng; không khóa được Admin
+            var banned = false;
+            if (model.BanUser)
+            {
+                if (model.Status != ReportStatus.Resolved
+                    || report.TargetType != ReportTargetType.User
+                    || report.TargetUser == null)
+                {
+                    return (false, "Chỉ khóa được tài khoản khi chấp nhận báo cáo về người dùng.");
+                }
+                if (report.TargetUser.Role?.Name == "Admin")
+                {
+                    return (false, "Không thể khóa tài khoản Admin.");
+                }
+
+                if (report.TargetUser.IsActive)
+                {
+                    report.TargetUser.IsActive = false;
+                    banned = true;
+
+                    // Các báo cáo khác đang chờ về cùng tài khoản này coi như đã xử lý
+                    var others = await _db.Reports
+                        .Where(r => r.TargetUserId == report.TargetUserId && r.Status == ReportStatus.Pending && r.Id != report.Id)
+                        .ToListAsync();
+                    foreach (var other in others)
+                    {
+                        other.Status = ReportStatus.Resolved;
+                        other.AdminNote = "Tài khoản đã bị khóa theo báo cáo khác.";
+                        other.HandledAt = DateTime.UtcNow;
+                    }
+                }
             }
 
             report.Status = model.Status;
@@ -137,8 +176,12 @@ namespace BTL_LTW_DOTJOB.Services.Admin
 
             await _db.SaveChangesAsync();
 
+            // Người vừa bị khóa bị đăng xuất ngay ở request kế tiếp (xem OnValidatePrincipal trong Program.cs)
+            if (banned) _cache.Remove($"user-active:{report.TargetUserId}");
+
             var message = $"Đã cập nhật báo cáo: {ReportStatus.Label(report.Status)}.";
             if (hidden) message += " Tin tuyển dụng đã được ẩn.";
+            if (banned) message += $" Đã khóa tài khoản {report.TargetUser!.Email}.";
             return (true, message);
         }
         // ===== Hiện lại tin đã ẩn =====
