@@ -3,6 +3,7 @@ using BTL_LTW_DOTJOB.Services.Application;
 using BTL_LTW_DOTJOB.Services.Auth;
 using BTL_LTW_DOTJOB.Services.Job;
 using BTL_LTW_DOTJOB.Services.Profile;
+using BTL_LTW_DOTJOB.Services.Reports;
 using BTL_LTW_DOTJOB.Services.SavedJobs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -79,6 +80,7 @@ builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<ISavedJobService, SavedJobService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 //Service thống kê cho Dashboard của Admin
 builder.Services.AddScoped<BTL_LTW_DOTJOB.Services.Admin.IDashboardService, BTL_LTW_DOTJOB.Services.Admin.DashboardService>();
@@ -231,6 +233,11 @@ app.MapStaticAssets().AllowAnonymous();
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 app.MapControllerRoute(

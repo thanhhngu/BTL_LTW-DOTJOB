@@ -182,6 +182,62 @@ namespace BTL_LTW_DOTJOB.Migrations
                     b.ToTable("JobPosting");
                 });
 
+            modelBuilder.Entity("BTL_LTW_DOTJOB.Models.Report", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AdminNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("HandledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JobPostingId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ReporterId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("TargetUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobPostingId");
+
+                    b.HasIndex("ReporterId");
+
+                    b.HasIndex("TargetUserId");
+
+                    b.HasIndex("Status", "CreatedAt");
+
+                    b.ToTable("Report", t =>
+                        {
+                            t.HasCheckConstraint("CK_Report_Target", "([TargetType] = 'JobPosting' AND [JobPostingId] IS NOT NULL AND [TargetUserId] IS NULL) OR ([TargetType] = 'User' AND [TargetUserId] IS NOT NULL AND [JobPostingId] IS NULL)");
+                        });
+                });
+
             modelBuilder.Entity("BTL_LTW_DOTJOB.Models.Role", b =>
                 {
                     b.Property<string>("Id")
@@ -320,6 +376,31 @@ namespace BTL_LTW_DOTJOB.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("BTL_LTW_DOTJOB.Models.Report", b =>
+                {
+                    b.HasOne("BTL_LTW_DOTJOB.Models.JobPosting", "JobPosting")
+                        .WithMany()
+                        .HasForeignKey("JobPostingId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("BTL_LTW_DOTJOB.Models.User", "Reporter")
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BTL_LTW_DOTJOB.Models.User", "TargetUser")
+                        .WithMany()
+                        .HasForeignKey("TargetUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("JobPosting");
+
+                    b.Navigation("Reporter");
+
+                    b.Navigation("TargetUser");
                 });
 
             modelBuilder.Entity("BTL_LTW_DOTJOB.Models.SavedJob", b =>

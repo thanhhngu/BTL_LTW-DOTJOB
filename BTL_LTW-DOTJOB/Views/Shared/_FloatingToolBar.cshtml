@@ -20,13 +20,16 @@
 
     <div class="toolbar-divider"></div>
 
-    <!-- 3. Góp ý -->
-    <a href="#" class="toolbar-item" title="Góp ý">
-        <i class="fa-solid fa-comment-dots text-success"></i>
-        <span class="toolbar-label">Góp ý</span>
-    </a>
+    @* 3. Góp ý / báo cáo tin: chỉ hiện ở trang chi tiết việc làm của Candidate (Detail.cshtml gán ViewData["ReportJobId"]) *@
+    @if (ViewData["ReportJobId"] is string)
+    {
+        <a href="#reportModal" data-bs-toggle="modal" class="toolbar-item" title="Báo cáo tin tuyển dụng này">
+            <i class="fa-solid fa-comment-dots text-success"></i>
+            <span class="toolbar-label">Góp ý</span>
+        </a>
 
-    <div class="toolbar-divider"></div>
+        <div class="toolbar-divider"></div>
+    }
 
     <!-- 4. Hỗ trợ -->
     <a href="#" class="toolbar-item" title="Hỗ trợ">

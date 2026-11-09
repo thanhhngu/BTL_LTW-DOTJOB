@@ -11,37 +11,65 @@
 <div id="featured-jobs-container">
     <partial name="_FeaturedJobs" model="Model" />
 </div>
-
 @section Scripts {
     <script>
         let autoSlideTimer;
+        let isHovering = false; // chuột đang nằm trên một thẻ việc làm
+
+        const jobsContainer = document.getElementById('featured-jobs-container');
 
         function loadJobsAjax(page) {
-            // Hiển thị hiệu ứng mờ đi 
-            document.getElementById('featured-jobs-container').style.opacity = '0.5';
+            // Hiển thị hiệu ứng mờ đi
+            jobsContainer.style.opacity = '0.5';
 
             fetch(`/Home/LoadFeaturedJobs?page=${page}`)
                 .then(response => response.text())
                 .then(html => {
                     // Đổ HTML mới vào khung chứa
-                    document.getElementById('featured-jobs-container').innerHTML = html;
-                    document.getElementById('featured-jobs-container').style.opacity = '1';
+                    jobsContainer.innerHTML = html;
+                    jobsContainer.style.opacity = '1';
 
-                    // Reset lại bộ đếm thời gian 5s để không bị nhảy trang kép
+                    // Thẻ cũ đã bị thay nên không còn sự kiện mouseout, đặt lại cờ cho chắc
+                    isHovering = false;
+
+                    // Reset lại bộ đếm thời gian để không bị nhảy trang kép
                     startAutoSlide();
                 })
                 .catch(err => console.error('Lỗi khi tải việc làm:', err));
         }
 
-        // Hàm tự động chuyển trang sau 5 giây
+        // Tự động chuyển trang sau 10 giây, nhưng KHÔNG chạy khi chuột đang ở trên một thẻ việc làm
         function startAutoSlide() {
             clearInterval(autoSlideTimer); // Xóa bộ đếm cũ
+            if (isHovering) return;        // Đang rê chuột trên thẻ: không đặt bộ đếm mới
+
             autoSlideTimer = setInterval(() => {
-                // Lấy số trang tiếp theo từ thẻ span ẩn (sẽ tạo ở Bước 2)
-                let nextPage = document.getElementById('ajax-next-page').value;
-                loadJobsAjax(nextPage);
-            }, 10000);
+                const next = document.getElementById('ajax-next-page');
+                if (next) loadJobsAjax(next.value);
+            }, 3000);
         }
+
+        // Thẻ việc làm bị thay mới sau mỗi lần chuyển trang nên gắn sự kiện ở khung cha (event delegation)
+
+        // Chuột vào một thẻ: dừng tự chuyển trang
+        jobsContainer.addEventListener('mouseover', e => {
+            if (!e.target.closest('.job-card') || isHovering) return;
+
+            isHovering = true;
+            clearInterval(autoSlideTimer);
+        });
+
+        // Chuột rời khỏi thẻ: chạy lại
+        jobsContainer.addEventListener('mouseout', e => {
+            const leftCard = e.target.closest('.job-card');
+            if (!leftCard) return;
+
+            // Chuột chỉ di chuyển giữa các phần tử bên TRONG cùng một thẻ thì vẫn coi là đang ở trên thẻ
+            if (e.relatedTarget && leftCard.contains(e.relatedTarget)) return;
+
+            isHovering = false;
+            startAutoSlide();
+        });
 
         // Bắt đầu chạy khi trang vừa load xong
         startAutoSlide();

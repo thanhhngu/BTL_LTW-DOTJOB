@@ -12,6 +12,7 @@ namespace BTL_LTW_DOTJOB.Data
         public DbSet<JobPosting> JobPostings { get; set; }
         public DbSet<Application> Applications { get; set; }
         public DbSet<SavedJob> SavedJobs { get; set; }
+        public DbSet<Report> Reports { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -51,6 +52,35 @@ namespace BTL_LTW_DOTJOB.Data
             modelBuilder.Entity<Application>()
                 .HasIndex(a => new { a.JobPostingId, a.UserId })
                 .IsUnique();
+
+            // 5. Bảng Report dùng chung (Candidate báo cáo tin, Employer báo cáo ứng viên, Admin xử lý).
+            // Người báo cáo và người bị báo cáo đều trỏ về User => đặt Restrict để tránh Multiple Cascade Paths
+            modelBuilder.Entity<Report>(entity =>
+            {
+                entity.HasOne(r => r.Reporter)
+                    .WithMany()
+                    .HasForeignKey(r => r.ReporterId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(r => r.TargetUser)
+                    .WithMany()
+                    .HasForeignKey(r => r.TargetUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(r => r.JobPosting)
+                    .WithMany()
+                    .HasForeignKey(r => r.JobPostingId)
+                    .OnDelete(DeleteBehavior.Cascade); // Tin bị xóa thì báo cáo về tin đó cũng bị xóa
+
+                // Danh sách của Admin lọc theo trạng thái và xếp theo thời gian
+                entity.HasIndex(r => new { r.Status, r.CreatedAt });
+
+                // Mỗi báo cáo trỏ tới đúng 1 đối tượng, khớp với TargetType
+                entity.ToTable(t => t.HasCheckConstraint(
+                    "CK_Report_Target",
+                    "([TargetType] = 'JobPosting' AND [JobPostingId] IS NOT NULL AND [TargetUserId] IS NULL) " +
+                    "OR ([TargetType] = 'User' AND [TargetUserId] IS NOT NULL AND [JobPostingId] IS NULL)"));
+            });
 
             // Không cho xóa Danh mục nếu vẫn còn tin tuyển dụng thuộc danh mục đó
             // (mặc định cũ là Cascade: xóa danh mục sẽ xóa luôn toàn bộ tin + đơn ứng tuyển)

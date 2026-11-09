@@ -1,0 +1,85 @@
+﻿@model string
+@* Model = Id của tin tuyển dụng bị báo cáo. Nút mở modal nằm ở _FloatingToolBar (mục Góp ý) *@
+
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <form id="reportForm">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="fa-regular fa-flag text-danger me-2"></i>Báo cáo tin tuyển dụng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-2">Cho chúng tôi biết tin này có vấn đề gì (lừa đảo, thông tin sai lệch, nội dung không phù hợp...). Quản trị viên sẽ xem xét.</p>
+                    <textarea id="reportContent" class="form-control" rows="5" maxlength="1000"
+                              placeholder="Mô tả vấn đề bạn gặp (tối thiểu 10 ký tự)"></textarea>
+                    <div class="d-flex justify-content-between mt-1">
+                        <span id="reportError" class="text-danger small"></span>
+                        <span class="text-muted small"><span id="reportCount">0</span>/1000</span>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-3 px-4" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" id="btnSubmitReport" class="btn btn-danger rounded-3 px-4 fw-bold">Gửi báo cáo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const form = document.getElementById('reportForm');
+        const content = document.getElementById('reportContent');
+        const count = document.getElementById('reportCount');
+        const errorBox = document.getElementById('reportError');
+        const btn = document.getElementById('btnSubmitReport');
+        const modalEl = document.getElementById('reportModal');
+
+        content.addEventListener('input', () => { count.textContent = content.value.length; });
+
+        // Mở lại modal thì xóa nội dung và lỗi của lần trước
+        modalEl.addEventListener('show.bs.modal', () => {
+            content.value = '';
+            count.textContent = '0';
+            errorBox.textContent = '';
+        });
+
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            errorBox.textContent = '';
+
+            const text = content.value.trim();
+            if (text.length < 10) {
+                errorBox.textContent = 'Nội dung báo cáo tối thiểu 10 ký tự.';
+                return;
+            }
+
+            btn.disabled = true;
+            try {
+                const res = await fetch('/reports/job/@Model', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest', // để server trả 401/403 thay vì chuyển hướng 302
+                        'RequestVerificationToken': getCsrfToken() // hàm có sẵn trong site.js
+                    },
+                    body: new URLSearchParams({ content: text })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                    Swal.fire('Đã gửi', data.message, 'success');
+                } else if (res.status === 401) {
+                    window.location.href = '/Auth/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                } else {
+                    errorBox.textContent = await res.text();
+                }
+            } catch {
+                errorBox.textContent = 'Không kết nối được máy chủ.';
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    })();
+</script>

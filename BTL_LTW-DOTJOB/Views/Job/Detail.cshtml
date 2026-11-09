@@ -18,6 +18,12 @@
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     var isCandidate = User.IsInRole("Candidate");
 
+    // Candidate được báo cáo tin này: bật nút Góp ý ở thanh công cụ nổi (xem _FloatingToolBar)
+    if (isCandidate)
+    {
+        ViewData["ReportJobId"] = Model!.Id;
+    }
+
     // Tin này đã được lưu chưa (để tô màu nút Lưu tin)
     // Candidate đã nộp hồ sơ vào tin này chưa (để đổi nút Ứng tuyển thành Đã ứng tuyển)
     var hasApplied = isCandidate
@@ -267,6 +273,9 @@
 <partial name="_ApplyModal" model="applyModel" />
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Modal báo cáo tin (mở từ nút Góp ý ở thanh công cụ nổi) -->
+<partial name="_ReportModal" model="Model.Id" />
 <script>
     const applyForm = document.getElementById('applyForm');
     const btnSubmit = document.getElementById('btnSubmitApply');
