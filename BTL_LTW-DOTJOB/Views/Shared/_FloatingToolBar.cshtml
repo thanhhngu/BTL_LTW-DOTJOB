@@ -1,14 +1,20 @@
-﻿<div class="floating-toolbar-wrapper">
+﻿@using System.Security.Claims
+@using BTL_LTW_DOTJOB.Services.SavedJobs
+@inject ISavedJobService SavedJobService
+@{
+    var savedCount = (await SavedJobService.GetSavedJobIdsAsync(User.FindFirstValue(ClaimTypes.NameIdentifier))).Count;
+}
+<div class="floating-toolbar-wrapper">
     <!-- 1. Việc làm đã lưu -->
-    <a href="#" class="toolbar-item" title="Việc làm đã lưu">
+    <a asp-controller="SavedJob" asp-action="Index" class="toolbar-item" title="Việc làm đã lưu">
         <i class="fa-solid fa-heart text-success"></i>
-        <span class="badge bg-success rounded-circle toolbar-badge">0</span>
+        <span class="badge bg-success rounded-circle toolbar-badge">@savedCount</span>
     </a>
 
     <div class="toolbar-divider"></div>
 
     <!-- 2. Quản lý tài khoản -->
-    <a href="#" class="toolbar-item" title="Tài khoản">
+    <a asp-controller="Profile" asp-action="Index"  class="toolbar-item" title="Tài khoản">
         <i class="fa-solid fa-user-plus text-success"></i>
     </a>
 

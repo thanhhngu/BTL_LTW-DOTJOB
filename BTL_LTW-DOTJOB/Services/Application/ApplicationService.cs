@@ -44,7 +44,7 @@ namespace BTL_LTW_DOTJOB.Services.Application
             if (existingApp != null)
                 return (false, "Bạn đã nộp hồ sơ cho vị trí này rồi.");
 
-            // 3. Lưu file CV vào App_Data/cvs (nằm ngoài wwwroot nên không thể truy cập trực tiếp bằng URL)
+            // 3. Lưu file CV vào AppData/cvs (nằm ngoài wwwroot nên không thể truy cập trực tiếp bằng URL)
             var uploadsFolder = Path.Combine(_env.ContentRootPath, "AppData", "cvs");
             if (!Directory.Exists(uploadsFolder))
             {

@@ -194,6 +194,32 @@ namespace BTL_LTW_DOTJOB.Migrations
                     b.ToTable("Role");
                 });
 
+            modelBuilder.Entity("BTL_LTW_DOTJOB.Models.SavedJob", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("JobPostingId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("SavedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobPostingId");
+
+                    b.HasIndex("UserId", "JobPostingId")
+                        .IsUnique();
+
+                    b.ToTable("SavedJob");
+                });
+
             modelBuilder.Entity("BTL_LTW_DOTJOB.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -291,6 +317,25 @@ namespace BTL_LTW_DOTJOB.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("BTL_LTW_DOTJOB.Models.SavedJob", b =>
+                {
+                    b.HasOne("BTL_LTW_DOTJOB.Models.JobPosting", "JobPosting")
+                        .WithMany()
+                        .HasForeignKey("JobPostingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BTL_LTW_DOTJOB.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("JobPosting");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BTL_LTW_DOTJOB.Models.User", b =>

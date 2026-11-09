@@ -1,5 +1,7 @@
-﻿@using BTL_LTW_DOTJOB.Models
-@model BTL_LTW_DOTJOB.Models.JobPosting
+﻿@model BTL_LTW_DOTJOB.Models.JobPosting
+@using System.Security.Claims
+@using BTL_LTW_DOTJOB.Services.SavedJobs
+@inject ISavedJobService SavedJobService
 @{
     ViewData["Title"] = Model?.Title ?? "Chi tiết công việc";
 
@@ -11,6 +13,9 @@
     // Trạng thái đăng nhập để hiển thị nút ứng tuyển phù hợp
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     var isCandidate = User.IsInRole("Candidate");
+
+    // Tin này đã được lưu chưa (để tô màu nút Lưu tin)
+    var isSaved = (await SavedJobService.GetSavedJobIdsAsync(User.FindFirstValue(ClaimTypes.NameIdentifier))).Contains(Model!.Id);
 
 
 }
@@ -91,8 +96,8 @@
                         </button>
                     }
 
-                    <button class="btn btn-outline-success px-4 py-3 fw-semibold rounded-3 btn-heart">
-                        <i class="fa-regular fa-heart me-1"></i> Lưu tin
+                    <button type="button" class="btn btn-outline-success px-4 py-3 fw-semibold rounded-3 btn-heart" data-job-id="@Model.Id">
+                        <i class="@(isSaved ? "fa-solid text-danger" : "fa-regular") fa-heart me-1"></i> <span class="heart-label">@(isSaved ? "Đã lưu" : "Lưu tin")</span>
                     </button>
                 </div>
             </div>
