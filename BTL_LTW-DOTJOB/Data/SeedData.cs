@@ -286,37 +286,15 @@ public static class SeedData
         }
     }
 
-    // PDF tối thiểu 1 trang, dùng làm CV mẫu (các offset trong bảng xref tính theo đúng chuỗi này, không sửa tay)
-    private const string SamplePdf = "%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n4 0 obj\n<< /Length 46 >>\nstream\nBT /F1 24 Tf 72 760 Td (CV mau - DotJob) Tj ET\nendstream\nendobj\n5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\nxref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000241 00000 n \n0000000337 00000 n \ntrailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n407\n%%EOF\n";
-
-    // Để máy mới clone về chạy được ngay (AppData/cvs và wwwroot/uploads không nằm trong Git):
-    // tạo các file CV mẫu còn thiếu, và bỏ đường dẫn ảnh trong DB trỏ tới file không tồn tại
+    // Để máy mới clone về chạy được ngay: bỏ đường dẫn ảnh trong DB trỏ tới file không tồn tại
+    // (wwwroot/uploads không nằm trong Git)
     private static void FixMissingFiles(IServiceProvider serviceProvider)
     {
         var env = serviceProvider.GetRequiredService<IWebHostEnvironment>();
         using var context = new AppDbContext(
             serviceProvider.GetRequiredService<DbContextOptions<AppDbContext>>());
 
-        // 1. CV mẫu của đơn seed (cvs/sample-cv-N.pdf), chỉ tạo file chưa có, không đụng vào CV thật của ứng viên
-        var cvRoot = Path.GetFullPath(Path.Combine(env.ContentRootPath, "AppData"));
-        var sampleCvs = context.Applications
-            .Where(application => application.CvFilePath.StartsWith("cvs/sample-cv-"))
-            .Select(application => application.CvFilePath)
-            .ToList();
-
-        foreach (var relativePath in sampleCvs)
-        {
-            var fullPath = Path.GetFullPath(Path.Combine(cvRoot, relativePath));
-            if (!fullPath.StartsWith(cvRoot + Path.DirectorySeparatorChar) || File.Exists(fullPath))
-            {
-                continue;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
-            File.WriteAllBytes(fullPath, System.Text.Encoding.ASCII.GetBytes(SamplePdf));
-        }
-
-        // 2. Avatar/logo cũ của bản seed trước (/images/...) không có file thật => để trống cho giao diện hiện ảnh mặc định
+        // Avatar/logo cũ của bản seed trước (/images/...) không có file thật => để trống cho giao diện hiện ảnh mặc định
         var webRoot = env.WebRootPath;
         if (string.IsNullOrEmpty(webRoot))
         {
