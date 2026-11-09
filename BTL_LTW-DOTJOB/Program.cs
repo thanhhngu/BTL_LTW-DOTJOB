@@ -88,6 +88,8 @@ builder.Services.AddScoped<BTL_LTW_DOTJOB.Services.Admin.IDashboardService, BTL_
 builder.Services.AddScoped<BTL_LTW_DOTJOB.Services.Admin.ICategoryService, BTL_LTW_DOTJOB.Services.Admin.CategoryService>();
 // Service quản lý người dùng (khóa / mở khóa) của Admin
 builder.Services.AddScoped<BTL_LTW_DOTJOB.Services.Admin.IUserManagementService, BTL_LTW_DOTJOB.Services.Admin.UserManagementService>();
+// Service xử lý báo cáo của Admin (khác IReportService của Candidate)
+builder.Services.AddScoped<BTL_LTW_DOTJOB.Services.Admin.IReportManagementService, BTL_LTW_DOTJOB.Services.Admin.ReportManagementService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>

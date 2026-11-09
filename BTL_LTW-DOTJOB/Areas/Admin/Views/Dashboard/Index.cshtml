@@ -71,4 +71,29 @@
             </div>
         </div>
     </div>
+    <div class="col-md-4">
+        <a asp-area="Admin" asp-controller="Report" asp-action="Index" asp-route-status="Pending"
+           class="text-decoration-none text-reset">
+            <div class="card stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#fde8e8;color:#dc2626;"><i class="bi bi-flag-fill"></i></div>
+                    <div>
+                        <div class="text-muted">Báo cáo chờ xử lý</div>
+                        <div class="fs-2 fw-bold">@Model.PendingReports</div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background:#eceff3;color:#4b5563;"><i class="bi bi-eye-slash-fill"></i></div>
+                <div>
+                    <div class="text-muted">Tin đang bị ẩn</div>
+                    <div class="fs-2 fw-bold">@Model.HiddenJobs</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

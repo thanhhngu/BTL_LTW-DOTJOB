@@ -1,0 +1,140 @@
+﻿@using BTL_LTW_DOTJOB.Models
+@model BTL_LTW_DOTJOB.ViewModels.Admin.ReportListViewModel
+@{
+    ViewData["Title"] = "Báo cáo vi phạm";
+}
+
+@functions {
+    // Màu nhãn theo trạng thái báo cáo
+    string StatusBadge(string status) => status switch
+    {
+        ReportStatus.Resolved => "bg-success",
+        ReportStatus.Dismissed => "bg-secondary",
+        _ => "bg-warning text-dark"
+    };
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (Model.PendingCount > 0)
+{
+    <div class="alert alert-warning py-2">
+        <i class="bi bi-flag-fill me-1"></i>Có <strong>@Model.PendingCount</strong> báo cáo đang chờ xử lý.
+    </div>
+}
+
+@* Bộ lọc gửi bằng GET để phân trang giữ được bộ lọc *@
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <select name="status" class="form-select">
+            <option value="" selected="@(string.IsNullOrEmpty(Model.Status))">Tất cả trạng thái</option>
+            <option value="Pending" selected="@(Model.Status == ReportStatus.Pending)">Chờ xử lý</option>
+            <option value="Resolved" selected="@(Model.Status == ReportStatus.Resolved)">Đã xử lý</option>
+            <option value="Dismissed" selected="@(Model.Status == ReportStatus.Dismissed)">Đã bác bỏ</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <select name="targetType" class="form-select">
+            <option value="" selected="@(string.IsNullOrEmpty(Model.TargetType))">Tất cả loại báo cáo</option>
+            <option value="JobPosting" selected="@(Model.TargetType == ReportTargetType.JobPosting)">Báo cáo tin tuyển dụng</option>
+            <option value="User" selected="@(Model.TargetType == ReportTargetType.User)">Báo cáo người dùng</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-outline-secondary">Lọc</button>
+    </div>
+</form>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Ngày gửi</th>
+                    <th>Người báo cáo</th>
+                    <th>Đối tượng bị báo cáo</th>
+                    <th>Nội dung</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Reports.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">Chưa có báo cáo nào.</td></tr>
+                }
+                @foreach (var r in Model.Reports)
+                {
+                    <tr>
+                        @* CreatedAt lưu giờ UTC nên đổi sang giờ máy chủ để hiển thị *@
+                        <td class="text-nowrap">@r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <div class="fw-semibold">@r.ReporterName</div>
+                            <div class="text-muted small">@r.ReporterEmail</div>
+                        </td>
+                        <td>
+                            @if (r.TargetType == ReportTargetType.JobPosting)
+                            {
+                                <span class="badge bg-primary-subtle text-primary-emphasis me-1">Tin</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info-subtle text-info-emphasis me-1">Người dùng</span>
+                            }
+                            <span class="fw-semibold">@(r.TargetTitle ?? "(không còn dữ liệu)")</span>
+                            <div class="text-muted small">@r.TargetSub</div>
+                        </td>
+                        <td class="text-muted">@r.ContentPreview</td>
+                        <td><span class="badge @StatusBadge(r.Status)">@ReportStatus.Label(r.Status)</span></td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@r.Id" class="btn btn-sm btn-outline-primary">
+                                @(r.Status == ReportStatus.Pending ? "Xử lý" : "Xem")
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-3 d-flex justify-content-between align-items-center">
+        <div class="text-muted small">Tổng @Model.TotalItems báo cáo, trang @Model.Page / @Model.TotalPages</div>
+        <ul class="pagination mb-0">
+            <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page - 1)"
+                   asp-route-status="@Model.Status" asp-route-targetType="@Model.TargetType">«</a>
+            </li>
+            @for (int p = 1; p <= Model.TotalPages; p++)
+            {
+                <li class="page-item @(p == Model.Page ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@p"
+                       asp-route-status="@Model.Status" asp-route-targetType="@Model.TargetType">@p</a>
+                </li>
+            }
+            <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(Model.Page + 1)"
+                   asp-route-status="@Model.Status" asp-route-targetType="@Model.TargetType">»</a>
+            </li>
+        </ul>
+    </nav>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+}

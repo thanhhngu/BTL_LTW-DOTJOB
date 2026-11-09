@@ -9,5 +9,7 @@
         public int TotalJobs { get; set; }        // Tổng số tin tuyển dụng
         public int TotalApplications { get; set; } // Tổng số đơn ứng tuyển
         public int TotalCategories { get; set; }  // Số danh mục ngành nghề
+        public int PendingReports { get; set; }   // Báo cáo đang chờ xử lý
+        public int HiddenJobs { get; set; }       // Tin tuyển dụng đang bị ẩn
     }
 }

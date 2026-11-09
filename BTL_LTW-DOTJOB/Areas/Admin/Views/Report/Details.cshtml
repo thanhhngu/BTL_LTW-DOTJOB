@@ -1,0 +1,180 @@
+﻿@using BTL_LTW_DOTJOB.Models
+@model BTL_LTW_DOTJOB.ViewModels.Admin.ReportDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết báo cáo";
+}
+
+@functions {
+    string StatusBadge(string status) => status switch
+    {
+        ReportStatus.Resolved => "bg-success",
+        ReportStatus.Dismissed => "bg-secondary",
+        _ => "bg-warning text-dark"
+    };
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<a asp-action="Index" class="btn btn-sm btn-light mb-3"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+
+<div class="row g-3">
+    @* ===== Cột trái: thông tin báo cáo ===== *@
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="mb-0">Thông tin báo cáo</h5>
+                    <span class="badge @StatusBadge(Model.Status)">@ReportStatus.Label(Model.Status)</span>
+                </div>
+
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Ngày gửi</dt>
+                    <dd class="col-sm-8">@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+
+                    <dt class="col-sm-4">Người báo cáo</dt>
+                    <dd class="col-sm-8">@Model.ReporterName <span class="text-muted">(@Model.ReporterEmail)</span></dd>
+
+                    @if (Model.TargetType == ReportTargetType.JobPosting)
+                    {
+                        <dt class="col-sm-4">Tin bị báo cáo</dt>
+                        <dd class="col-sm-8">
+                            <div class="fw-semibold">@Model.JobTitle</div>
+                            <div class="text-muted small">@Model.CompanyName</div>
+                            @if (Model.JobIsActive)
+                            {
+                                @* Chỉ tin đang hiển thị mới mở được ở trang công khai *@
+                                <a asp-area="" asp-controller="Job" asp-action="Detail" asp-route-id="@Model.JobPostingId"
+                                   target="_blank" class="btn btn-sm btn-outline-success mt-1">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>Mở tin
+                                </a>
+                            }
+                            else
+                            {
+                                @* Tin đang bị ẩn: hiện nhãn và nút hiện lại (có xác nhận) *@
+                                <div class="mt-1 d-flex align-items-center gap-2">
+                                    <span class="badge bg-danger">Đã bị ẩn</span>
+                                    <form asp-action="RestoreJob" method="post" class="d-inline"
+                                          onsubmit="return confirm('Hiện lại tin tuyển dụng này trên trang công khai?');">
+                                        <input type="hidden" name="id" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-eye me-1"></i>Hiện lại tin
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </dd>
+                    }
+                    else
+                    {
+                        <dt class="col-sm-4">Người bị báo cáo</dt>
+                        <dd class="col-sm-8">
+                            <div class="fw-semibold">@Model.TargetUserName</div>
+                            <div class="text-muted small">@Model.TargetUserEmail</div>
+                            @* Sang trang Người dùng, tìm sẵn theo email để khóa tài khoản nếu cần *@
+                            <a asp-area="Admin" asp-controller="User" asp-action="Index" asp-route-keyword="@Model.TargetUserEmail"
+                               class="btn btn-sm btn-outline-danger mt-1">
+                                <i class="bi bi-person-lock me-1"></i>Tới trang Người dùng
+                            </a>
+                        </dd>
+                    }
+                </dl>
+
+                <hr />
+                <div class="fw-semibold mb-1">Nội dung báo cáo</div>
+                @* white-space giữ nguyên xuống dòng người dùng nhập *@
+                <div class="p-3 bg-light rounded" style="white-space: pre-wrap;">@Model.Content</div>
+            </div>
+        </div>
+    </div>
+
+    @* ===== Cột phải: xử lý ===== *@
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="mb-3">Xử lý báo cáo</h5>
+
+                @if (Model.Status == ReportStatus.Pending)
+                {
+                    <form asp-action="Handle" method="post" id="handleForm">
+                        <input type="hidden" name="Id" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Kết quả</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="Status" id="stResolved" value="Resolved" checked />
+                                <label class="form-check-label" for="stResolved">Đã xử lý (báo cáo hợp lệ)</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="Status" id="stDismissed" value="Dismissed" />
+                                <label class="form-check-label" for="stDismissed">Bác bỏ (báo cáo không hợp lệ)</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="AdminNote">Ghi chú xử lý</label>
+                            <textarea class="form-control" id="AdminNote" name="AdminNote" rows="4" maxlength="1000"
+                                      placeholder="VD: Đã liên hệ nhà tuyển dụng, tin có dấu hiệu lừa đảo..."></textarea>
+                        </div>
+
+                        @if (Model.TargetType == ReportTargetType.JobPosting && Model.JobIsActive)
+                        {
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="HideJob" id="HideJob" value="true" />
+                                <label class="form-check-label" for="HideJob">
+                                    Ẩn tin tuyển dụng này khỏi trang công khai
+                                    <div class="text-muted small">Chỉ áp dụng khi chọn "Đã xử lý".</div>
+                                </label>
+                            </div>
+                        }
+
+                        <button type="submit" class="btn btn-success w-100">Lưu kết quả xử lý</button>
+                    </form>
+                }
+                else
+                {
+                    @* Đã xử lý: chỉ xem, không sửa lại để giữ lịch sử *@
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Kết quả</dt>
+                        <dd class="col-sm-8"><span class="badge @StatusBadge(Model.Status)">@ReportStatus.Label(Model.Status)</span></dd>
+
+                        <dt class="col-sm-4">Xử lý lúc</dt>
+                        <dd class="col-sm-8">@(Model.HandledAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm"))</dd>
+
+                        <dt class="col-sm-4">Ghi chú</dt>
+                        <dd class="col-sm-8" style="white-space: pre-wrap;">@(string.IsNullOrWhiteSpace(Model.AdminNote) ? "(không có)" : Model.AdminNote)</dd>
+                    </dl>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Xác nhận trước khi ẩn tin, vì ẩn xong Admin không tự hiện lại được trên trang này
+        const handleForm = document.getElementById('handleForm');
+        if (handleForm) {
+            handleForm.addEventListener('submit', function(e) {
+                const hide = document.getElementById('HideJob');
+                const resolved = document.getElementById('stResolved');
+                if (hide && hide.checked && resolved.checked) {
+                    if (!confirm('Ẩn tin tuyển dụng này khỏi trang công khai?')) e.preventDefault();
+                }
+            });
+        }
+    </script>
+}
