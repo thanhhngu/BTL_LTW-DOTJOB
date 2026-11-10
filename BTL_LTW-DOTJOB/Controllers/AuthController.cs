@@ -80,12 +80,12 @@ namespace BTL_LTW_DOTJOB.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
                 });
 
-            HttpContext.Session.SetUser(new SessionUser
-            {
-                UserId = user.Id,
-                Email = user.Email,
-                Role = roleName
-            });
+            //HttpContext.Session.SetUser(new SessionUser
+            //{
+            //    UserId = user.Id,
+            //    Email = user.Email,
+            //    Role = roleName
+            //});
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
@@ -106,7 +106,7 @@ namespace BTL_LTW_DOTJOB.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            HttpContext.Session.Clear();
+            //HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 

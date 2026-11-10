@@ -1,8 +1,8 @@
 ﻿@using BTL_LTW_DOTJOB.Services.Auth
 @{
-    var me = Context.Session.GetUser();
-    var email = me?.Email ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin";
-
+    // var me = Context.Session.GetUser();
+    // var email = me?.Email ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin";
+    var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin";
     var initial = email.Substring(0, 1).ToUpper();
 
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
